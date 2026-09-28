@@ -11,15 +11,10 @@
 "area: plan":
   - changed-files:
       - any-glob-to-any-file:
-          - "AUTH_*.md"
-          - "IMPLEMENTATION_*.md"
-          - "*_GUIDE.md"
-          - "QUICK_*.md"
-          - "FEATURE_*.md"
-          - "SWAGGER_*.md"
-          - "LOGGING_*.md"
-          - ".lingma/**"
-          - "docs/plan/**"
+          - "docs/**"
+          - "AGENTS.md"
+          - "CLAUDE.md"
+          - ".claude/**"
 "area: infra":
   - changed-files: [{ any-glob-to-any-file: ["infra/**", "docker-compose*.yml", "compose*.yml"] }]
 "area: docs":

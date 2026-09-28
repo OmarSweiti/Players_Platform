@@ -1,0 +1,255 @@
+# Master plan
+
+The spine of the plan: what the requirements get right and wrong, where the code stands, the phases,
+the effort, the risks, the questions only the owner or counsel can answer, and every place the plan
+departs from the frozen requirements.
+
+| Document | Answers |
+|---|---|
+| [`../requirements/`](../requirements/README.md) | **what** Sodara must be, and why — frozen |
+| [`../adr/`](../adr/README.md) | the load-bearing **how** decisions, with the alternatives rejected |
+| [`../reference/`](../reference/) | the contracts every microstep relies on |
+| this folder | **what to build next**, in what order, exactly how, and how you know it worked |
+
+Two independent authors produced this plan — Claude and Codex (GPT-6 Astra) — each from the four
+requirement documents and a full audit of the three repositories, and then negotiated every
+disagreement on evidence. The outcome of each contested point is recorded in the ADR it produced.
+
+---
+
+## Verdict on the requirements
+
+**Build on them.** The four documents are separated by purpose the way a professional delivery needs,
+carry stable IDs from business objective to testable requirement, and get right the things a
+player-management product usually gets wrong:
+
+1. **Tenant isolation as defense in depth**, not a middleware flag (SYS-TEN-001…008).
+2. **Confidential by default** — medical, legal-internal, compensation — and absent from search,
+   exports, notifications and logs, not merely from screens (BR-RULE-02, BR-RULE-07, SR-MED-007).
+3. **Workflow over free-form status** — contracts, tickets, enrollment and reports move through
+   controlled, audited transitions (BR-RULE-03, BR-RULE-05).
+4. **Honest scope** — a modular monolith first, AI only with a human in the loop, and an explicit list
+   of what the schema does not yet model.
+
+**They are a draft, with gaps.** Priority labels are not a release order; the medical workspace
+appears in no release; several "current technology" paragraphs are assertions rather than
+compatibility evidence; and signature sufficiency, retention, guardian authority, capacity and provider
+choices are unanswered. Every departure and gap is in [errata and concordance](#errata-and-concordance);
+every unanswered question is in the [OPEN register](#open-register) with the default the code follows
+meanwhile.
+
+---
+
+## Where the code stands
+
+**Pre-production: real foundations, broken flows, real holes.** Verified against the code on
+28 September 2026 by independent audits of the backend, the frontend, the schema and the legacy
+documents; nothing is taken from the legacy status documents, which claimed "95% complete, production
+ready" for work that does not run. The full inventory, with evidence for every line and an owning
+microstep for every defect, is [`../reference/current-state.md`](../reference/current-state.md).
+
+| Area | State |
+|---|---|
+| Delivery flow | **Live** in all three repositories: branches, rulesets, five required checks, Dependabot, CodeQL, secret scanning, hooks — [`03-github-workflow.md`](03-github-workflow.md) |
+| Schema | 29 models, 26 enums, six migrations; sound tenancy foundations with serious gaps — [`../reference/database.md`](../reference/database.md) |
+| Backend | 53 routes. The local sign-in **does not work end to end** and hides exploitable defects behind the failure; medical and scouting are partial; players, contracts, legal, training, chat and notifications are **empty module shells**; the permission seed crashes, so every permission-guarded route answers 403; the production build does not start |
+| Frontend | sign-in pages in front of routes that do not exist; `/` is the Next.js starter; **no internationalisation or RTL**; no tests |
+| Quality | the backend builds and its one starter test passes; lint is not yet a gate (748 backend problems, 21 frontend); npm audit is clean and gated in both applications |
+
+**The defects that make Phase 0 non-negotiable** (the complete list is in current-state):
+
+| Defect | Evidence | Owner |
+|---|---|---|
+| Tokens can be forged: the signing key falls back to the literal `'default-secret'` | `auth.module.ts:35`, `jwt.strategy.ts:36` | `0.1.5`, `0.1.6` |
+| Reset and verification links, whole emails and — in the browser — passwords are written to logs | `mail.service.ts:21–22`, `logging.interceptor.ts:24`, `api-client.ts:64–70` | `0.1.4` |
+| Anyone can register with any role, `SUPER_ADMIN` included | `register.dto.ts:40–46`, `register.usecase.ts:45` | `0.1.6` |
+| Sign-in resolves every tenant to the literal `'default-tenant'`; refresh reads a body the browser never sends; sessions and revocation are placeholders; 2FA is never asked for and stored in plaintext | `auth.controller.ts:117, 200–204, 358`; `enable-2fa.usecase.ts:24–27` | `0.1.6` (retired) → `0.5.5`–`0.5.8` (rebuilt on OIDC) |
+| No database tenant enforcement; six foreign keys can cross tenants | `prisma.service.ts:98–120`; `schema.prisma:638, 756, 834, 975, 1287, 1358` | `0.4.3`–`0.4.5` |
+| Authorization fails open for routes that declare nothing; the permission seed crashes | `roles.guard.ts:27`; `permission.service.ts:46–54` | `0.6.1`, `0.6.2` |
+| A player can read any medical record; a scout can approve their own report; reports expose the player's passport | `permission.service.ts:227`; `update-scouting-report.dto.ts:8`; `scouting-report.repository.ts:56` | `0.6.8` |
+| Audit is an ordinary, deletable table written through a queue | `schema.prisma:1361`; `event.service.ts:37` | `0.7.1`, `0.7.2` |
+
+---
+
+## Phase map
+
+| Phase | Delivers | Ends when the agency can… | BRD release |
+|---|---|---|---|
+| [**0 — Foundation & hardening**](phase-0-foundation.md) | the local sign-in retired and rebuilt on an external identity provider; tenant transactions under row-level security; deny-by-default authorization with confidential projections; append-only audit, outbox and worker; the private file pipeline with scanning; the API contract; the bilingual shell; runtimes, harnesses and local recovery | …trust that nothing existing leaks or can be abused, and that every feature has rails to land on | enabler |
+| [**1 — MVP**](phase-1-mvp.md) | tenant and user administration; players (360, completeness, organisations and club history, documents, media); contracts (lifecycle, immutable versions, approvals bound to a version, signature evidence under an approved policy, expiry reminders); legal tickets with SLA; notifications; audit search and timeline; search and dashboards; exports; **production launch for the first tenant** | …run its player, contract and legal work in production, in Arabic and English | R1 |
+| [**2 — Operations**](phase-2-operations.md) | medical and rehabilitation; training, sessions, enrollment, attendance, certificates; performance records and imports; versioned rating schemes; chat on a realtime process; push; media processing; job-based imports and exports; department dashboards | …run training, medical and performance in the platform | R2 |
+| [**3 — Intelligence**](phase-3-intelligence.md) | scouting with prospects; clubs, competitions and matches; dossiers and a sharing portal; finance; e-signature provider integration; scheduled reports; mobile readiness | …recruit and present players to clubs from the platform | R3 |
+| [**4 — Scale**](phase-4-scale.md) | platform operators and audited support access; tenant onboarding and entitlements; integrations and webhooks; governed AI assistance; capacity, upgrade and recovery at scale | …onboard a second agency without a code change | R4 |
+
+**Why this order.** Phase 0 front-loads what cannot be retrofitted once real data exists — tenancy in
+the database, audit immutability, money, dates, identity — and replaces a broken sign-in instead of
+repairing it. Phase 1 ends in production, because a release no real user has run has not been tested
+by one. Medical waits for Phase 2, behind a proven confidentiality framework; the partial medical and
+scouting code stays in the tree, quarantined until its phase.
+
+---
+
+## Effort model
+
+**Engineering hours, not calendar promises.** Assume one experienced TypeScript developer with AI
+agents, **25 focused delivery hours a week** after operations and review, and add an explicit **30%
+reserve** for integration and rework. Every microstep carries a size — **S ≤ 4 h, M ≤ 8 h, L ≤ 16 h**;
+anything larger is split before it starts. Sizes are ceilings, so the honest estimate is a range from
+half the weighted total to the full total. Do **not** divide by an assumed AI speed-up: measure it.
+
+| Phase | Microsteps | S · M · L | Hours before reserve | With 30% reserve, at 25 h/week |
+|---|---:|---|---:|---:|
+| 0 | 81 | 22 · 49 · 10 | 320–640 | 17–33 weeks |
+| 1 | 64 | 0 · 17 · 47 | 444–888 | 23–46 weeks |
+| 2 | 44 | 0 · 13 · 31 | 300–600 | 16–31 weeks |
+| 3 | 29 | 0 · 7 · 22 | 204–408 | 11–21 weeks |
+| 4 | 25 | 0 · 3 · 22 | 188–376 | 10–20 weeks |
+| **All** | **243** | 22 · 89 · 132 | 1456–2912 | 76–151 weeks |
+
+Phase 0's sizes were set step by step against the code; the later phases were sized conservatively —
+almost every full-stack step as L — and will come down as their phase-entry refinement splits and
+re-sizes them. Treat the upper figures as a capacity bound, not a forecast.
+
+**Make it falsifiable.** From the first microstep, record active hours, elapsed days, review and rework
+time and the cause of any wait in each PR. After five completed steps, and weekly from then:
+*remaining forecast = remaining weighted size × (median actual hours ÷ weight) × observed reserve ÷
+actual weekly capacity.* If the median runs above 1.5× the weights, or two weeks deliver under 60% of
+planned capacity, re-forecast the phase and reduce scope only by the owner's decision. Waiting on
+counsel, providers or hosting is queue time, not effort — it is in the [long-lead
+register](#long-lead-register), not in these numbers.
+
+---
+
+## Risk register
+
+| Risk | Trigger — observable | Response · owner |
+|---|---|---|
+| **A cross-tenant leak** | any foreign-id response, count, job or file path succeeds; the runtime role bypasses RLS | stop exposure, reproduce, fix, add the case to the isolation suite · `0.4.5`, `0.6.9` |
+| **Confidential data in the wrong place** | a medical, legal or finance canary appears in an ordinary response, log, export, cache or notification | disable the surface, investigate copies, fail the release · `0.6.4`, `0.10.2` |
+| **Identity provider not ready for production** | the production provider is undecided at the hosting decision, or cannot meet the revocation, MFA or residency criteria | real users wait; development and staging continue on Keycloak · `1.10.1` |
+| **A contract marked signed without sufficient evidence** | a transition to `SIGNED` without an approved evidence policy, or evidence whose hash does not match the approved version | keep `APPROVED`; no production signing until counsel approves a policy · `1.4.5` |
+| **Data migration loss** | the preflight finds mismatches or timestamps of unknown provenance; a backup does not restore | stop, get an owner-approved mapping, never delete to make a constraint pass · `0.4.1`, `0.10.3` |
+| **Lost or duplicated async work** | the oldest pending outbox event exceeds its alert threshold; a retry changes a business outcome | stop replay, reconcile by dedup keys and provider state · `0.7.5`, `0.7.6` |
+| **A missing test gives a false green** | an empty suite, a skipped named test, a stale configuration | the gate fails; fix the harness · `0.1.3`, `0.2.3` |
+| **AI-written code drifts from the conventions** | a convention violated in a merged PR | turn the convention into a CI check; path-scoped agent rules · `0.1.2`, `0.2.5` |
+| **Solo overload, bus factor** | measured cycle time above 1.5× the weights; two weeks under 60% of capacity | re-forecast, split, move approved scope; this documentation and the restore-from-runbook drill · every gate |
+| **Legal answers arrive late** — signature, medical hosting, retention, minors | four weeks without an answer to a long-lead question | the safe default stays in force; the dependent release waits · owner |
+| **Scope creep from the four-release vision** | a PR with no microstep reference | a new ask becomes an erratum or a later microstep, never an unplanned branch · weekly |
+| **Dependency churn** — Next.js, NestJS, Prisma majors | a major release of any of the three | grouped monthly Dependabot; majors one at a time, migration notes read, the app exercised · monthly |
+| **Unstaffed reliability target** | a restore misses its RPO/RTO; a critical alert goes unacknowledged | delay the release, revise operating support, repeat the drill · `1.10.12`, `1.10.13` |
+
+---
+
+## Long-lead register
+
+Queue time, not effort. **Start** is when the request goes out; the default holds until the answer
+arrives.
+
+| Start | Question or artifact | Latest safe point | Default while waiting |
+|---|---|---|---|
+| Phase 0 | Counsel: which signature evidence is sufficient, per jurisdiction; signatory authority; minors | `1.4.5` | evidence collected; nothing reaches `SIGNED` in production |
+| Phase 0 | Counsel and the medical owner: purposes, recipients, hosting and legal basis for medical data | Phase 2 medical entry | medical stays quarantined |
+| Phase 0 | The agency: roles and approval chains, required profile fields, contract types in use, SLA per priority, currencies | `1.1.5`, `1.2.5`, `1.4.3`, `1.5.2`, `0.4.7` | seeded defaults, marked as defaults |
+| Phase 0 | The owner: the repositories' licence (see the OPEN register) | before any outside contribution | no outside contributions |
+| Phase 1 start | Hosting: provider, region, managed PostgreSQL 18 with point-in-time recovery, private storage, key custody, production identity provider | `1.10.1` | the stack stays portable; staging waits |
+| Phase 1 start | Email provider and sending domain (SPF, DKIM, DMARC) | `1.6.3` | Mailpit only |
+| Phase 1 | Counsel and the agency: retention per record class, legal hold | `1.3.4` | archive only; nothing is purged |
+| Phase 1 | A native-speaker Arabic review; representative users | `1.10.15` | Arabic ships reviewed by the team only |
+| Phase 1, before launch | An independent security review against ASVS Level 2 | `1.10.14` | launch waits |
+
+---
+
+## OPEN register
+
+One shape for every open question: **the question · the default the code follows meanwhile · the
+owning microstep · what settles it.** A default is what the code does, not an answer, and elapsed time
+never turns a default into a decision. When an item is settled, record the date, the person, the
+evidence and the affected requirement and test IDs here, and update the owning microstep.
+
+| # | Question | Default meanwhile | Owner | Settled by |
+|---|---|---|---|---|
+| OPEN-01 | Which identity provider runs in production — self-hosted Keycloak or a managed provider — and in which region? | Keycloak in development and staging; no production users | `1.10.1` | the owner, with the hosting decision and the provider's MFA, recovery, revocation and residency evidence |
+| OPEN-02 | Session lifetimes and the provider-change exposure window | idle 30 min, absolute 12 h; provider-side changes apply at the next back-channel event or session expiry; offboarding is done in Sodara, which is immediate | `0.5.6`, `0.5.7` | the owner accepts the window in writing |
+| OPEN-03 | Which signature evidence is legally sufficient for the agency's contracts, per jurisdiction; who may sign; minors | evidence may be collected; `SIGNED` requires an approved policy; none is approved | `1.4.5` | counsel's approved evidence policy |
+| OPEN-04 | Who owns the medical workflow; its purposes, permitted recipients and summaries; where medical data may be hosted and on what legal basis | medical quarantined; no clinical narrative outside the medical workspace; no automated return-to-play | Phase 2 medical entry | a named medical owner and counsel's approved policy |
+| OPEN-05 | Child protection: how minors, guardians and a player's own access are verified and scoped | no inferred guardian permission; links inactive until verified; minors' data confidential by default | `0.6.5`, `1.2.3` | counsel and the agency |
+| OPEN-06 | Retention per record class, erasure, legal hold, archival PDF/A | archive, never purge; no retention period invented | `1.3.4` | counsel and the agency |
+| OPEN-07 | Legal SLA: business hours, pauses, holiday calendar | elapsed-time deadlines in the tenant's zone, visible and manually overridable | `1.5.2` | the legal owner's policy with examples |
+| OPEN-08 | The real capacity envelope | 1 tenant · 50 members · 500 players · 20,000 documents · 200 GB media — for load tests only | `1.10.6` | the agency's numbers |
+| OPEN-09 | Currencies, rounding, settlement rules, tax and the payment provider | JOD enabled; no real payments; exact decimals; unknown settlement is unresolved, never paid | `0.4.7`, Phase 3 finance | the agency's finance owner and counsel |
+| OPEN-10 | Permitted AI uses, providers, data disclosure and evaluation thresholds | AI disabled | Phase 4 AI governance | the owner, domain leads and a privacy review, with evaluation results |
+| OPEN-11 | Does any database hold real data, and of what provenance? | treat every database as possibly real: preflight first, no destructive reset, no guessed time zone | `0.4.1` | the read-only preflight report and the owner's confirmation |
+| OPEN-12 | Email and push channels, sender identity, mandatory notices, device policy | in-app notifications and Mailpit; push off; no confidential content in any message | `1.6.3` | the owner and the provider's deliverability setup |
+| OPEN-13 | One current season per tenant, or parallel competition seasons? | one current season per tenant (`0.4.10`) | `1.2.1` | the sporting owner's examples |
+| OPEN-14 | Do coaching contracts need subjects other than players? Is the agency's own representation agreement a contract type, and who is the counterparty? | player contracts only, with an organisation counterparty; a `REPRESENTATION` type is added only once the agency confirms it; coaching disabled | `1.4.1` | the agency's example contracts |
+| OPEN-15 | Do watchlists include external prospects, and are they shared among staff? | private lists of existing players; prospect conversion explicit | Phase 3 scouting | the sporting owner |
+| OPEN-16 | Is break-glass emergency access needed, and who approves it? | disabled; scoped, time-boxed support grants only, never self-approved | Phase 4 support access | the owner, security and counsel |
+| OPEN-17 | The default role matrix and approval chains | the seeded defaults in [`../reference/security-privacy.md`](../reference/security-privacy.md) | `1.1.5` | the agency confirms the matrix |
+| OPEN-18 | The repositories are public and licensed GPL-3.0, while the backend's `package.json` says `UNLICENSED`. Which licence is intended for a commercial agency platform? | no outside contributions; nothing changes until the owner decides | owner | the owner — this is not legal advice; counsel if in doubt |
+
+---
+
+## Errata and concordance
+
+The requirement documents are frozen ([`../requirements/README.md`](../requirements/README.md)).
+Where the plan departs from them or fills a gap, the entry is here; the frozen text stays as written,
+and the right-hand columns are what the code implements.
+
+| # | Requirement | Says or omits | The plan | Why · owner |
+|---|---|---|---|---|
+| E-01 | BRD §13, PRD-ME-001, SR-MED-* | medical is in scope and in no release | Phase 2, quarantined until then; denial tests from Phase 0 | needs the confidentiality framework first · `0.1.8`, Phase 2 |
+| E-02 | SysRD §2 vs SR-AUTH-001 | an OIDC provider in the architecture; either OIDC or application-managed in the SRS | external OIDC; the local credential system is retired, not repaired | [ADR-0002](../adr/0002-identity-oidc.md) · `0.1.6`, `0.5.1`–`0.5.8` |
+| E-03 | the "current technology" paragraphs; SysRD §2 | version and support claims asserted, not evidenced | the lockfiles and `.nvmrc` govern; PostgreSQL 18 is qualified by an executed replay | [ADR-0013](../adr/0013-postgresql-18.md) · `0.2.2` |
+| E-04 | SYS-TEN-005 | "consider" RLS for the highest-risk tables once patterns are validated | RLS forced on **every** tenant-owned table in Phase 0 | the audit found no database enforcement at all · `0.4.5` |
+| E-05 | SR-CORE-006, UX-007 | "store timestamps in UTC" | civil `DATE` for birthdays and contract days; `timestamptz` for instants; IANA zones for schedules | a birthday is not an instant · `0.4.8` |
+| E-06 | SR-CT-005, SR-TR-006 | amounts and currencies, without scale, rounding or settlement | `NUMERIC(19,4)` with the currency's exponent enforced on payable amounts; settlement in Phase 3 | JOD has three decimals · `0.4.7` |
+| E-07 | BR-RULE-04, SR-CT-008 vs SR-CT-011 | signed means "meets the configured signature policy"; provider integration is P1 | `SIGNED` only under an approved evidence policy; an approved manual method may satisfy SR-CT-008; **SR-CT-011 (provider integration) is deferred to Phase 3** | counsel has not approved a policy; the provider waits for it · `1.4.5`, Phase 3 |
+| E-08 | SR-DOC-004 (P1) | malware scanning "supported" | scanning in Phase 0; an unscanned file cannot be used or downloaded | unsafe files cannot be made safe later · `0.8.4` |
+| E-09 | SR-ACL-002, SysRD player link | a tenant-unique email | `Identity(issuer, subject)` plus tenant memberships; email never links an identity | email is contact data · `0.5.3` |
+| E-10 | SR-AUD-007, BR-RULE-11 | recoverability, retention and legal hold | archive; no scheduled purge until a retention policy exists; audit has its own stricter retention | the rules conflict without a policy · OPEN-06 |
+| E-11 | SR-NFR-PERF-001 | p95 targets without a capacity envelope | a provisional envelope, declared hardware and mix, falsified by load tests | the target is unmeasurable without one · `1.10.6` |
+| E-12 | SysRD §7.10, SR-RT-004 | ratings versioned against schemes | existing scores are labelled with a legacy scheme; no historical weights are invented | provenance cannot be recovered · Phase 2 |
+| E-13 | SR-CT-002, SR-CT-004 | no counterparty; no representation agreement type | an `Organization` counterparty and a `REPRESENTATION` type — **confirm with the agency** | a contract has two parties · `1.4.1`, OPEN-14 |
+| E-14 | SR-DB-002 | UUIDs; v7 "may" be used where justified | v4 by default; v7 for high-ingest append tables | as written · `0.4.11` |
+| E-15 | (gap) onboarding | unrestricted registration excluded (BRD §6); no onboarding defined | provisioning command and invitations | a closed product needs a way in · `0.5.9`, `0.5.10` |
+| E-16 | (gap) guardians | a guardian persona with no relation to a player | explicit, scoped, verified guardian links | cannot authorize without one · `0.6.5`, `1.2.3` |
+| E-17 | (gap) bilingual data | UI localisation only | Arabic and Latin-script names on players and organisations; Arabic-normalised search | typing "Mohammad" must find "محمد" · `1.2.1`, `1.2.4` |
+| E-18 | (gap) home-dashboard tasks | the BRD names tasks; no requirement defines them | actions derived from workflow state; a task entity waits for demand | · `1.8.2` |
+| E-19 | the standards references | ASVS, OWASP API Top 10, ISO 27001/27701, WCAG listed | verification targets with evidence per release; never a compliance claim | counsel settles applicability · `1.10.7`, `1.10.8`, `1.10.14` |
+| E-20 | the legacy documents | "never filter by tenant — middleware does it"; "HttpOnly prevents CSRF"; "fake revocation is fine for an MVP"; "delete the lockfile" | all superseded | [`../reference/consolidation.md`](../reference/consolidation.md) · `0.1.1` |
+| E-21 | SR-AUTH-003 | refresh tokens rotate and are revocable per device | no refresh tokens: the provider's token is never stored; an opaque, database-checked application session per device is rotated and revocable instead | [ADR-0003](../adr/0003-browser-sessions.md) · `0.5.6`, `0.5.7` |
+| E-22 | SR-DOC-008 | PDF/A archival copies "where required by document policy" | delivered with dossier generation in Phase 3; no earlier policy requires it | revisit if the retention policy (OPEN-06) requires archival copies sooner · `3.3.1` |
+| E-23 | SR-TR-006 | training price and payment status | Phase 2 records payment *observations*; verified settlement arrives with Phase 3 finance | an operational "paid" flag is not settlement evidence · Phase 2, Phase 3 |
+| E-24 | SR-AUTH-008 | passkeys as a future factor without an API change | the provider offers them from `0.5.1`; the journeys are qualified in Phase 4 | a provider capability is not an accepted journey · `4.2.2` |
+
+---
+
+## Deferred requirements
+
+Requirement IDs that no microstep owns, each with its reason. The plan check fails for any other
+unowned ID. The target is an empty table.
+
+<!-- plan:deferred:begin -->
+<!-- plan:deferred:end -->
+
+---
+
+## Product definition of done
+
+Each item is a passing test, a signed checklist or a named reviewer — **never an intention**.
+
+1. **Tenants are isolated.** The two-tenant suite covers every route, job and file path, raw SQL as the
+   runtime role returns nothing across tenants, and both pass (SR-NFR-SEC-003).
+2. **Confidential data stays confidential.** For every confidential field, a test against an independent
+   classification proves it absent for every role without the permission — in responses, search,
+   exports, notifications and logs.
+3. **Workflows are controlled.** No endpoint writes a workflow status directly; every transition is
+   audited (BR-RULE-03).
+4. **Evidence cannot be edited.** The database refuses `UPDATE`, `DELETE` and `TRUNCATE` on audit and
+   on immutable evidence, for every role.
+5. **Arabic and English are equivalent.** Every P0 journey passes in both, RTL and LTR, under axe and a
+   keyboard walk-through.
+6. **The contract holds.** The deployed API matches the committed OpenAPI document.
+7. **Data survives.** A restore into a clean staging environment, performed from the runbook by someone
+   who did not write it, meets the approved RPO and RTO — identity configuration and keys included
+   (`1.10.13`).
