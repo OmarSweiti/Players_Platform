@@ -46,9 +46,15 @@ setup-all: setup
 guards:
     bash ./scripts/test-policy.sh
 
-# Every application pin is a commit its flow branches keep (CI's `test` check): just check [staging|main]
+# CI's `test` check: every application pin is a commit its flow branches keep, and the plan, its
+# progress record, requirement traceability and links agree: just check [staging|main]
 check $target='development':
     bash ./scripts/check-submodules.sh "$target"
+    python3 ./scripts/check-plan.py
+
+# Regenerate the plan's derived blocks (progress rows, frontier, test catalog, traceability), then check
+plan:
+    python3 ./scripts/check-plan.py --write
 
 # Move both application pins to their development tips, then show what that adopts
 pin:

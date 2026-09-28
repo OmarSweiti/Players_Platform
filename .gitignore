@@ -1,0 +1,6 @@
+# Python bytecode from running the plan check and other scripts
+__pycache__/
+*.py[cod]
+
+# macOS
+.DS_Store

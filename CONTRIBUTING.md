@@ -7,7 +7,7 @@ application.
 |---|---|
 | `frontend/` | submodule → [Players_Platform_Frontend](https://github.com/OmarSweiti/Players_Platform_Frontend) (Next.js) |
 | `backend/` | submodule → [Players_Platform_Backend](https://github.com/OmarSweiti/Players_Platform_Backend) (NestJS, Prisma, PostgreSQL) |
-| `IMPLEMENTATION_CHECKLIST.md` and the other guides | the plan: what to build, and in what order |
+| `docs/` | the plan: requirements, the implementation plan and its progress, references, decisions — start at `docs/implementation/README.md` |
 
 Each of the three repositories has the same flow, the same gates, and its own
 `just` recipes. Application code changes in the application's repository,

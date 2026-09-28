@@ -49,6 +49,12 @@ jobs:
           target=$REF_NAME
           if [ "$EVENT_NAME" = pull_request ]; then target=$BASE_REF; fi
           bash ./scripts/check-submodules.sh "$target"
+      # A done microstep is verified against GitHub (merged PRs) and the pinned
+      # application commits (its named tests exist and are not skipped).
+      - name: The plan, its progress record, requirement traceability and links agree
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 ./scripts/check-plan.py
 
   # REQUIRED CHECK. The policy scripts and the git hooks prove they still refuse.
   guards:
