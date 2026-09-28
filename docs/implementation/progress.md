@@ -21,9 +21,9 @@ edit only Status and Evidence.
 <!-- plan:progress:begin -->
 | Step | Title | Repo | Status | Evidence |
 |---|---|---|---|---|
-| 0.1.1 | The documentation set lands; the legacy documents are retired | umbrella + backend + frontend | todo |  |
-| 0.1.2 | Agent entry files and scoped rules | umbrella + backend + frontend | todo |  |
-| 0.1.3 | The plan checks itself in CI | umbrella | todo |  |
+| 0.1.1 | The documentation set lands; the legacy documents are retired | umbrella + backend + frontend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/19 · https://github.com/OmarSweiti/Players_Platform_Frontend/pull/20 · https://github.com/OmarSweiti/Players_Platform/pull/6 |
+| 0.1.2 | Agent entry files and scoped rules | umbrella + backend + frontend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/19 · https://github.com/OmarSweiti/Players_Platform_Frontend/pull/20 · https://github.com/OmarSweiti/Players_Platform/pull/6 |
+| 0.1.3 | The plan checks itself in CI | umbrella | done | https://github.com/OmarSweiti/Players_Platform/pull/6 |
 | 0.1.4 | Stop secrets and personal data reaching logs and error responses | backend + frontend | todo |  |
 | 0.1.5 | Refuse to boot without real configuration | backend | todo |  |
 | 0.1.6 | Retire the local credential system | backend | todo |  |
