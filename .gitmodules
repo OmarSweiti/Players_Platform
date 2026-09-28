@@ -1,6 +1,8 @@
 [submodule "frontend"]
 	path = frontend
 	url = https://github.com/OmarSweiti/Players_Platform_Frontend.git
+	branch = development
 [submodule "backend"]
 	path = backend
 	url = https://github.com/OmarSweiti/Players_Platform_Backend.git
+	branch = development
