@@ -33,19 +33,19 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 <!-- plan:catalog:begin -->
 | Test | Microstep | Repo | Status |
 |---|---|---|---|
-| `a_missing_progress_row_is_refused` | 0.1.3 | umbrella | todo |
-| `a_done_step_without_a_merged_pr_is_refused` | 0.1.3 | umbrella | todo |
-| `a_two_repository_step_needs_a_pr_per_repository` | 0.1.3 | umbrella | todo |
-| `an_unmerged_pr_is_refused` | 0.1.3 | umbrella | todo |
-| `a_pr_outside_the_pinned_history_is_refused` | 0.1.3 | umbrella | todo |
-| `a_done_step_with_an_undone_dependency_is_refused` | 0.1.3 | umbrella | todo |
-| `a_done_step_whose_named_test_is_missing_is_refused` | 0.1.3 | umbrella | todo |
-| `a_name_only_in_a_comment_is_refused` | 0.1.3 | umbrella | todo |
-| `a_skipped_named_test_is_refused` | 0.1.3 | umbrella | todo |
-| `a_skipped_suite_is_refused` | 0.1.3 | umbrella | todo |
-| `an_unowned_requirement_is_refused` | 0.1.3 | umbrella | todo |
-| `an_edited_frozen_requirement_is_refused` | 0.1.3 | umbrella | todo |
-| `a_broken_link_or_anchor_is_refused` | 0.1.3 | umbrella | todo |
+| `a_missing_progress_row_is_refused` | 0.1.3 | umbrella | done |
+| `a_done_step_without_a_merged_pr_is_refused` | 0.1.3 | umbrella | done |
+| `a_two_repository_step_needs_a_pr_per_repository` | 0.1.3 | umbrella | done |
+| `an_unmerged_pr_is_refused` | 0.1.3 | umbrella | done |
+| `a_pr_outside_the_pinned_history_is_refused` | 0.1.3 | umbrella | done |
+| `a_done_step_with_an_undone_dependency_is_refused` | 0.1.3 | umbrella | done |
+| `a_done_step_whose_named_test_is_missing_is_refused` | 0.1.3 | umbrella | done |
+| `a_name_only_in_a_comment_is_refused` | 0.1.3 | umbrella | done |
+| `a_skipped_named_test_is_refused` | 0.1.3 | umbrella | done |
+| `a_skipped_suite_is_refused` | 0.1.3 | umbrella | done |
+| `an_unowned_requirement_is_refused` | 0.1.3 | umbrella | done |
+| `an_edited_frozen_requirement_is_refused` | 0.1.3 | umbrella | done |
+| `a_broken_link_or_anchor_is_refused` | 0.1.3 | umbrella | done |
 | `no_log_line_contains_a_token_or_password` | 0.1.4 | backend + frontend | todo |
 | `urls_are_logged_without_query_strings` | 0.1.4 | backend + frontend | todo |
 | `the_web_client_never_logs_a_request_body` | 0.1.4 | backend + frontend | todo |

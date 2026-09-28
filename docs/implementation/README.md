@@ -6,9 +6,9 @@ agent.
 ## Frontier
 
 <!-- plan:frontier:begin -->
-**Phase 0** — 0 of 81 microsteps done (0 of 243 across all phases).
+**Phase 0** — 3 of 81 microsteps done (3 of 243 across all phases).
 In progress: none.
-Ready now (every dependency done): `0.1.1`, `0.2.1`, `0.2.2`, `0.2.4`, `0.2.5`.
+Ready now (every dependency done): `0.2.1`, `0.2.2`, `0.2.4`, `0.2.5`.
 Blocked: none.
 <!-- plan:frontier:end -->
 
