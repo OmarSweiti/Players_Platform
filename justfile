@@ -29,7 +29,12 @@ setup:
       echo "note: {{ signing_key }} not found — release tags cannot be signed until you set up SSH signing"
     fi
     command -v gitleaks >/dev/null 2>&1 || { echo "gitleaks is required: https://github.com/gitleaks/gitleaks#installing" >&2; exit 1; }
-    git submodule update --init
+    # Initialise only what is not initialised yet: `submodule update` on an
+    # application you have checked out would detach it from its branch and back
+    # to the pinned commit — and a pin older than the hooks disables them silently.
+    git submodule status | awk '/^-/ { print $2 }' | while read -r sub; do
+      git submodule update --init -- "$sub"
+    done
     echo "core.hooksPath=$(git config core.hooksPath)  user.email=$(git config user.email)  tag.gpgSign=$(git config tag.gpgSign || echo unset)"
 
 # Set up this repository and both applications (each runs its own `just setup`)
