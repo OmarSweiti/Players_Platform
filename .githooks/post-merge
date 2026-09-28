@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# ADVISORY ONLY — Git ignores this hook's exit status and cannot undo a merge,
+# so it refuses nothing. It says what a pull just invalidated.
+# (Deliberately no post-checkout hook: Git does NOT ignore that one's status —
+# it breaks `git clone` / `git worktree add` — and it fires on every switch.)
+set -uo pipefail
+
+if [ "${1:-0}" = 1 ]; then # a squash merge leaves the incoming content in the index
+  changed=$(git diff --cached --name-only 2>/dev/null) || exit 0
+else
+  git rev-parse --verify --quiet ORIG_HEAD >/dev/null || exit 0
+  changed=$(git diff --name-only ORIG_HEAD HEAD 2>/dev/null) || exit 0
+fi
+[ -n "$changed" ] || exit 0
+
+notes=''
+# ── the pins this repository holds, and what to run ────────────────────────
+grep -qxE 'frontend|backend' <<<"$changed" &&
+  notes="$notes  an application pin moved → git submodule update --init"$'\n'
+grep -qxE '\.gitmodules' <<<"$changed" &&
+  notes="$notes  .gitmodules changed → git submodule sync && git submodule update --init"$'\n'
+# ────────────────────────────────────────────────────────────────────────────
+[ -n "$notes" ] && printf 'post-merge: this pull changed something your environment is pinned to.\n%s' "$notes" >&2
+exit 0

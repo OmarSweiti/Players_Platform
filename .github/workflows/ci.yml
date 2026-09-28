@@ -1,0 +1,150 @@
+name: ci
+
+on:
+  push:
+    branches: [development, staging, main]
+  pull_request:
+    branches: [development, staging, main]
+
+permissions:
+  contents: read
+
+# Cancel a superseded run on work branches only — never on staging or main:
+# a half-cancelled promotion build tells you nothing about whether it was green.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: >-
+    ${{ github.base_ref != 'main' && github.base_ref != 'staging' &&
+        github.ref != 'refs/heads/main' && github.ref != 'refs/heads/staging' }}
+
+defaults:
+  run:
+    shell: bash # = bash -eo pipefail; the implicit default has no pipefail
+
+jobs:
+  # REQUIRED CHECK. The check context GitHub reports is the job's `name:` if it
+  # has one, else its id — so required jobs here have no `name:`. Rename the id
+  # if you like, but the ruleset context must equal it exactly, or every merge
+  # waits forever for a check that never reports.
+  #
+  # This repository holds no application code: its build is the pair of
+  # commits it pins. The applications test themselves in their own
+  # repositories; this check proves every pin is a commit their flow branches
+  # keep — a squash merge orphans work-branch commits — and that platform
+  # staging and main pin only what the applications already promoted.
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false # and no submodules: the pins are read from the tree
+      - name: Every application pin is a commit its own flow branches keep
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          target=$REF_NAME
+          if [ "$EVENT_NAME" = pull_request ]; then target=$BASE_REF; fi
+          bash ./scripts/check-submodules.sh "$target"
+
+  # REQUIRED CHECK. The policy scripts and the git hooks prove they still refuse.
+  guards:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install the pinned, digest-verified Gitleaks release
+        run: ./scripts/install-gitleaks-ci.sh
+      - name: Every guard still refuses what it must
+        run: bash ./scripts/test-policy.sh
+
+  # REQUIRED CHECK. Secrets and attribution over what this change adds.
+  supply-chain:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install the pinned, digest-verified Gitleaks release
+        run: ./scripts/install-gitleaks-ci.sh
+      # A PR runs the BASE branch's scanner config and checker, so a change
+      # cannot relax the policy in the same diff that needs the relaxation.
+      # Keep their command-line interfaces backward compatible across one
+      # promotion: staging's older copy runs against every promotion PR.
+      - name: Take the policy from the trusted base
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          policy="$RUNNER_TEMP/policy"
+          mkdir -p "$policy"
+          for file in .gitleaks.toml scripts/check-attribution.sh; do
+            if [ "$EVENT_NAME" = pull_request ] && git cat-file -e "$BASE_SHA:$file" 2>/dev/null; then
+              git show "$BASE_SHA:$file" >"$policy/${file##*/}"
+            else
+              cp "$file" "$policy/${file##*/}"
+            fi
+          done
+      - name: No secret in the proposed commits (PR) or in the reachable history (push)
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          opts=(--config "$RUNNER_TEMP/policy/.gitleaks.toml" --redact=100 --verbose
+                --no-banner --log-level error --ignore-gitleaks-allow)
+          if [ "$EVENT_NAME" = pull_request ]; then
+            gitleaks git "${opts[@]}" --log-opts="$BASE_SHA..$HEAD_SHA" .
+          else
+            gitleaks git "${opts[@]}" .
+          fi
+      - name: No assistant attribution anywhere in the reachable history
+        run: git rev-list HEAD | bash "$RUNNER_TEMP/policy/check-attribution.sh" --commits-stdin
+      # No package ecosystem lives here, so there is no advisory gate: each
+      # application audits its own dependencies. Dependabot keeps the pins and
+      # the pinned actions moving.
+
+  # Runs AFTER a promotion lands (a push to staging or main) and inspects what
+  # actually landed: a promotion must be a merge commit, because a squash forks
+  # the branches permanently. Push-only, so it produces no check run on a pull
+  # request: NEVER add it to a ruleset's required checks.
+  promotion-shape:
+    if: >-
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: A release branch advances only by a merge commit
+        run: |
+          set -euo pipefail
+          if [ "$(git rev-list --no-walk --count --merges HEAD)" != 1 ]; then
+            echo "::error::$GITHUB_REF_NAME advanced by a commit with fewer than two parents."
+            echo "A promotion merges with a MERGE COMMIT. A squash forks the branches permanently."
+            git log -1 --format='  landed: %h  %s' HEAD
+            exit 1
+          fi
+          git log -1 --format='promotion shape OK: %h is a merge commit — %s' HEAD
+
+  # OPTIONAL: the expensive matrix (other operating systems, packaging) runs
+  # only where a break is expensive — promotion PRs and the release branches —
+  # plus a weekly canary workflow for the default branch. Not a required check.
+  # cross-platform:
+  #   if: >-
+  #     github.base_ref == 'staging' || github.base_ref == 'main' ||
+  #     github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main'
+  #   strategy: { fail-fast: false, matrix: { os: [ubuntu-latest, macos-latest, windows-latest] } }
+  #   runs-on: ${{ matrix.os }}

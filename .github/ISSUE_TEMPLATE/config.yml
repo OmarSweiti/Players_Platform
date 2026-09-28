@@ -1,0 +1,8 @@
+blank_issues_enabled: false # the fields are exactly the parts people skip
+contact_links:
+  - name: The plan — what to build, and in what order
+    url: https://github.com/OmarSweiti/Players_Platform/blob/development/IMPLEMENTATION_CHECKLIST.md
+    about: Read the plan before opening an issue; work enters there, not here.
+  - name: Report a security vulnerability
+    url: https://github.com/OmarSweiti/Players_Platform/security/advisories/new
+    about: Privately. Never in a public issue.

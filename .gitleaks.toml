@@ -1,0 +1,8 @@
+title = "Players Platform — secret-scanning policy"
+
+# Keep Gitleaks' maintained rules instead of a snapshot that silently ages.
+# Exceptions, if ever needed, are narrow reviewed allowlists HERE — inline
+# `gitleaks:allow` comments are ignored (--ignore-gitleaks-allow) so a secret
+# cannot approve itself in the same change.
+[extend]
+useDefault = true

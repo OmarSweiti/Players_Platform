@@ -1,0 +1,51 @@
+# Path → label, applied by .github/workflows/labeler.yml (sync-labels: true).
+# Labels you have to remember to add are labels nobody adds.
+# `type:` is NOT here on purpose — it comes from the PR title.
+
+# ── area: mirrors the commit scopes (scripts/validate-change-title.sh) ─────
+# A submodule bump changes exactly one path: the gitlink.
+"area: frontend":
+  - changed-files: [{ any-glob-to-any-file: ["frontend"] }]
+"area: backend":
+  - changed-files: [{ any-glob-to-any-file: ["backend"] }]
+"area: plan":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "AUTH_*.md"
+          - "IMPLEMENTATION_*.md"
+          - "*_GUIDE.md"
+          - "QUICK_*.md"
+          - "FEATURE_*.md"
+          - "SWAGGER_*.md"
+          - "LOGGING_*.md"
+          - ".lingma/**"
+          - "docs/plan/**"
+"area: infra":
+  - changed-files: [{ any-glob-to-any-file: ["infra/**", "docker-compose*.yml", "compose*.yml"] }]
+"area: docs":
+  - changed-files: [{ any-glob-to-any-file: ["README.md", "docs/**"] }]
+"area: repo":
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".github/**"
+          - ".githooks/**"
+          - "scripts/**"
+          - "justfile"
+          - ".gitattributes"
+          - ".gitignore"
+          - ".gitleaks.toml"
+          - ".gitmodules"
+          - "VERSION"
+
+# ── risk: changes HOW a PR is reviewed, not merely where it lands ──────────
+"risk: security":
+  - changed-files:
+      - any-glob-to-any-file:
+          - ".gitmodules" # where the application code comes from
+          - "**/*secret*"
+          - ".github/workflows/**"
+          - ".github/dependabot.yml"
+          - ".githooks/**"
+          - "scripts/**"
+          - ".gitleaks.toml"
+          - "SECURITY.md"

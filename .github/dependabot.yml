@@ -1,0 +1,39 @@
+version: 2
+
+# Monthly and grouped on purpose: every bump is a diff somebody must actually
+# read. Here that includes the application pins: a submodule bump is the
+# platform adopting new frontend and backend commits, and the `test` check
+# refuses any pin the application's flow branches do not keep.
+updates:
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule: { interval: monthly }
+    cooldown: { default-days: 7 } # let a bad release be yanked before you take it
+    open-pull-requests-limit: 5
+    target-branch: development
+    commit-message:
+      prefix: "chore(repo)" # the title grammar's type(scope); the labeler adds [—]
+    labels: ["type: chore", "area: repo", "meta: dependencies"]
+    # Split patch from minor: one group is atomic, and one bump that can never
+    # go green would strand every other update in it for a month.
+    groups:
+      actions-patch:
+        applies-to: version-updates
+        update-types: ["patch"]
+      actions-minor:
+        applies-to: version-updates
+        update-types: ["minor"]
+
+  # The application pins move to each application's default branch
+  # (development) once a month, together, in one reviewable PR.
+  - package-ecosystem: gitsubmodule
+    directory: "/"
+    schedule: { interval: monthly }
+    open-pull-requests-limit: 2
+    target-branch: development
+    commit-message:
+      prefix: "chore(repo)"
+    labels: ["type: chore", "area: repo", "meta: dependencies"]
+    groups:
+      applications:
+        patterns: ["*"]
