@@ -52,7 +52,21 @@ check $target='development':
 
 # Move both application pins to their development tips, then show what that adopts
 pin:
-    git submodule update --init --remote
+    #!/usr/bin/env bash
+    set -euo pipefail
+    # --remote follows `branch = development` in .gitmodules. Without it, Git
+    # uses each clone's origin/HEAD, which never refreshes on its own: a clone
+    # made while the default branch was main would "pin" the old main — a rewind.
+    git config -f .gitmodules --get-regexp '^submodule\..*\.path$' | while read -r _ app; do
+      old=$(git ls-tree HEAD -- "$app" | awk '{ print $3 }')
+      git submodule update --init --remote -- "$app"
+      new=$(git -C "$app" rev-parse HEAD)
+      if ! git -C "$app" merge-base --is-ancestor "$old" "$new"; then
+        git submodule update -- "$app" # put the checkout back on the old pin
+        echo "pin: REFUSED — $app would move from ${old:0:12} to ${new:0:12}, which does not contain it: a rewind." >&2
+        exit 1
+      fi
+    done
     git diff --submodule=log -- frontend backend
 
 # The complete local gate: the CI checks, every guard, and a full-history secret scan
