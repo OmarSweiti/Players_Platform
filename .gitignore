@@ -4,3 +4,7 @@ __pycache__/
 
 # macOS
 .DS_Store
+
+# The local stack: settings copied from infra/.env.example, and the exported CA
+infra/.env
+infra/.local/

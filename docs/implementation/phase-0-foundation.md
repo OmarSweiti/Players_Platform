@@ -186,11 +186,13 @@ scouting query runs.
 ## Group 0.2 — Reproducible runtimes and test harnesses
 
 ### 0.2.1 — The local stack: PostgreSQL 18, S3-compatible storage, Valkey, ClamAV, Mailpit, Keycloak
-**Repo:** umbrella · **Size:** M · **Depends on:** — · **Requirements:** SR-DB-001
-**Files:** `infra/compose.yaml` (new), `infra/postgres/init/` (new), `infra/keycloak/` (new), `infra/proxy/Caddyfile` (new),
-`justfile` (`up`, `down`, `logs`, `reset`, `trust-dev-ca`, `dev-ca-path`), `.env.example` (new)
+**Repo:** umbrella + frontend · **Size:** M · **Depends on:** — · **Requirements:** SR-DB-001
+**Files:** `infra/compose.yaml` (new), `infra/.env.example` (new), `infra/postgres/init/` (new), `infra/keycloak/` (new),
+`infra/proxy/Caddyfile` (new), `infra/objectstore/bootstrap.py` (new), `infra/README.md` (new), `scripts/check-stack.py` (new),
+`justfile` (`up`, `down`, `logs`, `reset`, `trust-dev-ca`, `dev-ca-path`); frontend `package.json` (`dev` on `:3001`)
 One command brings up everything the applications need: PostgreSQL 18, Valkey, an S3-compatible object
-store that supports presigned URLs **and bucket versioning** (chosen and pinned in this step), ClamAV,
+store that supports presigned URLs **and bucket versioning** (Versity S3 Gateway, chosen on evidence in
+[ADR-0020](../adr/0020-local-object-store.md) and proven by `infra/objectstore/bootstrap.py` on every `just up`), ClamAV,
 Mailpit, Keycloak, and **a local HTTPS proxy** (Caddy, `tls internal`) that serves
 `https://sadara.localhost` and `https://northwind.localhost` exactly as production will be routed — `/` to
 the web app, `/api/` to the API — so the `__Host-` session cookie is tested as specified, not weakened;
