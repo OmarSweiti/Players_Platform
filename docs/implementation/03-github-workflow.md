@@ -56,6 +56,9 @@ just pr 'feat(players): add the player directory  [1.2.4]' notes/pr.md   # gate 
 just merge <the PR URL that just pr printed>  # route, title, attribution, checks, clean merge state
 ```
 
+- Every pull request is assigned to the maintainer: `just pr` and the promotion recipes assign the
+  author, Dependabot assigns through `dependabot.yml`, and the labeler workflow assigns any other PR
+  when it opens. CODEOWNERS requests the maintainer's review.
 - `just pr` runs `just pre-push` (the complete local gate) first. Use the **URL it prints** for
   `just merge`; never guess a PR number — another PR (often Dependabot's) may have taken it.
 - `just merge` refuses unless every required check passed **and** GitHub reports the PR as cleanly
@@ -113,5 +116,6 @@ just pr 'chore(repo): pin the applications and record 1.2.1–1.2.3  [1.2.1–1.
 ## Dependabot
 
 Monthly grouped version updates (patch and minor separately; majors one by one, for deliberate
-review) and immediate security updates, all against `development`, all titled `chore(repo): …  [—]`.
+review) and immediate security updates, all against `development`, all titled `chore(repo): …  [—]`,
+all assigned to the maintainer.
 Read every one before merging it; a major needs its migration notes read and the app exercised.
