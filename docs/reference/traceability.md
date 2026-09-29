@@ -231,7 +231,7 @@ The four source documents and their checksums: [`../requirements/README.md`](../
 | SR-NFR-OBS-001 | SRD | 0.3.7, 1.10.4, 1.10.12 | 0/3 |
 | SR-NFR-MNT-001 | SRD | 0.2.8, 1.10.10 | 0/2 |
 | SR-NFR-MNT-002 | SRD | 0.2.9, 1.2.2, 1.4.8, 1.10.2, 1.10.11 | 0/5 |
-| SR-DB-001 | SRD | 0.2.1 | 0/1 |
+| SR-DB-001 | SRD | 0.2.1 | 1/1 |
 | SR-DB-002 | SRD | 0.4.11 | 0/1 |
 | SR-DB-003 | SRD | 0.4.1, 1.2.2, 1.4.1, 2.1.1, 2.4.4, 3.1.1, 3.2.1, 3.4.1, 4.1.5 | 0/9 |
 | SR-DB-004 | SRD | 0.4.3 | 0/1 |
