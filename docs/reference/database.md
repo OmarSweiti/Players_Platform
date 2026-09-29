@@ -152,7 +152,7 @@ Invitation(id UUID, tenantId, normalizedEmail, rolePolicyKey, tokenHash UNIQUE N
 
 Keep User IDs as tenant membership IDs; do not rename the underlying table merely to change vocabulary. Expand identityId nullable, link only through approved proof of issuer/subject, keep unlinked legacy accounts disabled, then enforce required identityId for active members. Preserve archived normalized-email reservations. Reactivation is an audited command, never automatic account linking. One identity can have multiple memberships; no email-only linking, merging, or role assignment from arbitrary IdP claims.
 
-Nest is the confidential OIDC relying party. No provider access, refresh or ID token is persisted. The login attempt's PKCE verifier is short-lived protocol state held in Valkey, never a stored provider token, and is gone after consumption or expiry. Provider responses are validated and discarded after deriving issuer/subject/sid/assurance/session times. `0.5.5` binds each attempt to the initiating browser: the existing session for a step-up, otherwise a short-lived `__Host-sodara_preauth` cookie that can only complete authentication and never authorizes a business route. The callback requires that binding plus state, consumes the attempt and sets a new authenticated session. Step-up binds the existing session and keeps it intact until successful replacement. Use the configured GET/query callback compatible with SameSite=Lax; do not silently switch to a cross-site form POST without redesigning cookie/protocol handling. Store only a digest of the opaque application cookie. `0.5.6` stores no CSRF token: it derives one as an HMAC of the session-token digest under a keyed, rotatable secret, so `GET /api/v1/auth/session` returns the same value to every tab until the session rotates. This is application CSRF material, not a provider token. A dedicated AuthBootstrapRepository resolves the exact configured host through TenantRegistry, then reads the matching session hash and membership in a tenant-scoped transaction; it cannot return domain records or mint the domain TenantContext until session, membership, tenant status and required assurance pass. Host resolution is routing, not authorization.
+Nest is the confidential OIDC relying party. No provider access, refresh or ID token is persisted. The login attempt's PKCE verifier is short-lived protocol state held in Valkey, never a stored provider token, and is gone after consumption or expiry. Provider responses are validated and discarded after deriving issuer/subject/sid/assurance/session times. `0.5.5` binds each attempt to the initiating browser: the existing session for a step-up, otherwise a short-lived `__Host-sadara_preauth` cookie that can only complete authentication and never authorizes a business route. The callback requires that binding plus state, consumes the attempt and sets a new authenticated session. Step-up binds the existing session and keeps it intact until successful replacement. Use the configured GET/query callback compatible with SameSite=Lax; do not silently switch to a cross-site form POST without redesigning cookie/protocol handling. Store only a digest of the opaque application cookie. `0.5.6` stores no CSRF token: it derives one as an HMAC of the session-token digest under a keyed, rotatable secret, so `GET /api/v1/auth/session` returns the same value to every tab until the session rotates. This is application CSRF material, not a provider token. A dedicated AuthBootstrapRepository resolves the exact configured host through TenantRegistry, then reads the matching session hash and membership in a tenant-scoped transaction; it cannot return domain records or mint the domain TenantContext until session, membership, tenant status and required assurance pass. Host resolution is routing, not authorization.
 
 Every protected request checks PostgreSQL session and membership state. App revocation applies to authorization checks after the revocation transaction commits; already-running commands must recheck critical preconditions before commit. Provider-side changes take effect at the next validated back-channel event or application-session expiry. That exposure window and provisional 30-minute idle / 12-hour absolute limits require owner acceptance. Back-channel logout enumerates TenantRegistry tenants with potentially live matching sessions, including disabled tenants, and revokes matching `(issuer, providerSid)` sessions within each tenant; a valid subject-only logout revokes that issuer/subject's sessions. Reject events with neither valid sid nor subject; never let an omitted identifier become an unfiltered query. There is no global bypass session scan. See [security](security-privacy.md) and [ADR-0003](../adr/0003-browser-sessions.md).
 
@@ -188,14 +188,14 @@ For Attendance add trainingId; Enrollment and TrainingSession each expose a uniq
 
 ### Database identities, grants and RLS
 
-`0.4.2` provisions `sodara_owner NOLOGIN`, a deployment-only `sodara_migrator` allowed to assume owner, and `sodara_app LOGIN NOBYPASSRLS` without ownership, superuser, CREATEDB, CREATEROLE or membership in either privileged role. Secrets are supplied by environment/hosting provisioning, never migration literals. Revoke PUBLIC schema creation and broad default grants; explicitly grant schema usage and reviewed table/sequence/function privileges. Migration credentials never enter API, worker or realtime containers.
+`0.4.2` provisions `sadara_owner NOLOGIN`, a deployment-only `sadara_migrator` allowed to assume owner, and `sadara_app LOGIN NOBYPASSRLS` without ownership, superuser, CREATEDB, CREATEROLE or membership in either privileged role. Secrets are supplied by environment/hosting provisioning, never migration literals. Revoke PUBLIC schema creation and broad default grants; explicitly grant schema usage and reviewed table/sequence/function privileges. Migration credentials never enter API, worker or realtime containers.
 
 `0.4.5` enables and forces RLS on **every tenant-owned table**; every subsequent tenant-table migration repeats the policy/grant/test pattern, including UserSession, UploadSession, outbox and inbox. Tenant IDs cannot be updated. Catalog tests inventory tables, RLS/FORCE flags, policy roles and predicates, owner identities, runtime grants and role membership; a new unclassified table fails CI.
 
 ```sql
 ALTER TABLE players ENABLE ROW LEVEL SECURITY;
 ALTER TABLE players FORCE ROW LEVEL SECURITY;
-CREATE POLICY players_tenant ON players FOR ALL TO sodara_app
+CREATE POLICY players_tenant ON players FOR ALL TO sadara_app
   USING ("tenantId" = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
   WITH CHECK ("tenantId" = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
 ```
@@ -213,7 +213,7 @@ export async function withTenantTransaction<T>(
 }
 ```
 
-Explicit repository tenant predicates remain mandatory. Use parameters, transaction-local configuration and the same checked-out connection for every query. Missing context denies reads/writes; malformed context fails closed. Network/provider calls run outside transactions. Tests use the actual sodara_app identity, not owner credentials, including concurrent pool reuse, rollback and raw SQL.
+Explicit repository tenant predicates remain mandatory. Use parameters, transaction-local configuration and the same checked-out connection for every query. Missing context denies reads/writes; malformed context fails closed. Network/provider calls run outside transactions. Tests use the actual sadara_app identity, not owner credentials, including concurrent pool reuse, rollback and raw SQL.
 
 TenantRegistry is a narrow infrastructure adapter over an explicitly maintained routing/discovery relation containing only tenant ID, canonical host/slug and active state. Business-job discovery receives only active eligible IDs; auth host resolution receives an exact match. Back-channel security cleanup includes disabled tenants with potentially live sessions so reactivation cannot revive provider-logged-out access. This global projection contains no Tenant.settings, member list or domain data and is updated transactionally with tenant lifecycle changes. Workers enumerate it, then claim work in separate tenant transactions. There is no BYPASSRLS worker or universal unscoped outbox query. The auth bootstrap and registry modules are not exported to business repositories.
 
@@ -226,7 +226,7 @@ RLS limits accidental missing predicates; it does not supply same-tenant medical
 `0.7.3` creates global SecurityEvent `(id, occurredAt, eventType, outcome, issuer?, identityRef?, tenantHint?, requestId, reasonCode, redactedMetadata)` for pre-tenant authentication failures and other genuine platform security events. An untrusted tenant hint is not a business-tenant FK or proof of membership. Restrict insertion through a typed adapter and reading to security operators; never manufacture a fake tenant/entity UUID to satisfy AuditLog fields. Business resource IDs may be nullable only for typed events with no resource.
 
 ```sql
-REVOKE UPDATE, DELETE, TRUNCATE ON audit_logs FROM sodara_app;
+REVOKE UPDATE, DELETE, TRUNCATE ON audit_logs FROM sadara_app;
 CREATE FUNCTION reject_evidence_mutation() RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
   RAISE EXCEPTION 'evidence is append-only' USING ERRCODE = '42501';
@@ -364,7 +364,7 @@ just test-int
 just check
 ```
 
-Missing or skipped named tests fail acceptance. Test raw SQL as sodara_app and HTTP/repository paths with two tenants, two players per tenant, a wrong-patient/program pair, archived rows, revoked membership, unlinked identity and platform operator. Include denied counts/joins, pool rollback, audit failure injection and immutable storage versions. This specification does not assert these commands have passed.
+Missing or skipped named tests fail acceptance. Test raw SQL as sadara_app and HTTP/repository paths with two tenants, two players per tenant, a wrong-patient/program pair, archived rows, revoked membership, unlinked identity and platform operator. Include denied counts/joins, pool rollback, audit failure injection and immutable storage versions. This specification does not assert these commands have passed.
 
 ## Policy dependencies
 

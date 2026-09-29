@@ -1,11 +1,11 @@
-<!-- Frozen baseline: faithful Markdown conversion of source/02_Sodara_PRD.docx (converted 28 September 2026).
-     Do not edit. Changes go through change control in README.md; the .docx is the original. -->
+<!-- Frozen baseline: faithful Markdown conversion of source/02_Sadara_PRD.docx (converted 28 September 2026;
+     product name corrected to Sadara on 29 September 2026). Do not edit — change control is in README.md. -->
 
-SODARA PLATFORM
+SADARA PLATFORM
 
 Product Requirements Document (PRD)
 
-Sodara Player Management Platform
+Sadara Player Management Platform
 
 Version 1.0 | Requirements Baseline | 28 September 2026
 
@@ -15,21 +15,21 @@ Status: Draft for stakeholder validation and architecture sign-off
 
 | Field | Value |
 |---|---|
-| Document | Sodara Platform - Product Requirements Document (PRD) |
+| Document | Sadara Platform - Product Requirements Document (PRD) |
 | Version | 1.0 |
 | Date | 28 September 2026 |
 | Status | Draft baseline |
 | Language | English |
 | Primary objective | Translate business outcomes into a coherent product experience, user journeys, capabilities, priorities, UX behavior, measurable outcomes and release criteria. |
 | Primary audience | Product owner, UX/UI, engineering, QA, business stakeholders, domain owners. |
-| Source baseline | Sodara concept brief + supplied Prisma/PostgreSQL schema |
+| Source baseline | Sadara concept brief + supplied Prisma/PostgreSQL schema |
 | Requirement method | ISO/IEC/IEEE 29148-aligned structure with explicit identifiers and acceptance intent |
 
 Traceability rule: business requirements are refined into product requirements, then system requirements, then software requirements. Requirement IDs are stable and must not be reused after baseline approval.
 
 ## 1. Product Vision
 
-Make Sodara the operational command center for every player relationship: one profile, one timeline, one controlled document space, one communication layer, and one evidence-based view of sporting, legal, medical, training and commercial status.
+Make Sadara the operational command center for every player relationship: one profile, one timeline, one controlled document space, one communication layer, and one evidence-based view of sporting, legal, medical, training and commercial status.
 
 ## 2. Product Principles
 

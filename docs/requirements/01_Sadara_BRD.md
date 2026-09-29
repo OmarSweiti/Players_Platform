@@ -1,11 +1,11 @@
-<!-- Frozen baseline: faithful Markdown conversion of source/01_Sodara_BRD.docx (converted 28 September 2026).
-     Do not edit. Changes go through change control in README.md; the .docx is the original. -->
+<!-- Frozen baseline: faithful Markdown conversion of source/01_Sadara_BRD.docx (converted 28 September 2026;
+     product name corrected to Sadara on 29 September 2026). Do not edit — change control is in README.md. -->
 
-SODARA PLATFORM
+SADARA PLATFORM
 
 Business Requirements Document (BRD)
 
-Sodara Sports Agency - Player Management Platform
+Sadara Sports Agency - Player Management Platform
 
 Version 1.0 | Requirements Baseline | 28 September 2026
 
@@ -15,21 +15,21 @@ Status: Draft for stakeholder validation and architecture sign-off
 
 | Field | Value |
 |---|---|
-| Document | Sodara Platform - Business Requirements Document (BRD) |
+| Document | Sadara Platform - Business Requirements Document (BRD) |
 | Version | 1.0 |
 | Date | 28 September 2026 |
 | Status | Draft baseline |
 | Language | English |
-| Primary objective | Define the business problem, outcomes, capabilities, stakeholders, business rules, KPIs, risks, and operating model for the Sodara Platform. |
+| Primary objective | Define the business problem, outcomes, capabilities, stakeholders, business rules, KPIs, risks, and operating model for the Sadara Platform. |
 | Primary audience | Agency leadership, business owners, legal, sporting, medical, finance, training, product, technology, implementation partner. |
-| Source baseline | Sodara concept brief + supplied Prisma/PostgreSQL schema |
+| Source baseline | Sadara concept brief + supplied Prisma/PostgreSQL schema |
 | Requirement method | ISO/IEC/IEEE 29148-aligned structure with explicit identifiers and acceptance intent |
 
 Traceability rule: business requirements are refined into product requirements, then system requirements, then software requirements. Requirement IDs are stable and must not be reused after baseline approval.
 
 ## 1. Executive Summary
 
-Sodara Platform is a digital operating platform for a sports agency to manage players across the player lifecycle: onboarding, profile management, contracts, legal support, scouting, performance, training and development, medical/rehabilitation, communication, notifications, evaluation, documents, and management reporting. The target operating model is a controlled multi-tenant SaaS foundation, while the initial deployment may serve Sodara as the first tenant.
+Sadara Platform is a digital operating platform for a sports agency to manage players across the player lifecycle: onboarding, profile management, contracts, legal support, scouting, performance, training and development, medical/rehabilitation, communication, notifications, evaluation, documents, and management reporting. The target operating model is a controlled multi-tenant SaaS foundation, while the initial deployment may serve Sadara as the first tenant.
 
 The business case is not simply digitizing records. The platform should create a single operational record for each player, reduce manual coordination between departments, improve contract and legal control, turn performance data into actionable insight, and produce a professional player dossier that can be shared with authorized external parties.
 

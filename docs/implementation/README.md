@@ -6,7 +6,7 @@ agent.
 ## Frontier
 
 <!-- plan:frontier:begin -->
-**Phase 0** — 3 of 81 microsteps done (3 of 243 across all phases).
+**Phase 0** — 3 of 82 microsteps done (3 of 244 across all phases).
 In progress: none.
 Ready now (every dependency done): `0.2.1`, `0.2.2`, `0.2.4`, `0.2.5`.
 Blocked: none.
@@ -17,9 +17,9 @@ next step is a **ready** one — every dependency done — in the current phase;
 follow the phase file's build order. Read [`handoff.md`](handoff.md) first in case someone stopped
 mid-step.*
 
-**Long-lead work starts now**, alongside Phase 0: counsel on signature evidence and medical data, the
-agency's answers on roles, approval chains and currencies, and the licence question —
-[master plan](00-master-plan.md#long-lead-register).
+**Owner decisions start now**, alongside Phase 0: approving the signature evidence policy, the
+medical-data rules (before Phase 2), and the agency's answers on roles, approval chains and contract
+types — [master plan](00-master-plan.md#long-lead-register).
 
 ## Read in this order
 

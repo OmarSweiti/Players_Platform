@@ -1,11 +1,11 @@
-<!-- Frozen baseline: faithful Markdown conversion of source/04_Sodara_SRD_SRS.docx (converted 28 September 2026).
-     Do not edit. Changes go through change control in README.md; the .docx is the original. -->
+<!-- Frozen baseline: faithful Markdown conversion of source/04_Sadara_SRD_SRS.docx (converted 28 September 2026;
+     product name corrected to Sadara on 29 September 2026). Do not edit — change control is in README.md. -->
 
-SODARA PLATFORM
+SADARA PLATFORM
 
 Software Requirements Document (SRD / SRS)
 
-Sodara Platform - Software Requirements Baseline
+Sadara Platform - Software Requirements Baseline
 
 Version 1.0 | Requirements Baseline | 28 September 2026
 
@@ -15,14 +15,14 @@ Status: Draft for stakeholder validation and architecture sign-off
 
 | Field | Value |
 |---|---|
-| Document | Sodara Platform - Software Requirements Document (SRD / SRS) |
+| Document | Sadara Platform - Software Requirements Document (SRD / SRS) |
 | Version | 1.0 |
 | Date | 28 September 2026 |
 | Status | Draft baseline |
 | Language | English |
 | Primary objective | Define implementation-testable software requirements with identifiers, functional behavior, data rules, API expectations, security controls and acceptance conditions. |
 | Primary audience | Software engineers, QA, security, DevOps/SRE, technical leads, product and domain owners. |
-| Source baseline | Sodara concept brief + supplied Prisma/PostgreSQL schema |
+| Source baseline | Sadara concept brief + supplied Prisma/PostgreSQL schema |
 | Requirement method | ISO/IEC/IEEE 29148-aligned structure with explicit identifiers and acceptance intent |
 
 Traceability rule: business requirements are refined into product requirements, then system requirements, then software requirements. Requirement IDs are stable and must not be reused after baseline approval.

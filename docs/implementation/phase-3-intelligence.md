@@ -191,10 +191,10 @@ Each step’s dependency field is authoritative, including intentional reference
 ### 3.5.0 — Approve the signature provider and evidence policy
 **Repo:** umbrella + backend · **Size:** M · **Depends on:** `2.10.3`, `1.4.5` · **Requirements:** SR-CT-008/011, BR-RULE-04
 **Files:** `docs/reference/domain-workflows.md` · `backend/test/signatures/provider-policy.e2e-spec.ts`
-**Build:** OPEN — e-signature policy: counsel/owner selects jurisdictions, provider, required signatory identity/assurance, document format, evidence retention and failure/dispute process. Default provider integration disabled; the Phase-1 approved manual evidence policy, if any, remains valid. Do not call a provider-certified flow legally valid without this decision. Add accepted/rejected evidence examples and a provider-exit retrieval exercise.
+**Build:** OPEN — e-signature policy: the owner selects jurisdictions, provider, required signatory identity/assurance, document format, evidence retention and failure/dispute process. Default provider integration disabled; the Phase-1 approved manual evidence policy, if any, remains valid. Do not call a provider-certified flow legally valid without this decision. Add accepted/rejected evidence examples and a provider-exit retrieval exercise.
 **Tests:** `signature_provider_requires_approved_evidence_policy`
 **Verify:** `(cd backend && just test-e2e -- test/signatures/provider-policy.e2e-spec.ts)`
-**Done when:** Provider activation is blocked until counsel/owner approve the evidence policy and retrieval examples.
+**Done when:** Provider activation is blocked until the owner approves the evidence policy and retrieval examples.
 
 ### 3.5.1 — Connect signature envelopes to the approved version
 **Repo:** backend · **Size:** L · **Depends on:** `3.5.0`, `1.4.8`, `1.4.9` · **Requirements:** SR-CT-011, SR-API-007, SR-CORE-010

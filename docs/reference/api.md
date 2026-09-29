@@ -18,7 +18,7 @@ One global validation pipeline enforces DTO allowlists, unexpected-property reje
 
 ## Authentication, cookies and CSRF
 
-Browser sign-in redirects to `GET /api/v1/auth/login`; its `returnTo` accepts only validated same-origin application paths. Nest handles authorization code + PKCE, state, nonce and validated ID-token claims (`0.5.5`). Each attempt is bound to the initiating browser by a short-lived `__Host-sodara_preauth` cookie (HttpOnly, Secure, SameSite=Lax) that grants no access to any business route; a step-up binds to the existing session instead. A valid state alone is insufficient: the callback requires the matching binding, consumes the attempt once and sets a new `__Host-sodara_session`. The browser never receives a provider token. Protected requests recheck the session and membership against primary PostgreSQL.
+Browser sign-in redirects to `GET /api/v1/auth/login`; its `returnTo` accepts only validated same-origin application paths. Nest handles authorization code + PKCE, state, nonce and validated ID-token claims (`0.5.5`). Each attempt is bound to the initiating browser by a short-lived `__Host-sadara_preauth` cookie (HttpOnly, Secure, SameSite=Lax) that grants no access to any business route; a step-up binds to the existing session instead. A valid state alone is insufficient: the callback requires the matching binding, consumes the attempt once and sets a new `__Host-sadara_session`. The browser never receives a provider token. Protected requests recheck the session and membership against primary PostgreSQL.
 
 `GET /api/v1/auth/session` returns the member, the selected tenant, locale, effective permissions (`0.6.6`), an assurance summary and the session's CSRF token, with `Cache-Control: no-store` (`0.5.6`). The CSRF token is **derived, not stored** — an HMAC of the session-token digest under a keyed, rotatable secret — so every tab receives the same value until the session rotates. Unsafe browser requests require `X-CSRF-Token` and an exact allowed `Origin`; neither CORS nor SameSite alone is CSRF protection. Logout is a POST that revokes the database session before clearing the cookie. OIDC back-channel logout authenticates with the verified logout token instead of a CSRF token; that exemption is explicit and covered by negative tests.
 
@@ -42,11 +42,11 @@ Decimal money uses canonical non-exponent strings and ISO currency codes; caller
 
 ## Problem details
 
-Use `application/problem+json` following [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457). The extensions and status mapping below are Sodara's contract. Standard HTTP status semantics remain authoritative; the JSON `status` equals the actual response status.
+Use `application/problem+json` following [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457). The extensions and status mapping below are Sadara's contract. Standard HTTP status semantics remain authoritative; the JSON `status` equals the actual response status.
 
 ```json
 {
-  "type": "urn:sodara:problem:validation-failed",
+  "type": "urn:sadara:problem:validation-failed",
   "title": "Validation failed",
   "status": 400,
   "detail": "Check the highlighted fields.",

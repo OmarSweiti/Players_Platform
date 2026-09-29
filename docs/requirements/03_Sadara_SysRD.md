@@ -1,11 +1,11 @@
-<!-- Frozen baseline: faithful Markdown conversion of source/03_Sodara_SysRD.docx (converted 28 September 2026).
-     Do not edit. Changes go through change control in README.md; the .docx is the original. -->
+<!-- Frozen baseline: faithful Markdown conversion of source/03_Sadara_SysRD.docx (converted 28 September 2026;
+     product name corrected to Sadara on 29 September 2026). Do not edit — change control is in README.md. -->
 
-SODARA PLATFORM
+SADARA PLATFORM
 
 System Requirements Document (SysRD)
 
-Sodara Platform - System Architecture and Operational Requirements
+Sadara Platform - System Architecture and Operational Requirements
 
 Version 1.0 | Requirements Baseline | 28 September 2026
 
@@ -15,21 +15,21 @@ Status: Draft for stakeholder validation and architecture sign-off
 
 | Field | Value |
 |---|---|
-| Document | Sodara Platform - System Requirements Document (SysRD) |
+| Document | Sadara Platform - System Requirements Document (SysRD) |
 | Version | 1.0 |
 | Date | 28 September 2026 |
 | Status | Draft baseline |
 | Language | English |
 | Primary objective | Define the complete system boundary, architecture, deployment, security, data, integration, operational, resilience and platform requirements needed to realize the product. |
 | Primary audience | Solution architect, system architect, security architect, DevOps/SRE, engineering leads, QA, product and domain owners. |
-| Source baseline | Sodara concept brief + supplied Prisma/PostgreSQL schema |
+| Source baseline | Sadara concept brief + supplied Prisma/PostgreSQL schema |
 | Requirement method | ISO/IEC/IEEE 29148-aligned structure with explicit identifiers and acceptance intent |
 
 Traceability rule: business requirements are refined into product requirements, then system requirements, then software requirements. Requirement IDs are stable and must not be reused after baseline approval.
 
 ## 1. System Purpose and Boundary
 
-The Sodara system consists of a responsive web client, API/application services, realtime communication gateway, asynchronous worker services, relational data store, object storage, identity provider, notification providers, observability stack, and external integration adapters. The system is designed as a modular monolith initially, with clear domain boundaries that permit later service extraction.
+The Sadara system consists of a responsive web client, API/application services, realtime communication gateway, asynchronous worker services, relational data store, object storage, identity provider, notification providers, observability stack, and external integration adapters. The system is designed as a modular monolith initially, with clear domain boundaries that permit later service extraction.
 
 ## 2. Recommended Architecture
 

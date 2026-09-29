@@ -64,7 +64,7 @@ Step dependency fields are authoritative; later-numbered policy/evaluation/gate 
 ### 4.1.6 — Offboard tenants while preserving required evidence
 **Repo:** backend · **Size:** L · **Depends on:** `4.1.5`, `4.3.2` · **Requirements:** BR-RULE-11/12, SR-AUD-007, SR-ACL-009
 **Files:** `backend/src/modules/platform/application/offboarding.service.ts` · `backend/test/platform/offboarding.e2e-spec.ts`
-**Build:** Implement approved Suspend→ExportPending→RetentionPending→EligibleForPurge workflow. Suspension revokes application sessions and disables API/realtime/jobs except reviewed recovery/export duties. Deliver a permission-scoped documented data export with integrity manifest; preserve legal holds, finance/signature/audit evidence and approved retention. No timed purge is enabled without owner/counsel policy and separately authorized retention credentials.
+**Build:** Implement approved Suspend→ExportPending→RetentionPending→EligibleForPurge workflow. Suspension revokes application sessions and disables API/realtime/jobs except reviewed recovery/export duties. Deliver a permission-scoped documented data export with integrity manifest; preserve legal holds, finance/signature/audit evidence and approved retention. No timed purge is enabled without an owner-approved policy and separately authorized retention credentials.
 **Tests:** `tenant_suspension_revokes_sessions_jobs_and_realtime` · `tenant_offboarding_preserves_held_evidence`
 **Verify:** `(cd backend && just test-e2e -- test/platform/offboarding.e2e-spec.ts)`
 **Done when:** Suspension denies new business access while offboarding cannot delete held or unexpired required evidence.
@@ -90,7 +90,7 @@ Step dependency fields are authoritative; later-numbered policy/evaluation/gate 
 ### 4.2.1 — Prove enterprise SSO and identity-provider portability
 **Repo:** backend + umbrella · **Size:** L · **Depends on:** `3.7.2` · **Requirements:** SR-AUTH-001/002/007, BR-OBJ-08, SR-DB-010
 **Files:** `backend/src/modules/auth/oidc/` · `backend/test/auth/enterprise-sso.e2e-spec.ts` · `docs/implementation/evidence/identity-portability.md`
-**Build:** OIDC is already implemented in Phase 0; this step qualifies enterprise federation and provider exit. Test a second approved issuer in isolated staging, explicit issuer/subject mapping, assurance mapping, verified back-channel logout and failure isolation. Linking or migration requires identity proof and an audited owner-approved mapping; email equality never links identities. Rehearse exporting recoverable identity configuration without persisting login provider tokens in Sodara. Document residual provider-change exposure until validated event or app-session expiry.
+**Build:** OIDC is already implemented in Phase 0; this step qualifies enterprise federation and provider exit. Test a second approved issuer in isolated staging, explicit issuer/subject mapping, assurance mapping, verified back-channel logout and failure isolation. Linking or migration requires identity proof and an audited owner-approved mapping; email equality never links identities. Rehearse exporting recoverable identity configuration without persisting login provider tokens in Sadara. Document residual provider-change exposure until validated event or app-session expiry.
 **Tests:** `enterprise_sso_never_links_identity_by_email` · `identity_provider_exit_preserves_membership_and_revocation`
 **Verify:** `(cd backend && just test-e2e -- test/auth/enterprise-sso.e2e-spec.ts)`
 **Done when:** A rehearsed approved issuer change preserves membership policy and revocation behavior without email-only linking.
@@ -98,7 +98,7 @@ Step dependency fields are authoritative; later-numbered policy/evaluation/gate 
 ### 4.2.2 — Qualify provider-managed passkeys and recovery assurance
 **Repo:** backend + frontend · **Size:** L · **Depends on:** `4.2.1` · **Requirements:** SR-AUTH-008/002, TEST-005/009/010
 **Files:** `backend/test/auth/passkey-assurance.e2e-spec.ts` · `frontend/tests/auth/passkeys.spec.ts` · `docs/implementation/evidence/passkeys.md`
-**Build:** Enable passkeys only in the approved IdP profile after verifying authenticators, enrollment/recovery, accessibility and assurance mapping on the pinned provider release. Sodara consumes validated acr/amr/auth_time and does not implement a second credential store. Test recovery or weaker fallback cannot satisfy a privileged step-up policy accidentally; use ar/en provider screens and avoid assuming every passkey ceremony means MFA.
+**Build:** Enable passkeys only in the approved IdP profile after verifying authenticators, enrollment/recovery, accessibility and assurance mapping on the pinned provider release. Sadara consumes validated acr/amr/auth_time and does not implement a second credential store. Test recovery or weaker fallback cannot satisfy a privileged step-up policy accidentally; use ar/en provider screens and avoid assuming every passkey ceremony means MFA.
 **Tests:** `passkey_recovery_cannot_bypass_privileged_assurance` · `passkey_provider_screens_support_both_locales`
 **Verify:** `(cd backend && just test-e2e -- test/auth/passkey-assurance.e2e-spec.ts) && (cd frontend && npx --no-install playwright test tests/auth/passkeys.spec.ts --project=ar --project=en)`
 **Done when:** Approved passkey and recovery journeys preserve the same privileged authorization requirements in both locales.
@@ -116,7 +116,7 @@ Step dependency fields are authoritative; later-numbered policy/evaluation/gate 
 ### 4.3.2 — Complete governed legal-hold administration
 **Repo:** backend · **Size:** L · **Depends on:** `3.7.2` · **Requirements:** SR-AUD-007, BR-RULE-11/12, SR-DOC-007
 **Files:** `backend/src/modules/retention/application/legal-holds.service.ts` · `backend/test/retention/legal-holds.e2e-spec.ts`
-**Build:** Extend the Phase-1 retention classifications and hold/purge safety guards into a formal hold workflow with case, scope, authority, effective time, approver, release reason and immutable history. Hold checks apply to business records, linked immutable FileObjects, derived artifacts, exports and backup expiry policy. Distinct approval releases a hold; release does not immediately purge, but recalculates ordinary retention eligibility. Jurisdiction and duration are counsel-owned OPEN policy, not hard-coded law.
+**Build:** Extend the Phase-1 retention classifications and hold/purge safety guards into a formal hold workflow with case, scope, authority, effective time, approver, release reason and immutable history. Hold checks apply to business records, linked immutable FileObjects, derived artifacts, exports and backup expiry policy. Distinct approval releases a hold; release does not immediately purge, but recalculates ordinary retention eligibility. Jurisdiction and duration are owner-set OPEN policy, never hard-coded law.
 **Tests:** `legal_hold_blocks_all_linked_retention_actions` · `legal_hold_release_requires_authorized_approval`
 **Verify:** `(cd backend && just test-e2e -- test/retention/legal-holds.e2e-spec.ts)`
 **Done when:** An active hold prevents deletion of every scoped record/artifact and release leaves an attributable approval trail.
@@ -176,7 +176,7 @@ Step dependency fields are authoritative; later-numbered policy/evaluation/gate 
 ### 4.5.1 — Approve AI data, model and human-review governance
 **Repo:** umbrella + backend · **Size:** M · **Depends on:** `3.7.2` · **Requirements:** BR-OBJ-09, BR-RULE-02/07/12, SR-CORE-009
 **Files:** `docs/reference/domain-workflows.md` · `backend/src/modules/assistance/domain/assistance-policy.ts` · `backend/test/assistance/policy.e2e-spec.ts`
-**Build:** OPEN — AI assistance policy: default disabled. Owner/privacy counsel approves provider/region/retention, permitted fields, consent basis, attribution, evaluation criteria, cost limit and human approval. No clinical diagnosis, player eligibility, contract approval, signing or financial posting is delegated to a model. Treat retrieved reports as untrusted data; no tool authority, hidden workflow mutation or unapproved provider training reuse.
+**Build:** OPEN — AI assistance policy: default disabled. The owner approves provider/region/retention, permitted fields, consent basis, attribution, evaluation criteria, cost limit and human approval. No clinical diagnosis, player eligibility, contract approval, signing or financial posting is delegated to a model. Treat retrieved reports as untrusted data; no tool authority, hidden workflow mutation or unapproved provider training reuse.
 **Tests:** `assistance_activation_requires_approved_data_policy`
 **Verify:** `(cd backend && just test-e2e -- test/assistance/policy.e2e-spec.ts)`
 **Done when:** The assistance feature cannot call a model until an approved data policy and evaluation criteria exist.

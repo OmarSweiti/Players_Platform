@@ -1,6 +1,6 @@
-# Sodara — Players Platform
+# Sadara — Players Platform
 
-The player-management platform for Sodara Sports Agency: player records, contracts and approvals,
+The player-management platform for Sadara Sports Agency: player records, contracts and approvals,
 legal tickets, documents and media, training, performance, medical, communication and scouting — for
 one agency first, built multi-tenant from the start, in Arabic and English.
 
@@ -22,4 +22,4 @@ cd Players_Platform && just setup-all      # then: docs/implementation/02-develo
 ```
 
 How changes ship: [`CONTRIBUTING.md`](CONTRIBUTING.md). Reporting a vulnerability:
-[`SECURITY.md`](SECURITY.md).
+[`SECURITY.md`](SECURITY.md). **Licence:** proprietary — all rights reserved; see [`LICENSE`](LICENSE).

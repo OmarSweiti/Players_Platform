@@ -20,7 +20,7 @@ the pinned commit.
 
 | Fixture | Holds | Used by |
 |---|---|---|
-| two tenants | `sodara` and `northwind`, colliding names across them, one member per role in each, a revoked session, an archived member | every authorization, isolation and data test |
+| two tenants | `sadara` and `northwind`, colliding names across them, one member per role in each, a revoked session, an archived member | every authorization, isolation and data test |
 | the field classification | every response field with its class — `PUBLIC`, `IDENTITY`, `MEDICAL`, `LEGAL_INTERNAL`, `FINANCE`, `MINOR` — kept independently of the code's markers | `0.6.4` and every later response |
 | the test issuer | an in-process OIDC issuer that mints valid, expired, foreign-issuer, foreign-audience and replayed tokens | `0.5.4`–`0.5.8` |
 | hostile files | an executable renamed `.pdf`, the EICAR string, a size-mismatched upload, a replayed presigned URL | `0.8.3`–`0.8.5` |
@@ -65,6 +65,8 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `the_unit_runner_renders_a_component` | 0.2.4 | frontend | todo |
 | `each_locale_project_opens_the_sign_in_page` | 0.2.4 | frontend | todo |
 | `the_built_image_answers_liveness` | 0.2.6 | backend | todo |
+| `the_app_boots_on_nestjs_12` | 0.2.9 | backend | todo |
+| `the_test_runner_loads_es_module_packages` | 0.2.9 | backend | todo |
 | `validation_errors_list_their_fields` | 0.3.1 | backend | todo |
 | `unknown_errors_leak_nothing` | 0.3.1 | backend | todo |
 | `every_error_carries_the_request_id` | 0.3.1 | backend | todo |
@@ -112,6 +114,7 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `jod_amounts_keep_three_decimals` | 0.4.7 | backend | todo |
 | `excess_scale_is_refused_not_rounded` | 0.4.7 | backend | todo |
 | `money_never_passes_through_a_javascript_number` | 0.4.7 | backend | todo |
+| `every_active_iso_4217_currency_is_seeded_with_its_decimals` | 0.4.7 | backend | todo |
 | `a_birth_date_is_the_same_day_in_every_timezone` | 0.4.8 | backend | todo |
 | `instants_round_trip_in_utc` | 0.4.8 | backend | todo |
 | `an_invalid_tenant_timezone_is_refused` | 0.4.8 | backend | todo |

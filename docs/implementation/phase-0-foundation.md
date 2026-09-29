@@ -5,7 +5,7 @@
 > row-level security, authorization, atomic audit, durable work, a private file pipeline, the API
 > contract and the bilingual shell are in place, tested and green in CI.
 
-**Effort:** 81 microsteps — 22 S, 49 M, 10 L — **320–640 engineering hours** before the 30% reserve
+**Effort:** 82 microsteps — 22 S, 49 M, 11 L — **328–656 engineering hours** before the 30% reserve
 (the size weights are ceilings); [`00-master-plan.md`](00-master-plan.md#effort-model) turns that into a
 forecast and recalibrates it from measured hours after the first five steps. No new product
 features: the demonstrations are about what can no longer go wrong.
@@ -192,15 +192,15 @@ scouting query runs.
 One command brings up everything the applications need: PostgreSQL 18, Valkey, an S3-compatible object
 store that supports presigned URLs **and bucket versioning** (chosen and pinned in this step), ClamAV,
 Mailpit, Keycloak, and **a local HTTPS proxy** (Caddy, `tls internal`) that serves
-`https://sodara.localhost` and `https://northwind.localhost` exactly as production will be routed — `/` to
+`https://sadara.localhost` and `https://northwind.localhost` exactly as production will be routed — `/` to
 the web app, `/api/` to the API — so the `__Host-` session cookie is tested as specified, not weakened;
 `just trust-dev-ca` trusts the proxy's local certificate authority. Every image is pinned **by digest**, every service has a health check and a named
 volume, and Keycloak runs `start-dev` only here — development mode has insecure defaults and never
 leaves an isolated machine. `just reset` destroys the local volumes and refuses any other target. Tenant
 hosts resolve through `*.localhost`.
 **Verify:** `just up && docker compose -f infra/compose.yaml ps --format json | jq -se 'all(.[]; .Health == "healthy")'`
-**Done when:** a fresh clone brings every service up healthy with `just up`, `https://sodara.localhost`
-reaches the web app and `https://sodara.localhost/api/` the API, and every image reference is a digest.
+**Done when:** a fresh clone brings every service up healthy with `just up`, `https://sadara.localhost`
+reaches the web app and `https://sadara.localhost/api/` the API, and every image reference is a digest.
 
 ### 0.2.2 — PostgreSQL 18 in CI and in the replay recipe
 **Repo:** backend · **Size:** S · **Depends on:** — · **Requirements:** SR-DB-005
@@ -220,7 +220,7 @@ qualification is already on record: PostgreSQL 18.6 with Prisma 7.10.0 applied a
 Jest projects with disjoint globs: `unit` (`src/**/*.spec.ts`), `integration`
 (`test/**/*.integration-spec.ts`) and `e2e` (`test/**/*.e2e-spec.ts`). The harness boots the
 app per file against `DATABASE_URL_TEST`, applies migrations into a fresh schema per run
-(`sodara_test_<random>`), and creates tenants and members **directly** — never through the seed. Once
+(`sadara_test_<random>`), and creates tenants and members **directly** — never through the seed. Once
 `0.4.2` lands, tests connect as the runtime role, never the owner. The starter `AppController` (not even
 registered) and the e2e test that expects "Hello World" are deleted. `--passWithNoTests` is forbidden.
 ```ts
@@ -275,12 +275,11 @@ remove what nothing imports — backend `socket.io`, `@nestjs/websockets`, `@nes
 `redis`, `ioredis`, `multer`, `@types/multer`, `dayjs`, and the credential libraries `0.1.6` orphaned;
 frontend 12 of 27 dependencies (seven Radix packages, `@tsparticles/*`, `framer-motion`, `date-fns`,
 `zustand`). A dependency returns with the step that first imports it. Every `@nestjs/*` package sits on
-**one** major version — the Dependabot merges of 28 September put `@nestjs/testing` and
-`@nestjs/event-emitter` on 12 while `@nestjs/core` and `@nestjs/common` stayed on 11; choose one major
-deliberately and move the family together. Use cases are `*.usecase.ts` (the
-11 `*.use-case.ts` files are renamed in one mechanical commit); the product is **Sodara** everywhere —
+**one** major version — today `@nestjs/event-emitter` is on 12 (its peers accept 11) while the rest of the
+family is on 11; `0.2.9` moves the family to 12 together. Use cases are `*.usecase.ts` (the
+11 `*.use-case.ts` files are renamed in one mechanical commit); the product is **Sadara** everywhere —
 the API title (`main.ts:56–57`), the page title (`app/layout.tsx:18`) and the packages (`backend`,
-`players_platform_frontend` → `sodara-backend`, `sodara-frontend`).
+`players_platform_frontend` → `sadara-backend`, `sadara-frontend`).
 **Verify:** `npx depcheck` in each application · `test -z "$(find src -name '*.use-case.ts')"`
 **Done when:** `depcheck` reports nothing in either application, one use-case suffix remains, and no
 user-visible string names the old product.
@@ -292,6 +291,20 @@ The required `test` job runs the integration and e2e projects against PostgreSQL
 containers, in addition to the unit tests.
 **Verify:** CI on the pull request
 **Done when:** a deliberately failing e2e test turns the required `test` check red.
+
+### 0.2.9 — NestJS 12, TypeScript 6 and an ES-module test setup, together
+**Repo:** backend · **Size:** L · **Depends on:** `0.2.3`, `0.2.5`, `0.2.7` · **Requirements:** SR-NFR-MNT-002
+**Files:** `package.json`, `package-lock.json`, `tsconfig.json`, `jest.config.ts`, `test/jest-e2e.json`, `.github/dependabot.yml`
+Dependabot offered the NestJS 12 family, `bullmq` 6, TypeScript 7 and ESLint 10 on 28 September; they were
+merged with failing checks and reverted (backend #26), because NestJS 12 ships as ES modules and the Jest
+setup cannot load them. This step makes the move deliberately and in one piece: every `@nestjs/*` package
+to 12 with `bullmq` 6; TypeScript 6 — TypeScript 7 waits until `ts-jest` and typescript-eslint support it;
+the TypeScript 6 settings decided explicitly (whether to turn `strict` on, `types`, `rootDir`); a test
+runner that loads ES-module packages; then the Dependabot holds on those majors are lifted.
+**Tests:** `the_app_boots_on_nestjs_12` · `the_test_runner_loads_es_module_packages`
+**Verify:** `rm -rf node_modules && npm ci && just check && just test-e2e`
+**Done when:** every `@nestjs/*` package is on 12, TypeScript is on 6, CI is green, and `dependabot.yml`
+no longer holds those majors.
 
 ---
 
@@ -407,7 +420,7 @@ lives at the identity provider (`0.5.1`).
 `src/main.ts`, `.github/workflows/ci.yml`, `justfile`
 The `@nestjs/swagger` CLI plugin describes the DTOs; the document registers the session-cookie scheme
 and the CSRF header (today two controllers reference an unregistered `bearer` scheme, `main.ts:59–69`)
-and is titled **Sodara API**. `npm run openapi` writes it without starting a server; CI fails if the
+and is titled **Sadara API**. `npm run openapi` writes it without starting a server; CI fails if the
 committed file differs from the generated one and runs `oasdiff breaking` against `development`'s copy —
 a breaking change needs `v2` of that endpoint or a reviewed exception
 ([ADR-0010](../adr/0010-api-contract.md)).
@@ -446,8 +459,8 @@ clean one.
 **Repo:** backend + umbrella · **Size:** M · **Depends on:** `0.2.1`, `0.2.2` · **Requirements:** SR-NFR-SEC-002
 **Files:** umbrella `infra/postgres/init/10-roles.sql`; backend `prisma.config.ts`, `src/config/env.schema.ts`,
 `.github/workflows/ci.yml`, `justfile`, `test/db/roles.integration-spec.ts` (new)
-`sodara_owner` (NOLOGIN) owns the schema; `sodara_migrator` assumes it only to run migrations
-(`MIGRATION_DATABASE_URL`, used by a new `just migrate`); `sodara_app`, the runtime role, is **not an owner and has NOBYPASSRLS**, with
+`sadara_owner` (NOLOGIN) owns the schema; `sadara_migrator` assumes it only to run migrations
+(`MIGRATION_DATABASE_URL`, used by a new `just migrate`); `sadara_app`, the runtime role, is **not an owner and has NOBYPASSRLS**, with
 default privileges granting it only DML. The application never connects as the owner or migrator, in
 any environment, and CI and the test harness use the same split.
 **Tests:** `the_runtime_role_owns_no_table` · `the_runtime_role_cannot_run_ddl` · `the_runtime_role_cannot_bypass_rls`
@@ -526,15 +539,17 @@ Prefix the unprefixed filter indexes ([`../reference/database.md`](../reference/
 **Repo:** backend · **Size:** M · **Depends on:** `0.4.1` · **Requirements:** —
 **Files:** `src/common/money/money.ts` (new), `prisma/schema.prisma`, migration `…_money`, contract and training DTOs
 Money columns become `Decimal @db.Decimal(19, 4)` (today `Decimal(…, 2)` — JOD has three decimals;
-`schema.prisma:616, 621, 825, 898`); a global `CurrencyDefinition(code, minorUnitExponent, enabled)` holds
-the approved currencies (OPEN — which ones; JOD is certain); enrollment payments capture their own
-currency. `Money` wraps Prisma's exact decimal and a currency code, validates payable amounts to the
+`schema.prisma:616, 621, 825, 898`); a global `CurrencyDefinition(code, minorUnitExponent, enabled)` is
+seeded with **every active ISO 4217 currency and its official decimals** — 0 to 4, all of which
+`NUMERIC(19,4)` holds — all enabled (owner decision, 29 September 2026); a tenant's default is JOD;
+enrollment payments capture their own currency; amounts in different currencies are never added without
+a recorded exchange rate. `Money` wraps Prisma's exact decimal and a currency code, validates payable amounts to the
 currency's exponent, refuses NaN, infinity and excess scale **before** PostgreSQL could round them, and
 travels as `{ "amount": "1250.500", "currency": "JOD" }` ([ADR-0006](../adr/0006-money.md)).
 ```ts
 export class Money { static parse(amount: string, currency: CurrencyCode): Money; add(other: Money): Money; toWire(): { amount: string; currency: CurrencyCode }; format(locale: 'ar' | 'en'): string }
 ```
-**Tests:** `jod_amounts_keep_three_decimals` · `excess_scale_is_refused_not_rounded` · `money_never_passes_through_a_javascript_number`
+**Tests:** `jod_amounts_keep_three_decimals` · `excess_scale_is_refused_not_rounded` · `money_never_passes_through_a_javascript_number` · `every_active_iso_4217_currency_is_seeded_with_its_decimals`
 **Verify:** `npx jest src/common/money && just migrations`
 **Done when:** `Money.parse('1.255', 'JOD').toWire()` round-trips exactly, `Money.parse('1.255', 'USD')`
 is refused, and no money column keeps scale 2.
@@ -603,14 +618,14 @@ transaction, and both tests pass.
 
 *Identity moves to an external OpenID Connect provider, as SysRD §2 specifies — Keycloak in development
 and staging, the production choice settled with hosting ([ADR-0002](../adr/0002-identity-oidc.md)). The
-provider authenticates (passwords, MFA, recovery, lockout); Sodara decides membership, roles and
+provider authenticates (passwords, MFA, recovery, lockout); Sadara decides membership, roles and
 policy. The API is the confidential OIDC client and owns one opaque session per browser, on the same
 origin as the web app ([ADR-0003](../adr/0003-browser-sessions.md)); no provider token is ever stored.*
 
 ### 0.5.1 — The Keycloak realm as code
 **Repo:** umbrella · **Size:** M · **Depends on:** `0.2.1` · **Requirements:** SR-AUTH-008, SR-AUTH-004
-**Files:** `infra/keycloak/realm-sodara.json` (new), `infra/keycloak/test-realm.sh` (new), `infra/compose.yaml`
-The realm is a reviewed file, imported at start. Client `sodara-api`: confidential, standard flow only,
+**Files:** `infra/keycloak/realm-sadara.json` (new), `infra/keycloak/test-realm.sh` (new), `infra/compose.yaml`
+The realm is a reviewed file, imported at start. Client `sadara-api`: confidential, standard flow only,
 **PKCE S256 required**, exact redirect and post-logout URIs per tenant host, back-channel logout URL
 with session required. Authentication: password policy length ≥ 12 with no composition rules and a
 blocked-password list; brute-force detection with temporary lockout; email verification; a conditional
@@ -634,7 +649,7 @@ refused, and an unknown host looks exactly like "no account here". The resolved 
 sign-in transaction and the membership lookup; after sign-in the session is the only source of tenant.
 **Tests:** `sign_in_uses_the_tenant_of_the_host` · `an_unknown_host_looks_like_no_account` · `an_inactive_tenant_cannot_sign_in`
 **Verify:** `just test-e2e -- test/auth/tenant-resolution.e2e-spec.ts`
-**Done when:** the three tests pass on `sodara.localhost` and `other.localhost`.
+**Done when:** the three tests pass on `sadara.localhost` and `other.localhost`.
 
 ### 0.5.3 — Identities, memberships and sessions in the schema
 **Repo:** backend · **Size:** M · **Depends on:** `0.4.5` · **Requirements:** —
@@ -677,12 +692,12 @@ the compose Keycloak.
 **Files:** `src/modules/identity/presentation/auth.controller.ts` (new), `src/modules/identity/application/sign-in.usecase.ts` (new), `test/auth/sign-in.e2e-spec.ts` (new)
 `GET /api/v1/auth/login?returnTo=` stores a one-time login transaction (state, nonce, PKCE verifier,
 tenant, validated same-origin `returnTo`) in Valkey for ten minutes — losing it only aborts a sign-in —
-and **binds it to the initiating browser** with a short-lived `__Host-sodara_preauth` cookie (HttpOnly,
+and **binds it to the initiating browser** with a short-lived `__Host-sadara_preauth` cookie (HttpOnly,
 Secure, SameSite=Lax, `Path=/`, no `Domain`) that grants no access and is cleared at the callback; for a step-up the existing session plays that role. It then
 redirects to the provider with the tenant's locale. `GET /api/v1/auth/callback` requires the pre-auth cookie to match, consumes the state
 once, exchanges the code, verifies the ID token, and looks up the membership of **that identity in the
 host's tenant**: none, archived or inactive means a refusal page and no session (and a security event,
-`0.7.3`); otherwise this step creates the `UserSession` row, issues the `__Host-sodara_session` cookie and returns
+`0.7.3`); otherwise this step creates the `UserSession` row, issues the `__Host-sadara_session` cookie and returns
 the browser to `returnTo`. Authenticating later requests with it, expiry and CSRF are `0.5.6`.
 **Tests:** `a_member_signs_in_end_to_end` · `a_non_member_gets_no_session` · `a_replayed_or_mismatched_state_is_refused` · `a_callback_from_another_browser_is_refused` · `return_to_cannot_leave_the_origin`
 **Verify:** `just test-e2e -- test/auth/sign-in.e2e-spec.ts`
@@ -693,7 +708,7 @@ callback completed in a browser that did not start the sign-in creates no sessio
 **Repo:** backend · **Size:** L · **Depends on:** `0.5.5`, `0.3.8` · **Requirements:** SR-AUTH-003, SR-ACL-007
 **Files:** `src/modules/identity/application/session.service.ts` (new), `src/common/guards/session.guard.ts`
 (replaces the placeholder), `src/common/security/csrf.guard.ts` (new), `test/auth/sessions.e2e-spec.ts` (new)
-The session `0.5.5` issued is one random 256-bit value in `__Host-sodara_session` (HttpOnly, Secure,
+The session `0.5.5` issued is one random 256-bit value in `__Host-sadara_session` (HttpOnly, Secure,
 SameSite=Lax, Path=/); PostgreSQL holds only its hash. This step makes it authenticate requests. **Every request checks the session, the membership and the
 tenant against PostgreSQL** — not a cache — so revocation and deactivation take effect on the very next
 request; a cache may come later only with a tested consistency protocol. Idle expiry 30 minutes, absolute
@@ -715,9 +730,9 @@ member; `GET /api/v1/auth/sessions` and `DELETE /api/v1/auth/sessions/{id}` mana
 (another member's is a 404). `POST /api/v1/auth/backchannel-logout` verifies the logout token fully —
 issuer, audience, `iat`, `jti` replay, the logout event, `sid` or `sub` — and revokes the matching
 sessions. **The exposure window, stated:** app-side revocation and deactivation are immediate;
-provider-side changes (a disabled account, a reset) reach Sodara through a back-channel event, and if that
+provider-side changes (a disabled account, a reset) reach Sadara through a back-channel event, and if that
 event is lost, at the session's idle or absolute expiry at the latest. The owner accepts this window
-(OPEN); offboarding is therefore done in Sodara, which is immediate.
+(OPEN); offboarding is therefore done in Sadara, which is immediate.
 **Tests:** `logout_revokes_the_session_server_side` · `logout_everywhere_revokes_every_session` · `a_member_cannot_revoke_another_members_session` · `a_valid_back_channel_logout_revokes_matching_sessions` · `a_forged_or_replayed_logout_token_is_refused`
 **Verify:** `just test-e2e -- test/auth/session-management.e2e-spec.ts`
 **Done when:** the five tests pass.
@@ -745,7 +760,7 @@ required actions (verify email, set password, configure MFA), links the identity
 membership and asks the provider to send the setup email. It never accepts a password and is idempotent
 per slug.
 ```
-npm run tenant:provision -- --slug sodara --name "Sodara Sports Agency" --domain sodara.example --owner-email owner@sodara.test
+npm run tenant:provision -- --slug sadara --name "Sadara Sports Agency" --domain sadara.example --owner-email owner@sadara.test
 ```
 **Tests:** `provisioning_creates_a_tenant_and_an_invited_owner` · `provisioning_is_idempotent_per_slug` · `provisioning_never_accepts_a_password`
 **Verify:** `just test-e2e -- test/cli/provision-tenant.e2e-spec.ts`
@@ -768,9 +783,9 @@ list shows pending, accepted, expired and revoked.
 
 ### 0.5.11 — Development identities and the synthetic seed
 **Repo:** backend + umbrella + frontend · **Size:** M · **Depends on:** `0.5.10`, `0.4.7`, `0.4.8`, `0.2.4` · **Requirements:** —
-**Files:** umbrella `infra/keycloak/realm-sodara.json` (development users), `infra/keycloak/README.md` (the development members),
+**Files:** umbrella `infra/keycloak/realm-sadara.json` (development users), `infra/keycloak/README.md` (the development members),
 `justfile` (`dev-cookie`); backend `src/database/seed.ts`, `justfile` (`seed`); frontend `scripts/dev-cookie.ts` (new)
-Two fictional tenants (`sodara`, `northwind`), one member per role in each, linked to development
+Two fictional tenants (`sadara`, `northwind`), one member per role in each, linked to development
 identities in the realm (documented development-only passwords; privileged members pre-enrolled in
 MFA), and synthetic players with Arabic and Latin names. Every address is on the reserved `.test`
 domain; today's seed names tenants after real clubs on a real-looking domain (`seed.ts:81–91`) and seeds
@@ -1254,15 +1269,15 @@ just check && just guards && just drill                             # pins, plan
 
 1. The route inventory has no local credential route; `POST /api/v1/auth/login` does not exist as a
    password endpoint, and a request with a token signed by `default-secret` is simply unauthenticated.
-2. A seeded coach of tenant `sodara` signs in through Keycloak in Arabic on `https://sodara.localhost`,
+2. A seeded coach of tenant `sadara` signs in through Keycloak in Arabic on `https://sadara.localhost`,
    lands on the home page, and `GET /api/v1/auth/session` answers; the same identity is refused on
    `https://northwind.localhost`.
 3. A seeded owner without MFA gets no session until they complete the step-up; a sensitive action more
    than five minutes after sign-in asks for re-authentication.
-4. Signed in as `sodara`'s admin, requesting a `northwind` player by id returns `404`; in `psql` as the
+4. Signed in as `sadara`'s admin, requesting a `northwind` player by id returns `404`; in `psql` as the
    runtime role with no tenant set, `SELECT count(*) FROM players` returns `0`.
 5. After logout, the old session cookie fails on the next request; logging out in Keycloak revokes the
-   Sodara session through the back channel.
+   Sadara session through the back channel.
 6. `UPDATE`, `DELETE` and `TRUNCATE` on `audit_logs` are refused by the database, even for the owner.
 7. After a full sign-in, invitation and upload flow, the logs contain no email address, token, cookie
    or body — and the canary test proves it automatically.

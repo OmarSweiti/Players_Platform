@@ -24,7 +24,7 @@ Group arrows summarize; each step's dependencies below are authoritative. A late
 ### 2.1.0 — Approve the medical activation policy
 **Repo:** umbrella + backend · **Size:** M · **Depends on:** `1.10.9` · **Requirements:** PRD-ME-001, BR-RULE-02/07, SR-MED-001/007
 **Files:** `docs/reference/security-privacy.md` · `backend/src/modules/medical/domain/medical-policy.ts` · `backend/test/medical/policy.e2e-spec.ts`
-**Build:** Record medical owner and counsel decisions on purpose, recipients, minors/guardians, hosting, retention, key custody and approved availability summaries. OPEN — medical policy: default disabled with synthetic fixtures only; settlement requires signed-off access scenarios and a recoverable-key exercise. Policy approval has a version; no role alone creates clinical authority.
+**Build:** Record the owner's and the medical lead's decisions on purpose, recipients, minors/guardians, hosting, retention, key custody and approved availability summaries. OPEN — medical policy: default disabled with synthetic fixtures only; settlement requires signed-off access scenarios and a recoverable-key exercise. Policy approval has a version; no role alone creates clinical authority.
 **Tests:** `medical_activation_requires_approved_policy`
 **Verify:** `(cd backend && just test-e2e -- test/medical/policy.e2e-spec.ts)`
 **Done when:** The server refuses activation without a recorded approved policy version.
@@ -72,7 +72,7 @@ Group arrows summarize; each step's dependencies below are authoritative. A late
 ### 2.1.6 — Reprove medical database isolation and key recovery
 **Repo:** backend · **Size:** M · **Depends on:** `2.1.5` · **Requirements:** SYS-TEN-005, SR-NFR-SEC-003, TEST-003/008
 **Files:** `backend/test/integration/medical-isolation.integration-spec.ts` · `backend/prisma/migrations/` · `docs/implementation/evidence/medical-isolation.md`
-**Build:** Extend the mandatory Phase-0 RLS inventory for every new medical/amendment/file-binding table. Exercise sodara_app reads/writes without context, tenant mismatch, pooled transaction reuse, UPDATE/DELETE/TRUNCATE evidence protection and restored keys. This step verifies expanded coverage; it does not defer initial RLS until Phase 2.
+**Build:** Extend the mandatory Phase-0 RLS inventory for every new medical/amendment/file-binding table. Exercise sadara_app reads/writes without context, tenant mismatch, pooled transaction reuse, UPDATE/DELETE/TRUNCATE evidence protection and restored keys. This step verifies expanded coverage; it does not defer initial RLS until Phase 2.
 **Tests:** `medical_new_tables_force_rls_and_preserve_evidence`
 **Verify:** `(cd backend && just test-int -- medical-isolation)`
 **Done when:** Runtime-role and restored-fixture tests prove isolation for every medical table.

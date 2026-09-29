@@ -1,6 +1,6 @@
 # Contributing
 
-The Players Platform (Sodara): the plan, and one pinned commit of each
+The Players Platform (Sadara): the plan, and one pinned commit of each
 application.
 
 | Path | What it is |
