@@ -37,6 +37,7 @@ edit only Status and Evidence.
 | 0.2.6 | A production build that starts, in a container | backend | todo |  |
 | 0.2.7 | Declared dependencies only; one naming scheme | backend + frontend | todo |  |
 | 0.2.8 | Integration and end-to-end tests in CI | backend | todo |  |
+| 0.2.9 | NestJS 12, TypeScript 6 and an ES-module test setup, together | backend | todo |  |
 | 0.3.1 | One error format: RFC 9457 problem details | backend | todo |  |
 | 0.3.2 | Strict validation, registered once | backend | todo |  |
 | 0.3.3 | Versioned routes under /api/v1 | backend + frontend | todo |  |

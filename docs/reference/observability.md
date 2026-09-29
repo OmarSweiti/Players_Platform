@@ -106,7 +106,7 @@ Never restore over a live environment during a drill. Production deletion, reten
 
 Start with environment/release, UTC time, route template, safe request ID and observed status/problem code. Reproduce using synthetic data with the same role, relationship and tenant boundaries. Trace API → database/audit → outbox → worker → provider, and web/realtime where present. Never disable RLS, policy, audit or scanning to make a reproduction pass; never copy live payloads into an issue or coding-agent transcript. See the [debugging playbook](../implementation/02-development-workflow.md#debugging).
 
-For suspected disclosure: disable the affected server capability, revoke implicated sessions/grants, preserve restricted evidence, record the incident timeline and notify the designated owner. Counsel determines external notification duties; this reference invents no statutory timeline. Restore exposure only after a reproducing regression test, reviewed containment scope and reconciliation of affected records/releases. Provider compromise requires provider-side recovery as well as local session invalidation.
+For suspected disclosure: disable the affected server capability, revoke implicated sessions/grants, preserve restricted evidence, record the incident timeline and notify the designated owner. The owner determines external notification duties, with legal advice recommended; this reference invents no statutory timeline. Restore exposure only after a reproducing regression test, reviewed containment scope and reconciliation of affected records/releases. Provider compromise requires provider-side recovery as well as local session invalidation.
 
 ## Verification and evidence
 

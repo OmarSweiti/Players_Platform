@@ -1,4 +1,4 @@
-# Sodara Players Platform — read this before you touch anything
+# Sadara Players Platform — read this before you touch anything
 
 A multi-tenant platform for a sports agency — players, documents, contracts, legal, training,
 performance, medical, chat, scouting, notifications and audit — in **Arabic and English**.

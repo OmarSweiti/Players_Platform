@@ -31,7 +31,7 @@ exports, notifications, caches, files or logs by another path. Missing policy de
 classification), `0.10.2`.
 
 ### I-3 · Authentication is not authorization
-The identity provider proves who someone is; Sodara decides what they may do — on every protected
+The identity provider proves who someone is; Sadara decides what they may do — on every protected
 action, on the server. A route declares its permission or is `@Public()`, or the application does not
 start. Hidden navigation is UX, never control.
 *Serves* SR-AUTH-009, SR-API-001. *Enforced by* `0.6.2`, `0.6.9`.

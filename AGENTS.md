@@ -1,4 +1,4 @@
-# Agent guide — Sodara Players Platform
+# Agent guide — Sadara Players Platform
 
 You are working on a multi-tenant, bilingual (Arabic and English) platform for a sports agency. This
 repository is the **umbrella**: the plan in `docs/`, the local stack in `infra/`, and one pinned commit

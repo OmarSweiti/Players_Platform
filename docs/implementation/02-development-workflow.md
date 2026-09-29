@@ -29,7 +29,7 @@ cd frontend && cp .env.example .env.local && npm run dev
 ```
 
 `just migrate` applies migrations as the migrator role (from `0.4.2`); `just seed` loads the synthetic
-tenants and members (from `0.5.11`). Open **`https://sodara.localhost`** — the host selects the tenant —
+tenants and members (from `0.5.11`). Open **`https://sadara.localhost`** — the host selects the tenant —
 and sign in as a development member from the realm (the list is in `infra/keycloak/README.md`). The
 browser only ever talks to one origin, over HTTPS, so the session cookie behaves exactly as in production.
 
@@ -40,8 +40,8 @@ repository's `AGENTS.md`.
 
 | Local URL | What |
 |---|---|
-| `https://sodara.localhost` | the web app, tenant `sodara` (`https://northwind.localhost` is the second tenant) |
-| `https://sodara.localhost/api/v1` | the API, through the proxy — the address the browser and your tests use |
+| `https://sadara.localhost` | the web app, tenant `sadara` (`https://northwind.localhost` is the second tenant) |
+| `https://sadara.localhost/api/v1` | the API, through the proxy — the address the browser and your tests use |
 | `http://localhost:3000/docs` | the API's OpenAPI UI, directly (development only) |
 | `http://localhost:8080` | Keycloak (development admin; never exposed beyond this machine) |
 | `http://localhost:8025` | Mailpit — every email the stack sends |
@@ -122,18 +122,18 @@ Run against the local stack after `just seed`. Every feature PR records what was
 Arabic and in English**, on a freshly seeded database — including at least one attempt that must fail:
 another tenant's id, a missing permission, an illegal transition, a stale `If-Match`.
 
-- **In the browser:** sign in on `https://sodara.localhost` as the member whose role you are testing;
+- **In the browser:** sign in on `https://sadara.localhost` as the member whose role you are testing;
   repeat the refusal case as a member of `northwind` and as a member without the permission.
 - **Against the API:** `just dev-cookie <member>` *(from 0.5.11)* signs a development member in
   headlessly and writes a curl cookie jar:
 
 ```bash
-API=https://sodara.localhost/api/v1; CA=$(just dev-ca-path)          # the proxy's local CA (from 0.2.1)
-just dev-cookie coach@sodara.test > jar
+API=https://sadara.localhost/api/v1; CA=$(just dev-ca-path)          # the proxy's local CA (from 0.2.1)
+just dev-cookie coach@sadara.test > jar
 CSRF=$(curl -s --cacert "$CA" -b jar "$API/auth/session" | jq -r .data.csrfToken)
 curl -s --cacert "$CA" -b jar "$API/players?limit=5" | jq '.data[0].id'
 ETAG=$(curl -s --cacert "$CA" -b jar -D - -o /dev/null "$API/players/<id>" | awk 'tolower($1)=="etag:"{print $2}' | tr -d '\r')
-curl -i --cacert "$CA" -b jar -X PATCH -H "X-CSRF-Token: $CSRF" -H 'Origin: https://sodara.localhost' \
+curl -i --cacert "$CA" -b jar -X PATCH -H "X-CSRF-Token: $CSRF" -H 'Origin: https://sadara.localhost' \
      -H 'Content-Type: application/json' -H "If-Match: $ETAG" -d '{"preferredFoot":"LEFT"}' "$API/players/<id>"
 ```
 
@@ -144,7 +144,7 @@ Always send back the `ETag` the API returned; a made-up one is simply stale.
 - **The database, as the application sees it:**
 
 ```bash
-docker compose -f infra/compose.yaml exec postgres psql -U sodara_app sodara
+docker compose -f infra/compose.yaml exec postgres psql -U sadara_app sadara
 BEGIN; SELECT set_config('app.tenant_id', '<tenant uuid>', true); SELECT count(*) FROM players; COMMIT;
 SELECT count(*) FROM players;          -- outside a tenant transaction: 0, by design
 ```

@@ -1,12 +1,12 @@
 # Master plan
 
 The spine of the plan: what the requirements get right and wrong, where the code stands, the phases,
-the effort, the risks, the questions only the owner or counsel can answer, and every place the plan
+the effort, the risks, the decisions only the owner can make, and every place the plan
 departs from the frozen requirements.
 
 | Document | Answers |
 |---|---|
-| [`../requirements/`](../requirements/README.md) | **what** Sodara must be, and why — frozen |
+| [`../requirements/`](../requirements/README.md) | **what** Sadara must be, and why — frozen |
 | [`../adr/`](../adr/README.md) | the load-bearing **how** decisions, with the alternatives rejected |
 | [`../reference/`](../reference/) | the contracts every microstep relies on |
 | this folder | **what to build next**, in what order, exactly how, and how you know it worked |
@@ -99,12 +99,12 @@ half the weighted total to the full total. Do **not** divide by an assumed AI sp
 
 | Phase | Microsteps | S · M · L | Hours before reserve | With 30% reserve, at 25 h/week |
 |---|---:|---|---:|---:|
-| 0 | 81 | 22 · 49 · 10 | 320–640 | 17–33 weeks |
+| 0 | 82 | 22 · 49 · 11 | 328–656 | 17–34 weeks |
 | 1 | 64 | 0 · 17 · 47 | 444–888 | 23–46 weeks |
 | 2 | 44 | 0 · 13 · 31 | 300–600 | 16–31 weeks |
 | 3 | 29 | 0 · 7 · 22 | 204–408 | 11–21 weeks |
 | 4 | 25 | 0 · 3 · 22 | 188–376 | 10–20 weeks |
-| **All** | **243** | 22 · 89 · 132 | 1456–2912 | 76–151 weeks |
+| **All** | **244** | 22 · 89 · 133 | 1464–2928 | 76–152 weeks |
 
 Phase 0's sizes were set step by step against the code; the later phases were sized conservatively —
 almost every full-stack step as L — and will come down as their phase-entry refinement splits and
@@ -115,7 +115,7 @@ time and the cause of any wait in each PR. After five completed steps, and weekl
 *remaining forecast = remaining weighted size × (median actual hours ÷ weight) × observed reserve ÷
 actual weekly capacity.* If the median runs above 1.5× the weights, or two weeks deliver under 60% of
 planned capacity, re-forecast the phase and reduce scope only by the owner's decision. Waiting on
-counsel, providers or hosting is queue time, not effort — it is in the [long-lead
+owner decisions, providers or hosting is queue time, not effort — it is in the [long-lead
 register](#long-lead-register), not in these numbers.
 
 ---
@@ -127,13 +127,13 @@ register](#long-lead-register), not in these numbers.
 | **A cross-tenant leak** | any foreign-id response, count, job or file path succeeds; the runtime role bypasses RLS | stop exposure, reproduce, fix, add the case to the isolation suite · `0.4.5`, `0.6.9` |
 | **Confidential data in the wrong place** | a medical, legal or finance canary appears in an ordinary response, log, export, cache or notification | disable the surface, investigate copies, fail the release · `0.6.4`, `0.10.2` |
 | **Identity provider not ready for production** | the production provider is undecided at the hosting decision, or cannot meet the revocation, MFA or residency criteria | real users wait; development and staging continue on Keycloak · `1.10.1` |
-| **A contract marked signed without sufficient evidence** | a transition to `SIGNED` without an approved evidence policy, or evidence whose hash does not match the approved version | keep `APPROVED`; no production signing until counsel approves a policy · `1.4.5` |
+| **A contract marked signed without sufficient evidence** | a transition to `SIGNED` without an approved evidence policy, or evidence whose hash does not match the approved version | keep `APPROVED`; no production signing until the owner approves an evidence policy (ADR-0019) · `1.4.5` |
 | **Data migration loss** | the preflight finds mismatches or timestamps of unknown provenance; a backup does not restore | stop, get an owner-approved mapping, never delete to make a constraint pass · `0.4.1`, `0.10.3` |
 | **Lost or duplicated async work** | the oldest pending outbox event exceeds its alert threshold; a retry changes a business outcome | stop replay, reconcile by dedup keys and provider state · `0.7.5`, `0.7.6` |
 | **A missing test gives a false green** | an empty suite, a skipped named test, a stale configuration | the gate fails; fix the harness · `0.1.3`, `0.2.3` |
 | **AI-written code drifts from the conventions** | a convention violated in a merged PR | turn the convention into a CI check; path-scoped agent rules · `0.1.2`, `0.2.5` |
 | **Solo overload, bus factor** | measured cycle time above 1.5× the weights; two weeks under 60% of capacity | re-forecast, split, move approved scope; this documentation and the restore-from-runbook drill · every gate |
-| **Legal answers arrive late** — signature, medical hosting, retention, minors | four weeks without an answer to a long-lead question | the safe default stays in force; the dependent release waits · owner |
+| **Owner decisions arrive late** — the signature evidence policy, medical-data rules, retention, minors | four weeks without an answer to a long-lead question | the safe default stays in force; the dependent release waits · owner |
 | **Scope creep from the four-release vision** | a PR with no microstep reference | a new ask becomes an erratum or a later microstep, never an unplanned branch · weekly |
 | **Dependency churn** — Next.js, NestJS, Prisma majors | a major release of any of the three | grouped monthly Dependabot; majors one at a time, migration notes read, the app exercised · monthly |
 | **Unstaffed reliability target** | a restore misses its RPO/RTO; a critical alert goes unacknowledged | delay the release, revise operating support, repeat the drill · `1.10.12`, `1.10.13` |
@@ -147,13 +147,12 @@ arrives.
 
 | Start | Question or artifact | Latest safe point | Default while waiting |
 |---|---|---|---|
-| Phase 0 | Counsel: which signature evidence is sufficient, per jurisdiction; signatory authority; minors | `1.4.5` | evidence collected; nothing reaches `SIGNED` in production |
-| Phase 0 | Counsel and the medical owner: purposes, recipients, hosting and legal basis for medical data | Phase 2 medical entry | medical stays quarantined |
-| Phase 0 | The agency: roles and approval chains, required profile fields, contract types in use, SLA per priority, currencies | `1.1.5`, `1.2.5`, `1.4.3`, `1.5.2`, `0.4.7` | seeded defaults, marked as defaults |
-| Phase 0 | The owner: the repositories' licence (see the OPEN register) | before any outside contribution | no outside contributions |
+| Phase 0 | The owner: approve the signature evidence policy — a default is proposed in [ADR-0019](../adr/0019-owner-approves-signature-policy.md); a lawyer's review is optional, recommended for cross-border transfers and contracts with minors | `1.4.5` | evidence collected; nothing reaches `SIGNED` until the policy is approved |
+| Phase 0 | The owner and the agency's medical lead: who may see medical records, player and guardian consent, hosting region | Phase 2 medical entry | medical stays quarantined |
+| Phase 0 | The agency: roles and approval chains, required profile fields, contract types in use, SLA per priority | `1.1.5`, `1.2.5`, `1.4.3`, `1.5.2` | seeded defaults, marked as defaults |
 | Phase 1 start | Hosting: provider, region, managed PostgreSQL 18 with point-in-time recovery, private storage, key custody, production identity provider | `1.10.1` | the stack stays portable; staging waits |
 | Phase 1 start | Email provider and sending domain (SPF, DKIM, DMARC) | `1.6.3` | Mailpit only |
-| Phase 1 | Counsel and the agency: retention per record class, legal hold | `1.3.4` | archive only; nothing is purged |
+| Phase 1 | The owner: retention per record class, legal hold (legal advice optional) | `1.3.4` | archive only; nothing is purged |
 | Phase 1 | A native-speaker Arabic review; representative users | `1.10.15` | Arabic ships reviewed by the team only |
 | Phase 1, before launch | An independent security review against ASVS Level 2 | `1.10.14` | launch waits |
 
@@ -169,23 +168,23 @@ evidence and the affected requirement and test IDs here, and update the owning m
 | # | Question | Default meanwhile | Owner | Settled by |
 |---|---|---|---|---|
 | OPEN-01 | Which identity provider runs in production — self-hosted Keycloak or a managed provider — and in which region? | Keycloak in development and staging; no production users | `1.10.1` | the owner, with the hosting decision and the provider's MFA, recovery, revocation and residency evidence |
-| OPEN-02 | Session lifetimes and the provider-change exposure window | idle 30 min, absolute 12 h; provider-side changes apply at the next back-channel event or session expiry; offboarding is done in Sodara, which is immediate | `0.5.6`, `0.5.7` | the owner accepts the window in writing |
-| OPEN-03 | Which signature evidence is legally sufficient for the agency's contracts, per jurisdiction; who may sign; minors | evidence may be collected; `SIGNED` requires an approved policy; none is approved | `1.4.5` | counsel's approved evidence policy |
-| OPEN-04 | Who owns the medical workflow; its purposes, permitted recipients and summaries; where medical data may be hosted and on what legal basis | medical quarantined; no clinical narrative outside the medical workspace; no automated return-to-play | Phase 2 medical entry | a named medical owner and counsel's approved policy |
-| OPEN-05 | Child protection: how minors, guardians and a player's own access are verified and scoped | no inferred guardian permission; links inactive until verified; minors' data confidential by default | `0.6.5`, `1.2.3` | counsel and the agency |
-| OPEN-06 | Retention per record class, erasure, legal hold, archival PDF/A | archive, never purge; no retention period invented | `1.3.4` | counsel and the agency |
+| OPEN-02 | Session lifetimes and the provider-change exposure window | idle 30 min, absolute 12 h; provider-side changes apply at the next back-channel event or session expiry; offboarding is done in Sadara, which is immediate | `0.5.6`, `0.5.7` | the owner accepts the window in writing |
+| OPEN-03 | What evidence makes a contract signed; who may sign; contracts with minors | evidence may be collected; `SIGNED` requires the owner-approved policy; the default in [ADR-0019](../adr/0019-owner-approves-signature-policy.md) awaits the owner's approval | `1.4.5` | **decided 29 September 2026: the owner, not a lawyer, approves the policy** (ADR-0019); the policy itself is approved in chat or in the product at `1.4.5`; a lawyer's review stays optional |
+| OPEN-04 | Who owns the medical workflow; its purposes, permitted recipients and summaries; where medical data may be hosted and on what legal basis | medical quarantined; no clinical narrative outside the medical workspace; no automated return-to-play | Phase 2 medical entry | the owner and a named medical lead — a lawyer's review optional (owner, 29 September 2026) |
+| OPEN-05 | Child protection: how minors, guardians and a player's own access are verified and scoped | no inferred guardian permission; links inactive until verified; minors' data confidential by default | `0.6.5`, `1.2.3` | the owner, within FIFA's rules on minors |
+| OPEN-06 | Retention per record class, erasure, legal hold, archival PDF/A | archive, never purge; no retention period invented | `1.3.4` | the owner (legal advice optional) |
 | OPEN-07 | Legal SLA: business hours, pauses, holiday calendar | elapsed-time deadlines in the tenant's zone, visible and manually overridable | `1.5.2` | the legal owner's policy with examples |
 | OPEN-08 | The real capacity envelope | 1 tenant · 50 members · 500 players · 20,000 documents · 200 GB media — for load tests only | `1.10.6` | the agency's numbers |
-| OPEN-09 | Currencies, rounding, settlement rules, tax and the payment provider | JOD enabled; no real payments; exact decimals; unknown settlement is unresolved, never paid | `0.4.7`, Phase 3 finance | the agency's finance owner and counsel |
+| OPEN-09 | Rounding, settlement, exchange rates, tax and the payment provider | **currencies decided 29 September 2026 (owner): every active ISO 4217 currency**, each with its official decimals; the tenant's default is JOD; no real payments yet; amounts in different currencies are never added without a recorded exchange rate; unknown settlement is unresolved, never paid | `0.4.7`, Phase 3 finance | the owner: the exchange-rate source, settlement and tax rules, the payment provider |
 | OPEN-10 | Permitted AI uses, providers, data disclosure and evaluation thresholds | AI disabled | Phase 4 AI governance | the owner, domain leads and a privacy review, with evaluation results |
 | OPEN-11 | Does any database hold real data, and of what provenance? | treat every database as possibly real: preflight first, no destructive reset, no guessed time zone | `0.4.1` | the read-only preflight report and the owner's confirmation |
 | OPEN-12 | Email and push channels, sender identity, mandatory notices, device policy | in-app notifications and Mailpit; push off; no confidential content in any message | `1.6.3` | the owner and the provider's deliverability setup |
 | OPEN-13 | One current season per tenant, or parallel competition seasons? | one current season per tenant (`0.4.10`) | `1.2.1` | the sporting owner's examples |
 | OPEN-14 | Do coaching contracts need subjects other than players? Is the agency's own representation agreement a contract type, and who is the counterparty? | player contracts only, with an organisation counterparty; a `REPRESENTATION` type is added only once the agency confirms it; coaching disabled | `1.4.1` | the agency's example contracts |
 | OPEN-15 | Do watchlists include external prospects, and are they shared among staff? | private lists of existing players; prospect conversion explicit | Phase 3 scouting | the sporting owner |
-| OPEN-16 | Is break-glass emergency access needed, and who approves it? | disabled; scoped, time-boxed support grants only, never self-approved | Phase 4 support access | the owner, security and counsel |
+| OPEN-16 | Is break-glass emergency access needed, and who approves it? | disabled; scoped, time-boxed support grants only, never self-approved | Phase 4 support access | the owner, with a security review |
 | OPEN-17 | The default role matrix and approval chains | the seeded defaults in [`../reference/security-privacy.md`](../reference/security-privacy.md) | `1.1.5` | the agency confirms the matrix |
-| OPEN-18 | The repositories are public and licensed GPL-3.0, while the backend's `package.json` says `UNLICENSED`. Which licence is intended for a commercial agency platform? | no outside contributions; nothing changes until the owner decides | owner | the owner — this is not legal advice; counsel if in doubt |
+| OPEN-18 | The licence of the code | **decided 29 September 2026 (owner): proprietary, all rights reserved** — `LICENSE` in all three repositories, `UNLICENSED` in both `package.json` files. The repositories stay publicly *visible*: GitHub's terms let anyone view and fork a public repository on GitHub, and only a private repository stops that | — | settled; versions published earlier under GPL-3.0 keep that licence for those versions |
 
 ---
 
@@ -203,7 +202,7 @@ and the right-hand columns are what the code implements.
 | E-04 | SYS-TEN-005 | "consider" RLS for the highest-risk tables once patterns are validated | RLS forced on **every** tenant-owned table in Phase 0 | the audit found no database enforcement at all · `0.4.5` |
 | E-05 | SR-CORE-006, UX-007 | "store timestamps in UTC" | civil `DATE` for birthdays and contract days; `timestamptz` for instants; IANA zones for schedules | a birthday is not an instant · `0.4.8` |
 | E-06 | SR-CT-005, SR-TR-006 | amounts and currencies, without scale, rounding or settlement | `NUMERIC(19,4)` with the currency's exponent enforced on payable amounts; settlement in Phase 3 | JOD has three decimals · `0.4.7` |
-| E-07 | BR-RULE-04, SR-CT-008 vs SR-CT-011 | signed means "meets the configured signature policy"; provider integration is P1 | `SIGNED` only under an approved evidence policy; an approved manual method may satisfy SR-CT-008; **SR-CT-011 (provider integration) is deferred to Phase 3** | counsel has not approved a policy; the provider waits for it · `1.4.5`, Phase 3 |
+| E-07 | BR-RULE-04, SR-CT-008 vs SR-CT-011 | signed means "meets the configured signature policy"; provider integration is P1 | `SIGNED` only under an approved evidence policy; an approved manual method may satisfy SR-CT-008; **SR-CT-011 (provider integration) is deferred to Phase 3** | the owner has not yet approved a policy ([ADR-0019](../adr/0019-owner-approves-signature-policy.md)); the provider waits for it · `1.4.5`, Phase 3 |
 | E-08 | SR-DOC-004 (P1) | malware scanning "supported" | scanning in Phase 0; an unscanned file cannot be used or downloaded | unsafe files cannot be made safe later · `0.8.4` |
 | E-09 | SR-ACL-002, SysRD player link | a tenant-unique email | `Identity(issuer, subject)` plus tenant memberships; email never links an identity | email is contact data · `0.5.3` |
 | E-10 | SR-AUD-007, BR-RULE-11 | recoverability, retention and legal hold | archive; no scheduled purge until a retention policy exists; audit has its own stricter retention | the rules conflict without a policy · OPEN-06 |
@@ -215,7 +214,7 @@ and the right-hand columns are what the code implements.
 | E-16 | (gap) guardians | a guardian persona with no relation to a player | explicit, scoped, verified guardian links | cannot authorize without one · `0.6.5`, `1.2.3` |
 | E-17 | (gap) bilingual data | UI localisation only | Arabic and Latin-script names on players and organisations; Arabic-normalised search | typing "Mohammad" must find "محمد" · `1.2.1`, `1.2.4` |
 | E-18 | (gap) home-dashboard tasks | the BRD names tasks; no requirement defines them | actions derived from workflow state; a task entity waits for demand | · `1.8.2` |
-| E-19 | the standards references | ASVS, OWASP API Top 10, ISO 27001/27701, WCAG listed | verification targets with evidence per release; never a compliance claim | counsel settles applicability · `1.10.7`, `1.10.8`, `1.10.14` |
+| E-19 | the standards references | ASVS, OWASP API Top 10, ISO 27001/27701, WCAG listed | verification targets with evidence per release; never a compliance claim | the owner settles applicability, with legal advice if wanted · `1.10.7`, `1.10.8`, `1.10.14` |
 | E-20 | the legacy documents | "never filter by tenant — middleware does it"; "HttpOnly prevents CSRF"; "fake revocation is fine for an MVP"; "delete the lockfile" | all superseded | [`../reference/consolidation.md`](../reference/consolidation.md) · `0.1.1` |
 | E-21 | SR-AUTH-003 | refresh tokens rotate and are revocable per device | no refresh tokens: the provider's token is never stored; an opaque, database-checked application session per device is rotated and revocable instead | [ADR-0003](../adr/0003-browser-sessions.md) · `0.5.6`, `0.5.7` |
 | E-22 | SR-DOC-008 | PDF/A archival copies "where required by document policy" | delivered with dossier generation in Phase 3; no earlier policy requires it | revisit if the retention policy (OPEN-06) requires archival copies sooner · `3.3.1` |
