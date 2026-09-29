@@ -49,3 +49,4 @@ the same pull request.
 | [0017](adr/0017-sql-managed-database-objects.md) | Partial indexes, checks, policies, triggers and grants live in SQL | Accepted |
 | [0018](adr/0018-product-name-sadara.md) | The product is named Sadara | Accepted |
 | [0019](adr/0019-owner-approves-signature-policy.md) | The owner approves the signature evidence policy | Accepted · default policy awaits the owner's approval |
+| [0020](adr/0020-local-object-store.md) | The local object store is Versity S3 Gateway | Accepted |

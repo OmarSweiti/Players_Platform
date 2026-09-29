@@ -55,6 +55,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: python3 ./scripts/check-plan.py
+      # Reads the model Compose resolves (docker compose config) and the backend
+      # files at the pinned commit (ADR-0013: one PostgreSQL digest everywhere).
+      - name: The local stack pins every image, binds loopback only, health-checks every service
+        run: python3 ./scripts/check-stack.py
 
   # REQUIRED CHECK. The policy scripts and the git hooks prove they still refuse.
   guards:

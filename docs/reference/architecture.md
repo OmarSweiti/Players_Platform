@@ -45,7 +45,7 @@ One backend codebase and database, with separately started API and worker proces
 | `web` | Locale routing, server rendering, interaction and accessible presentation, generated API calls | Credential issuance, direct database access, provider-token custody, business authorization | `0.9.1`, `0.9.4`, `0.9.5` |
 | Release migration job | Forward migrations, explicit privileged catalog changes | Application traffic or sharing its credentials with runtime containers | `0.4.2`, `1.10.2` |
 
-Local services are installed in `0.2.1`: PostgreSQL 18, Valkey, private S3-compatible storage, ClamAV, Mailpit and an exact pinned Keycloak image. Production hosting and provider choice remain OPEN in `1.10.1`; staging uses production-mode Keycloak with TLS and restricted administration. The existing branch, promotion, ruleset and pin flow remains unchanged; see [delivery workflow](../implementation/03-github-workflow.md#the-umbrella-pins-and-progress).
+Local services are installed in `0.2.1` ([`infra/README.md`](../../infra/README.md)): PostgreSQL 18, Valkey, private versioned S3-compatible storage (Versity S3 Gateway, [ADR-0020](../adr/0020-local-object-store.md)), ClamAV, Mailpit, an exact pinned Keycloak image, and the HTTPS proxy that routes each tenant host. Production hosting and provider choice remain OPEN in `1.10.1`; staging uses production-mode Keycloak with TLS and restricted administration. The existing branch, promotion, ruleset and pin flow remains unchanged; see [delivery workflow](../implementation/03-github-workflow.md#the-umbrella-pins-and-progress).
 
 ## Module boundaries and dependency direction
 

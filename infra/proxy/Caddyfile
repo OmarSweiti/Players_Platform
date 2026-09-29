@@ -1,0 +1,22 @@
+# The local HTTPS entry point: one origin per tenant host, routed exactly as
+# production routes it — the API under /api/, everything else to the web app —
+# so the __Host- session cookie is tested as specified, not weakened (0.2.1).
+# Certificates come from Caddy's own local authority; `just trust-dev-ca`
+# trusts it on this machine, once.
+{
+	skip_install_trust # the host trusts the authority through `just trust-dev-ca`
+	servers {
+		protocols h1 h2 # only TCP 443 is published; no HTTP/3 over UDP
+	}
+}
+
+# Another tenant host? Add it to this list; browsers resolve *.localhost locally.
+sadara.localhost, northwind.localhost {
+	tls internal
+	handle /api/* {
+		reverse_proxy host.docker.internal:3000 # the API: backend, npm run start:dev
+	}
+	handle {
+		reverse_proxy host.docker.internal:3001 # the web app: frontend, npm run dev
+	}
+}

@@ -25,7 +25,7 @@ Then two terminals, each starting at the umbrella root:
 # terminal 1 — the API (on :3000, served at https://<tenant>.localhost/api/ by the proxy)
 cd backend && cp .env.example .env && just migrate && just seed && npm run start:dev
 # terminal 2 — the web app (on :3001, served at https://<tenant>.localhost/ by the proxy)
-cd frontend && cp .env.example .env.local && npm run dev
+cd frontend && npm run dev
 ```
 
 `just migrate` applies migrations as the migrator role (from `0.4.2`); `just seed` loads the synthetic
@@ -33,7 +33,8 @@ tenants and members (from `0.5.11`). Open **`https://sadara.localhost`** — the
 and sign in as a development member from the realm (the list is in `infra/keycloak/README.md`). The
 browser only ever talks to one origin, over HTTPS, so the session cookie behaves exactly as in production.
 
-Needs: `git` ≥ 2.34, `gh` (authenticated, SSH), `just`, `jq`, `gitleaks` ≥ 8.19, Docker, Python 3, and
+Needs: `git` ≥ 2.34, `gh` (authenticated, SSH), `just`, `jq`, `gitleaks` ≥ 8.19, Docker with at least 4 GB of
+memory ([why](../../infra/README.md#this-machine)), Python 3, and
 Node from each application's `.nvmrc` (24.19.0). Work **from the umbrella root** so the plan and both
 applications are in view; an agent opened inside one application reaches the plan through that
 repository's `AGENTS.md`.
@@ -51,7 +52,8 @@ repository's `AGENTS.md`.
 | Where | Command | Does |
 |---|---|---|
 | umbrella | `just setup` · `just setup-all` | hooks and identity here · and in both applications |
-| umbrella | `just up` · `just down` · `just logs` · `just reset` | the local stack; `reset` destroys local volumes only |
+| umbrella | `just up` · `just down` · `just logs` · `just reset` | the local stack ([`infra/README.md`](../../infra/README.md)); `reset` asks, then destroys only its state volumes |
+| umbrella | `just trust-dev-ca` · `just dev-ca-path` | trust the proxy's local certificate authority, once · print its path for `curl --cacert` |
 | umbrella | `just check` | pins, the plan check, links — CI's `test` |
 | umbrella | `just plan` | regenerate the progress rows, frontier, test catalog and traceability, then check |
 | umbrella | `just pin` | move both pins to their `development` tips; refuses a rewind |
@@ -155,7 +157,8 @@ SELECT count(*) FROM players;          -- outside a tenant transaction: 0, by de
 From a symptom to a minimal reproduction:
 
 1. **Read the exact error** — the problem-details `code` and `requestId`, then the API log line with the
-   same `requestId` (`just logs api`). Guessing costs more than reading.
+   same `requestId`, in the terminal running the API (`just logs <service>` for the stack). Guessing costs
+   more than reading.
 2. **Check the stack:** `just up` reports every service healthy? ClamAV's first signature download takes
    minutes; Keycloak takes about a minute to import the realm.
 3. **Empty results where data exists** → the query ran outside `withTenantTransaction`, so row-level

@@ -46,11 +46,11 @@ setup-all: setup
 guards:
     bash ./scripts/test-policy.sh
 
-# CI's `test` check: every application pin is a commit its flow branches keep, and the plan, its
-# progress record, requirement traceability and links agree: just check [staging|main]
+# CI's `test` check — the pins, the plan and its records, the local stack's promises: just check [staging|main]
 check $target='development':
     bash ./scripts/check-submodules.sh "$target"
     python3 ./scripts/check-plan.py
+    python3 ./scripts/check-stack.py
 
 # Regenerate the plan's derived blocks (progress rows, frontier, test catalog, traceability), then check
 plan:
@@ -75,6 +75,84 @@ pin:
       git add -- "$app" # staged: `just plan` and the plan check read the pins from the index
     done
     git diff --cached --submodule=log -- frontend backend
+
+# ── The local stack (infra/README.md) ─────────────────────────────────────────
+
+# Start PostgreSQL, Valkey, the object store, ClamAV, Mailpit, Keycloak and the HTTPS proxy; wait until healthy
+up:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [ ! -f infra/.env ]; then
+      cp infra/.env.example infra/.env
+      echo "up: created infra/.env from infra/.env.example (development-only values)"
+    fi
+    docker compose --file infra/compose.yaml up --detach --wait --wait-timeout 900
+    python3 infra/objectstore/bootstrap.py
+    echo
+    echo "  https://sadara.localhost    the web app (:3001) and the API (/api/ → :3000), through the proxy"
+    echo "  http://localhost:8080       Keycloak — admin password in infra/.env"
+    echo "  http://localhost:8025       Mailpit — every email the stack sends"
+    echo "  First time on this machine? just trust-dev-ca"
+
+# Stop the stack; every volume is kept
+down:
+    docker compose --file infra/compose.yaml down
+
+# Follow the stack's logs: just logs [service…]
+logs *$services:
+    docker compose --file infra/compose.yaml logs --follow --tail 100 $services
+
+# Destroy the local state (database, identities, objects, queues, mail); keeps the CA and the virus signatures
+reset $confirm='':
+    #!/usr/bin/env bash
+    set -euo pipefail
+    # Only ever a Docker engine on this machine, and only this project's state volumes.
+    endpoint=${DOCKER_HOST:-$(docker context inspect | jq -r '.[0].Endpoints.docker.Host')}
+    case "$endpoint" in
+      unix://* | npipe://*) ;;
+      *) echo "reset: REFUSED — $endpoint is not a Docker engine on this machine" >&2; exit 1 ;;
+    esac
+    if [ "$confirm" != yes ]; then
+      [ -t 0 ] || { echo "reset: REFUSED — not interactive; to confirm, run: just reset yes" >&2; exit 1; }
+      read -r -p "reset: destroy the local database, identities, objects, queues and mail? [y/N] " answer
+      case "$answer" in y | Y) ;; *) echo "reset: cancelled"; exit 1 ;; esac
+    fi
+    docker compose --file infra/compose.yaml down --remove-orphans
+    docker volume ls --quiet --filter label=com.docker.compose.project=sadara --filter label=org.sadara.state=true |
+      xargs -r docker volume rm
+    echo "reset: done — the proxy's certificate authority and ClamAV's signatures were kept; run just up"
+
+# Trust the proxy's local certificate authority on this machine — once; it asks for your password
+trust-dev-ca:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    ca=$(just dev-ca-path)
+    case "$(uname -s)" in
+      Darwin)
+        security add-trusted-cert -r trustRoot -k "$HOME/Library/Keychains/login.keychain-db" "$ca" ;;
+      Linux)
+        if command -v update-ca-certificates >/dev/null 2>&1; then
+          sudo install -m 0644 "$ca" /usr/local/share/ca-certificates/sadara-dev-ca.crt
+          sudo update-ca-certificates
+        elif command -v trust >/dev/null 2>&1; then
+          sudo trust anchor --store "$ca"
+        else
+          echo "trust-dev-ca: add $ca to this system's trust store by hand" >&2; exit 1
+        fi ;;
+      *) echo "trust-dev-ca: add $ca to this system's trust store by hand" >&2; exit 1 ;;
+    esac
+    echo "trusted: $ca"
+    echo "Firefox keeps its own store (Settings → Privacy & Security → Certificates → Import);"
+    echo "Node.js ignores the system store: NODE_EXTRA_CA_CERTS=\"$ca\""
+
+# Print the path of the proxy's certificate authority — for curl --cacert and NODE_EXTRA_CA_CERTS
+dev-ca-path:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    mkdir -p infra/.local
+    docker compose --file infra/compose.yaml cp proxy:/data/caddy/pki/authorities/local/root.crt infra/.local/dev-ca.crt >/dev/null 2>&1 ||
+      { echo "dev-ca-path: the proxy is not running — run just up first" >&2; exit 1; }
+    echo "$PWD/infra/.local/dev-ca.crt"
 
 # The complete local gate: the CI checks, every guard, and a full-history secret scan
 pre-push: check guards
