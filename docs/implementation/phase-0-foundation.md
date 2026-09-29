@@ -235,21 +235,26 @@ different schema, and an empty suite fails.
 
 ### 0.2.4 — The web test harness: Vitest, Testing Library, MSW, Playwright in Arabic and English, axe
 **Repo:** frontend · **Size:** M · **Depends on:** — · **Requirements:** TEST-009
-**Files:** `vitest.config.ts`, `playwright.config.ts`, `tests/setup.ts`, `tests/msw/` (new), `justfile`, `package.json`
+**Files:** `vitest.config.mts`, `playwright.config.ts`, `tests/setup.ts`, `tests/msw/` (new), `tests/e2e/fixtures.ts` (new), `justfile`, `package.json`
 Vitest with Testing Library in jsdom and MSW for API responses, on `src/**/*.test.{ts,tsx}`; Playwright
 on `tests/**/*.spec.ts` with an `ar` and an `en` project and axe on every page it visits — disjoint globs,
-so neither runner picks up the other's files; both wired into `just check` and CI's `test` job.
+so neither runner picks up the other's files; both wired into `just check` and CI's `test` job. The axe
+fixture checks the page every test ends on and exports `expectAccessible(page)` for each navigation
+inside a journey; a serious or critical WCAG 2.2 AA finding fails, lesser ones are attached to the report.
 **Tests:** `the_unit_runner_renders_a_component` · `each_locale_project_opens_the_sign_in_page`
 **Verify:** `just check`
 **Done when:** CI runs both runners on every pull request and an empty suite fails.
 
 ### 0.2.5 — Lint and format gates in both applications
 **Repo:** backend + frontend · **Size:** M · **Depends on:** — · **Requirements:** —
-**Files:** backend `.prettierrc`, `eslint.config.mjs`, `.git-blame-ignore-revs`, `justfile`, `.github/workflows/ci.yml`;
-frontend `eslint.config.mjs`, `justfile`, `.github/workflows/ci.yml`
-Backend: Prettier over `src` and `test` in one formatting-only commit (listed in `.git-blame-ignore-revs`),
-then the remaining ESLint errors (748 problems today); frontend: the 21 problems (13 errors). Then
-`prettier --check` and `eslint --max-warnings=0` join `just check` and CI's `test` job in both.
+**Files:** in each application `.prettierrc`, `eslint.config.mjs`, `eslint-suppressions.json`, `.git-blame-ignore-revs`,
+`justfile`, `.github/workflows/ci.yml`
+In each application: Prettier over the application code in one formatting-only commit (listed in
+`.git-blame-ignore-revs`), then the ESLint findings — 748 problems in the backend, 21 in the frontend on
+28 September 2026. They are fixed in code that stays; in code a later step rewrites or deletes they are
+recorded in `eslint-suppressions.json` (ESLint's bulk suppressions), which fails on any new finding and
+on a fixed one until `just lint-prune` removes it, so the baseline only shrinks. Then `prettier --check`
+and `eslint --max-warnings=0` join `just check` and CI's `test` job in both.
 **Verify:** `just check` in each application
 **Done when:** CI fails on any new lint or formatting problem in either application.
 

@@ -61,15 +61,16 @@ repository's `AGENTS.md`.
 | any | `just merge <PR URL>` | the verified, clean squash merge |
 | any | `just guards` · `just pre-push` | every guard proves it still refuses · the complete local gate |
 | any | `just flow` · `just gh-audit` | what waits between branches · live GitHub settings vs the files |
-| backend | `just check` | Prisma validate and generate, build, unit tests, lint *(lint from 0.2.5)* |
+| backend | `just check` | Prisma validate and generate, lint and formatting, build, unit tests |
 | backend | `just test-int` · `just test-e2e` | integration and API tests on a real database *(from 0.2.3)* |
 | backend | `just migrations` | replay every migration on a throwaway PostgreSQL 18; no drift allowed |
 | backend | `just preflight` | the read-only integrity report *(from 0.4.1)* |
 | backend | `just seed` | synthetic data, idempotent *(from 0.5.11)* |
 | backend | `npm run openapi` | regenerate the committed contract *(from 0.3.9)* |
 | backend | `npm run tenant:provision -- …` | create a tenant and invite its owner *(from 0.5.9)* |
-| frontend | `just check` | type-check, lint, unit tests, production build |
-| frontend | `npx playwright test` | the browser journeys in Arabic and English, with axe *(from 0.2.4)* |
+| frontend | `just check` | type-check, lint and formatting, production build, unit tests, the browser journeys |
+| frontend | `just test` · `just test-e2e` | unit and component tests (Vitest, jsdom, MSW) · the browser journeys in Arabic and English, with axe, against a fresh build |
+| frontend | `just format` | rewrite the application code in Prettier's format |
 | frontend | `npm run api:generate` | regenerate the typed client from the backend contract *(from 0.9.4)* |
 
 ## The microstep lifecycle

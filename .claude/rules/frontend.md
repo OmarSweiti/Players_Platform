@@ -25,4 +25,4 @@ The UI contract is `docs/reference/ui-ux.md`.
   string with its currency; dates are `YYYY-MM-DD` or an instant with its zone.
 - **Tests:** Vitest and Testing Library beside the code as `src/**/*.test.{ts,tsx}`; Playwright journeys
   as `tests/**/*.spec.ts`, run in the `ar` and `en` projects with axe. The title contains the plan's test name verbatim.
-- Gate: `just check`, and `npx playwright test` for journeys you touched.
+- Gate: `just check` — it builds, then runs the unit tests and the journeys; `just test` runs the unit tests alone.

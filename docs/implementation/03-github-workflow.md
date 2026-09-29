@@ -85,7 +85,7 @@ The umbrella pins one commit of each application. After application PRs merge:
 ```bash
 cd Players_Platform
 just branch chore/pin-applications
-just pin                     # both pins → their development tips; refuses a rewind; prints the adopted commits
+just pin                     # both pins → their development tips, staged; refuses a rewind; prints the adopted commits
 # set those microsteps to done in docs/implementation/progress.md, each with its merged PR URL
 just plan                    # regenerate the frontier, test catalog and traceability; then check
 git commit -am "chore(repo): pin the applications and record 1.2.1–1.2.3  [1.2.1–1.2.3]"
