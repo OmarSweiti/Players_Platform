@@ -135,7 +135,7 @@ register](#long-lead-register), not in these numbers.
 | **Solo overload, bus factor** | measured cycle time above 1.5× the weights; two weeks under 60% of capacity | re-forecast, split, move approved scope; this documentation and the restore-from-runbook drill · every gate |
 | **Owner decisions arrive late** — the signature evidence policy, medical-data rules, retention, minors | four weeks without an answer to a long-lead question | the safe default stays in force; the dependent release waits · owner |
 | **Scope creep from the four-release vision** | a PR with no microstep reference | a new ask becomes an erratum or a later microstep, never an unplanned branch · weekly |
-| **Dependency churn** — Next.js, NestJS, Prisma majors | a major release of any of the three | grouped monthly Dependabot; majors one at a time, migration notes read, the app exercised · monthly |
+| **Dependency churn** — Next.js, NestJS, Prisma, TypeScript, ESLint majors | a major release, or a Dependabot PR whose `test` is red | grouped monthly Dependabot; majors one at a time, migration notes read, the app exercised; a major the toolchain cannot support yet is held in `dependabot.yml` with its blocking error quoted (TypeScript 7, ESLint 10, NestJS 12) and moved by a planned step (`0.2.9` for the backend); a red Dependabot PR is never merged through the bypass · monthly |
 | **Unstaffed reliability target** | a restore misses its RPO/RTO; a critical alert goes unacknowledged | delay the release, revise operating support, repeat the drill · `1.10.12`, `1.10.13` |
 
 ---

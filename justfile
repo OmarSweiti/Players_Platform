@@ -56,7 +56,7 @@ check $target='development':
 plan:
     python3 ./scripts/check-plan.py --write
 
-# Move both application pins to their development tips, then show what that adopts
+# Move both application pins to their development tips, stage them, then show what that adopts
 pin:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -72,8 +72,9 @@ pin:
         echo "pin: REFUSED — $app would move from ${old:0:12} to ${new:0:12}, which does not contain it: a rewind." >&2
         exit 1
       fi
+      git add -- "$app" # staged: `just plan` and the plan check read the pins from the index
     done
-    git diff --submodule=log -- frontend backend
+    git diff --cached --submodule=log -- frontend backend
 
 # The complete local gate: the CI checks, every guard, and a full-history secret scan
 pre-push: check guards

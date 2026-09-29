@@ -62,8 +62,8 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `a_disabled_module_never_reaches_its_repository` | 0.1.8 | backend | todo |
 | `harness_boots_against_an_isolated_schema` | 0.2.3 | backend | todo |
 | `two_harness_runs_never_share_a_schema` | 0.2.3 | backend | todo |
-| `the_unit_runner_renders_a_component` | 0.2.4 | frontend | todo |
-| `each_locale_project_opens_the_sign_in_page` | 0.2.4 | frontend | todo |
+| `the_unit_runner_renders_a_component` | 0.2.4 | frontend | done |
+| `each_locale_project_opens_the_sign_in_page` | 0.2.4 | frontend | done |
 | `the_built_image_answers_liveness` | 0.2.6 | backend | todo |
 | `the_app_boots_on_nestjs_12` | 0.2.9 | backend | todo |
 | `the_test_runner_loads_es_module_packages` | 0.2.9 | backend | todo |
