@@ -15,11 +15,15 @@ hand-written (and checked) or generated from them (and checked for staleness):
   docs/reference/test-catalog.md      <!-- plan:catalog --> block         (generated)
   docs/reference/traceability.md      <!-- plan:trace --> block           (generated)
   docs/implementation/00-master-plan.md  <!-- plan:deferred --> rows    (hand-written)
+  docs/implementation/demo-milestone.md  <!-- milestone:steps --> rows  (hand-written, in build order)
+                                      and its <!-- plan:milestone --> block (generated)
   docs/requirements/README.md         SHA-256 table of the frozen sources (hand-written)
 
 A microstep marked `done` must cite a merged PR, have every dependency done, and
 have every test it names present — and not skipped — in the application it
-changes, at the commit the umbrella pins. Standard library only.
+changes, at the commit the umbrella pins. A milestone lists steps in build order:
+each one's dependencies come earlier in the list or are already done. Standard
+library only.
 """
 import hashlib
 import json
@@ -54,6 +58,9 @@ REPO_OF = {"umbrella": "Players_Platform", "backend": "Players_Platform_Backend"
 PR_PARTS = re.compile(r"https://github\.com/OmarSweiti/(Players_Platform(?:_Backend|_Frontend)?)/pull/(\d+)")
 TEST_PATHS = {"backend": ["src", "test"], "frontend": ["src", "app", "tests", "e2e"],
               "umbrella": ["scripts", ".githooks"]}
+MILESTONE = "docs/implementation/demo-milestone.md"
+MILESTONE_ROW = re.compile(r"^\|\s*([A-Z])\b[^|]*\|(.*)\|\s*$", re.M)  # | A — stage name | `0.2.3` · `0.1.5` |
+WEIGHT = {"S": 4, "M": 8, "L": 16}  # the size ceilings, in hours (00-master-plan.md, Effort model)
 LINK = re.compile(r"(?<!!)\[[^\]\n]*\]\(([^)\s]+)(?:\s+\"[^\"]*\")?\)")
 
 
@@ -61,6 +68,7 @@ class Step:
     def __init__(self, sid, title, phase, path, line):
         self.id, self.title, self.phase, self.path, self.line = sid, title, phase, path, line
         self.repos, self.deps, self.reqs, self.tests = [], [], [], []
+        self.size = ""
 
 
 def read(path):
@@ -127,6 +135,9 @@ def load_plan(root, findings):
             for r in s.repos:
                 if r not in APPS + ("umbrella",):
                     findings.append("%s:%d: step %s names an unknown repo '%s'" % (rel, i + 1, sid, r))
+            s.size = field(block, "Size")
+            if s.size not in WEIGHT:
+                findings.append("%s:%d: step %s has no **Size:** of S, M or L" % (rel, i + 1, sid))
             s.deps = ID_IN_TICKS.findall(field(block, "Depends on"))
             s.reqs = expand(field(block, "Requirements"))
             tests = field(block, "Tests")
@@ -160,6 +171,53 @@ def load_progress(root, findings):
             findings.append("%s:%d: step %s has two rows" % (rel, i, sid))
         rows[sid] = {"title": cells[0], "repo": cells[1], "status": cells[2], "evidence": cells[3], "line": i}
     return rows
+
+
+def load_milestone(root, steps, rows, findings):
+    """The demo milestone's steps as (id, stage), in build order; [] when the plan has no milestone."""
+    path = os.path.join(root, MILESTONE)
+    if not os.path.exists(path):
+        return []
+    m = re.search(r"<!-- milestone:steps:begin -->(.*?)<!-- milestone:steps:end -->", read(path), re.S)
+    if not m:
+        findings.append("%s: no <!-- milestone:steps:begin/end --> block" % MILESTONE)
+        return []
+    listed = [(sid, stage) for stage, cell in MILESTONE_ROW.findall(m.group(1)) for sid in ID_IN_TICKS.findall(cell)]
+    if not listed:
+        findings.append("%s: the milestone lists no step" % MILESTONE)
+    position = {}
+    for n, (sid, _) in enumerate(listed):
+        if sid in position:
+            findings.append("%s: step %s is listed twice" % (MILESTONE, sid))
+        position.setdefault(sid, n)
+        if sid not in steps:
+            findings.append("%s: step %s does not exist" % (MILESTONE, sid))
+        elif status_of(rows, sid) == "superseded":
+            findings.append("%s: step %s is superseded; list its replacement" % (MILESTONE, sid))
+    for sid, _ in listed:
+        for d in steps[sid].deps if sid in steps else []:
+            if status_of(rows, d) == "done":
+                continue  # a finished dependency is satisfied wherever it is listed
+            if d in position:
+                if position[d] > position[sid]:
+                    findings.append("%s: %s is listed before its dependency %s — the list is the build order"
+                                    % (MILESTONE, sid, d))
+            else:
+                findings.append("%s: %s depends on %s, which is neither in the milestone nor done"
+                                % (MILESTONE, sid, d))
+    if listed and listed[-1][0] in steps:
+        last = listed[-1][0]
+        reach, stack = set(), [last]
+        while stack:
+            for d in steps[stack.pop()].deps:
+                if d in steps and d not in reach:
+                    reach.add(d)
+                    stack.append(d)
+        for sid, _ in listed[:-1]:
+            if sid in steps and sid not in reach and status_of(rows, sid) != "done":
+                findings.append("%s: the milestone's last step %s does not depend on %s — the last step accepts "
+                                "the whole milestone" % (MILESTONE, last, sid))
+    return listed
 
 
 def defined_requirements(root):
@@ -531,7 +589,37 @@ def render_progress(steps, rows):
     return "\n".join(out) + "\n"
 
 
-def render_frontier(steps, rows):
+def milestone_lines(steps, rows, milestone):
+    """The milestone's progress, remaining ceiling hours and the steps ready in build order."""
+    ids = [sid for sid, _ in milestone if sid in steps]
+    if not ids:
+        return []
+    done = sum(1 for sid in ids if status_of(rows, sid) == "done")
+    left = sum(WEIGHT.get(steps[sid].size, 0) for sid in ids if status_of(rows, sid) != "done")
+    ready = [sid for sid in ids if status_of(rows, sid) == "todo"
+             and all(status_of(rows, d) == "done" for d in steps[sid].deps)]
+    return ["**Demo milestone** ([build order](demo-milestone.md)) — %d of %d microsteps done; %d–%d engineering "
+            "hours left before the reserve." % (done, len(ids), left // 2, left),
+            "Next in build order (every dependency done): %s." % (
+                ", ".join("`%s`" % x for x in ready[:8]) or "none")
+            + (" … and %d more." % (len(ready) - 8) if len(ready) > 8 else "")]
+
+
+def render_milestone(steps, rows, milestone):
+    lines = milestone_lines(steps, rows, milestone)
+    if not lines:
+        return "The milestone lists no step.\n"
+    out = [lines[0].replace(" ([build order](demo-milestone.md))", ""), "", lines[1], "",
+           "| Stage | Step | Title | Repo | Size | Status |", "|---|---|---|---|---|---|"]
+    for sid, stage in milestone:
+        if sid in steps:
+            s = steps[sid]
+            out.append("| %s | %s | %s | %s | %s | %s |" % (stage, sid, s.title.replace("|", "\\|"), " + ".join(s.repos),
+                                                          s.size, status_of(rows, sid)))
+    return "\n".join(out) + "\n"
+
+
+def render_frontier(steps, rows, milestone=()):
     live = [s for s in steps.values() if status_of(rows, s.id) not in ("done", "superseded")]
     if not live:
         return "Every microstep is done.\n"
@@ -543,7 +631,8 @@ def render_frontier(steps, rows):
              and all(status_of(rows, d) == "done" for d in s.deps)]
     doing = [s.id for s in in_phase if status_of(rows, s.id) == "in-progress"]
     blocked = [s.id for s in in_phase if status_of(rows, s.id) == "blocked"]
-    lines = ["**Phase %d** — %d of %d microsteps done (%d of %d across all phases)."
+    lines = milestone_lines(steps, rows, milestone) + [
+             "**Phase %d** — %d of %d microsteps done (%d of %d across all phases)."
              % (phase, done, len(in_phase), total_done, len(steps)),
              "In progress: %s." % (", ".join("`%s`" % x for x in doing) or "none"),
              "Ready now (every dependency done): %s." % (", ".join("`%s`" % x for x in ready[:12]) or "none")
@@ -580,10 +669,11 @@ def render_trace(steps, rows, defined, deferred):
 
 
 GENERATED = [
-    ("docs/implementation/progress.md", "progress", lambda st, ro, de, df: render_progress(st, ro)),
-    ("docs/implementation/README.md", "frontier", lambda st, ro, de, df: render_frontier(st, ro)),
-    ("docs/reference/test-catalog.md", "catalog", lambda st, ro, de, df: render_catalog(st, ro)),
-    ("docs/reference/traceability.md", "trace", lambda st, ro, de, df: render_trace(st, ro, de, df)),
+    ("docs/implementation/progress.md", "progress", lambda st, ro, de, df, mi: render_progress(st, ro)),
+    ("docs/implementation/README.md", "frontier", lambda st, ro, de, df, mi: render_frontier(st, ro, mi)),
+    ("docs/reference/test-catalog.md", "catalog", lambda st, ro, de, df, mi: render_catalog(st, ro)),
+    ("docs/reference/traceability.md", "trace", lambda st, ro, de, df, mi: render_trace(st, ro, de, df)),
+    (MILESTONE, "milestone", lambda st, ro, de, df, mi: render_milestone(st, ro, mi)),  # only when it exists
 ]
 
 
@@ -595,13 +685,15 @@ def run(root, write_mode=False, check_tests=True, quiet=False, online=None):
     rows = load_progress(root, findings)
     defined = defined_requirements(root)
     deferred = deferred_requirements(root)
+    milestone = load_milestone(root, steps, rows, findings)
     for rel, name, render in GENERATED:
         path = os.path.join(root, rel)
         if not os.path.exists(path):
-            findings.append("%s: missing" % rel)
+            if rel != MILESTONE:
+                findings.append("%s: missing" % rel)
             continue
         text = read(path)
-        new = replace_block(text, name, render(steps, rows, defined, deferred))
+        new = replace_block(text, name, render(steps, rows, defined, deferred, milestone))
         if new is None:
             findings.append("%s: no <!-- plan:%s:begin/end --> block" % (rel, name))
         elif new != text:
@@ -639,9 +731,9 @@ FIXTURE = {
     "docs/implementation/00-master-plan.md": "<!-- plan:deferred:begin -->\n| TEST-001 | covered by every gate |\n<!-- plan:deferred:end -->\n",
     "docs/implementation/phase-0-x.md": (
         "# Phase 0\n\n## Group 0.1 — A\n\n"
-        "### 0.1.1 — First\n**Repo:** umbrella · **Depends on:** — · **Requirements:** BR-OBJ-01, SR-CORE-001..002\n"
+        "### 0.1.1 — First\n**Repo:** umbrella · **Size:** S · **Depends on:** — · **Requirements:** BR-OBJ-01, SR-CORE-001..002\n"
         "**Tests:** `first_step_proves_itself`\n**Verify:** `true`\n**Done when:** yes.\n\n"
-        "### 0.1.2 — Second\n**Repo:** umbrella · **Depends on:** `0.1.1` · **Requirements:** BR-RULE-01, SR-CORE-003\n"
+        "### 0.1.2 — Second\n**Repo:** umbrella · **Size:** M · **Depends on:** `0.1.1` · **Requirements:** BR-RULE-01, SR-CORE-003\n"
         "**Tests:** `second_step_proves_itself`\n**Verify:** `true`\n**Done when:** yes.\n"),
     "docs/implementation/progress.md": "# Progress\n\n<!-- plan:progress:begin -->\n<!-- plan:progress:end -->\n",
     "docs/implementation/README.md": "# Index\n\n[plan](phase-0-x.md#011--first)\n\n<!-- plan:frontier:begin -->\n<!-- plan:frontier:end -->\n",
@@ -755,6 +847,28 @@ def self_test():
            pulls={"merged": True, "merge_commit_sha": "0" * 40})
     expect("a_merged_pr_in_the_pinned_history_passes", done1, "", regenerate=True,
            pulls={"merged": True, "merge_commit_sha": "HEAD"})
+    expect("a_step_without_a_size_is_refused", edit(phase, " · **Size:** M", ""), "has no **Size:** of S, M or L")
+
+    def milestone(*rows):
+        body = "".join("| %s — a stage | `%s` |\n" % (stage, sid) for sid, stage in rows)
+        return lambda t: write(os.path.join(t, MILESTONE),
+                               "# Demo\n\n<!-- milestone:steps:begin -->\n| Stage | Steps |\n|---|---|\n%s"
+                               "<!-- milestone:steps:end -->\n\n<!-- plan:milestone:begin -->\n<!-- plan:milestone:end -->\n"
+                               % body)
+    expect("a_sound_milestone_passes", milestone(("0.1.1", "A"), ("0.1.2", "B")), "", regenerate=True)
+    expect("a_milestone_step_with_an_unfinished_outside_dependency_is_refused", milestone(("0.1.2", "A")),
+           "neither in the milestone nor done", regenerate=True)
+    expect("a_milestone_out_of_build_order_is_refused", milestone(("0.1.2", "A"), ("0.1.1", "A")),
+           "listed before its dependency", regenerate=True)
+    expect("a_milestone_naming_a_missing_step_is_refused", milestone(("0.1.1", "A"), ("0.1.9", "A")),
+           "step 0.1.9 does not exist", regenerate=True)
+    expect("a_milestone_whose_last_step_misses_a_step_is_refused", lambda t: (
+        edit(phase, "**Depends on:** `0.1.1` ·", "**Depends on:** — ·")(t), milestone(("0.1.1", "A"), ("0.1.2", "B"))(t)),
+        "does not depend on 0.1.1", regenerate=True)
+    expect("a_stale_milestone_block_is_refused", lambda t: (
+        milestone(("0.1.1", "A"), ("0.1.2", "A"))(t), run(t, write_mode=True, quiet=True),
+        edit(prog, "| 0.1.1 | First | umbrella | todo |  |", "| 0.1.1 | First | umbrella | done | %s |" % pr)(t)),
+        "the milestone block is stale")
     if failures:
         print("\n".join("  FAIL " + f for f in failures))
         return 1

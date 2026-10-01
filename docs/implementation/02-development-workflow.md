@@ -79,9 +79,9 @@ repository's `AGENTS.md`.
 
 Every change follows nine stations. An agent follows them literally.
 
-1. **Pick.** Read the frontier at the top of [`README.md`](README.md). Take a *ready* step — every
-   dependency done — in the current phase; prefer the build order in the phase file; go sideways to an
-   independent group when blocked. Never start a step whose dependencies are open.
+1. **Pick.** Read the frontier at the top of [`README.md`](README.md). Take the first *ready* step —
+   every dependency done — in the [demo milestone](demo-milestone.md)'s build order; go to the next ready
+   one when it is blocked. Never start a step whose dependencies are open.
 2. **Read.** The microstep in full, every file it names, the requirements it cites, the references it
    links, and the conventions it touches. If the microstep is wrong against the code as it stands, **fix
    the microstep first** (a `docs(plan)` PR): the plan is maintained, not admired.

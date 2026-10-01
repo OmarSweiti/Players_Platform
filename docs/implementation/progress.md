@@ -77,7 +77,7 @@ edit only Status and Evidence.
 | 0.6.5 | Player-account and guardian relationships | backend | todo |  |
 | 0.6.6 | Effective permissions for the web app | backend | todo |  |
 | 0.6.7 | No implicit platform access | backend | todo |  |
-| 0.6.8 | The existing medical and scouting routes obey the rules | backend | todo |  |
+| 0.6.8 | The existing medical routes obey the rules | backend | todo |  |
 | 0.6.9 | The two-tenant isolation suite over every route | backend | todo |  |
 | 0.7.1 | Audit evidence is append-only in the database | backend | todo |  |
 | 0.7.2 | Audit inside the business transaction, redacted; a failed audit aborts the change | backend | todo |  |
@@ -102,7 +102,8 @@ edit only Status and Evidence.
 | 0.10.2 | Redaction by allowlist, proven by canaries | backend | todo |  |
 | 0.10.3 | Local backup and restore, drilled | umbrella + backend | todo |  |
 | 0.10.4 | Failure drills: worker crash, database loss, storage loss | backend | todo |  |
-| 0.11.1 | Run the Phase-0 gate and record the evidence | umbrella + backend + frontend | todo |  |
+| 0.11.0 | The foundation gate: what every product feature builds on | umbrella + backend + frontend | todo |  |
+| 0.11.1 | Run the Phase-0 production gate and record the evidence | umbrella + backend + frontend | todo |  |
 | 1.1.1 | Users: list, invite, deactivate and change role | backend | todo |  |
 | 1.1.2 | Tenant settings and private branding | backend + frontend | todo |  |
 | 1.1.3 | Own profile, locale and identity security links | backend + frontend | todo |  |
@@ -139,6 +140,7 @@ edit only Status and Evidence.
 | 1.5.3 | Notes, internal notes and attachments | backend | todo |  |
 | 1.5.4 | The legal queue and requester journey | frontend | todo |  |
 | 1.5.5 | Ticket commands and assignment API | backend | todo |  |
+| 1.5.6 | Legal on the shared surfaces: Player 360, timeline, search and dashboards | backend + frontend | todo |  |
 | 1.6.1 | Templated, localized, tracked notifications | backend | todo |  |
 | 1.6.2 | The notification center | backend + frontend | todo |  |
 | 1.6.3 | Production email provider and preferences | backend | todo |  |
@@ -167,6 +169,18 @@ edit only Status and Evidence.
 | 1.10.13 | Independent restore and incident rehearsal | umbrella + backend | todo |  |
 | 1.10.14 | Security review and abuse-case acceptance | umbrella | todo |  |
 | 1.10.15 | Arabic language and domain-owner acceptance | umbrella + frontend | todo |  |
+| 1.11.1 | Unify prospects with the player lifecycle | backend | todo |  |
+| 1.11.2 | Control scouting assignments and reassignment | backend | todo |  |
+| 1.11.3 | Make report review preserve the submitted evidence | backend | todo |  |
+| 1.11.4 | Provide private watchlists with deliberate sharing | backend | todo |  |
+| 1.11.5 | Convert an approved prospect through an explicit onboarding action | backend | todo |  |
+| 1.11.6 | Build the scouting workspace and review experience | frontend | todo |  |
+| 1.11.7 | Authorize scouting activation with an abuse gate | backend + umbrella | todo |  |
+| 1.11.8 | Scouting on the shared surfaces: Player 360 and the home dashboard | backend + frontend | todo |  |
+| 1.12.1 | The demo dataset: two fictional agencies at work | backend + umbrella | todo |  |
+| 1.12.2 | The laptop demo: one command, production images | umbrella + backend + frontend | todo |  |
+| 1.12.3 | Demo acceptance: rehearse the pitch, record the evidence | umbrella + frontend | todo |  |
+| 1.12.4 | The hosted demo: a small server, a sandbox per prospect | umbrella + backend | todo |  |
 | 2.1.0 | Approve the medical activation policy | umbrella + backend | todo |  |
 | 2.1.1 | Type medical records without losing legacy provenance | backend | todo |  |
 | 2.1.2 | Enforce purpose and immutable clinical amendments | backend | todo |  |
@@ -211,13 +225,6 @@ edit only Status and Evidence.
 | 2.10.2 | Restore operational data and immutable files on staging | backend + umbrella | todo |  |
 | 2.10.3 | Accept and promote operational depth | umbrella + backend + frontend | todo |  |
 | 2.10.4 | Verify operational accessibility and bilingual journeys | frontend + umbrella | todo |  |
-| 3.1.1 | Unify prospects with the player lifecycle | backend | todo |  |
-| 3.1.2 | Control scouting assignments and reassignment | backend | todo |  |
-| 3.1.3 | Make report review preserve the submitted evidence | backend | todo |  |
-| 3.1.4 | Provide private watchlists with deliberate sharing | backend | todo |  |
-| 3.1.5 | Convert an approved prospect through an explicit onboarding action | backend | todo |  |
-| 3.1.6 | Build the scouting workspace and review experience | frontend | todo |  |
-| 3.1.7 | Authorize scouting activation with an abuse gate | backend + umbrella | todo |  |
 | 3.2.1 | Complete organization, team and competition history | backend | todo |  |
 | 3.2.2 | Build traceable player and cohort comparisons | backend | todo |  |
 | 3.2.3 | Present accessible comparisons and analytical uncertainty | frontend | todo |  |

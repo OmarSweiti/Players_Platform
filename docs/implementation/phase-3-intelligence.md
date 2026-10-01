@@ -1,13 +1,12 @@
 # Phase 3 — Agency intelligence (BRD release 3)
 
-> **Exit:** Approved scouting and sourced analytics support recruitment; dossier sharing is explicitly scoped and revocable; finance and provider signatures operate only under approved policies with recoverable evidence.
+> **Exit:** Sourced analytics support recruitment; dossier sharing is explicitly scoped and revocable; finance and provider signatures operate only under approved policies with recoverable evidence.
 
-All microsteps are planned targets. Refinement may split work but must preserve existing IDs. Every new tenant table includes tenant-safe references, ENABLE/FORCE RLS, least-privilege grants and catalog tests in the same migration. [OPEN decisions](00-master-plan.md#open-register) keep external finance/signature integration disabled until settled. Scouting remains server-disabled until `3.1.7`; no Phase-3 feature reintroduces local credentials, provider token storage or unrestricted public files.
+All microsteps are planned targets. Refinement may split work but must preserve existing IDs. Every new tenant table includes tenant-safe references, ENABLE/FORCE RLS, least-privilege grants and catalog tests in the same migration. [OPEN decisions](00-master-plan.md#open-register) keep external finance/signature integration disabled until settled. Scouting moved into Phase 1 (group 1.11, [ADR-0021](../adr/0021-a-product-built-to-sell.md)) and is released by `1.11.7`; no Phase-3 feature reintroduces local credentials, provider token storage or unrestricted public files.
 
 ```text
-2.10.3 → 3.1 prospects/assignments/review → 3.1.7 activation ──┐
-2.4.4 + 3.1.2 → 3.2 affiliation/comparison → analytics UI ────┤
-3.1.7 + 3.2.2 → 3.3 snapshot → grant → portal → staff UI ────┤
+2.4.4 + 1.11.2 → 3.2 affiliation/comparison → analytics UI ───┤
+1.11.7 + 3.2.2 → 3.3 snapshot → grant → portal → staff UI ───┤
 2.10.3 → 3.4.5 finance policy → ledger/provider/reconcile ────┤
 1.4 evidence + 2.10.3 → 3.5 provider policy → evidence ───────┤
 3.2 + 3.4 + 2.9 → 3.6 report schedules ─────────────────────┤
@@ -16,70 +15,12 @@ all leaves → 3.7 security → load → restore → release acceptance
 
 Each step’s dependency field is authoritative, including intentional references to a later-numbered policy or gate step. Verify commands run from the umbrella after the Phase-0 harness exists.
 
-**Effort:** 29 steps (0 S / 7 M / 22 L); sizing capacity up to 408 focused hours +30% reserve = 530.4 hours, 21.2 weeks at 25 focused hours/week. This is a falsifiable planning bound, not a promised date; re-estimate at entry and split any step exceeding 16 hours.
-
-## Group 3.1 — Scouting pipeline
-
-### 3.1.1 — Unify prospects with the player lifecycle
-**Repo:** backend · **Size:** L · **Depends on:** `2.10.3` · **Requirements:** SR-SC-002/005, PRD-SC-001, SR-DB-003/007
-**Files:** `backend/prisma/schema.prisma` · `backend/prisma/migrations/<timestamp>_scouting_domain/migration.sql` · `backend/test/scouting/prospects.e2e-spec.ts`
-**Build:** Use Player.lifecycleStage=PROSPECT with stage-specific completeness rules; a prospect is not a second player identity. Reports reference either an existing onboarded Player or that prospect Player. Type assignment status, recommendation, watch priority and score ranges; retain unresolved legacy values in restricted provenance. New tables/FKs/checks ship FORCE RLS, runtime grants and catalog tests. The scouting feature flag remains disabled.
-**Tests:** `scouting_prospect_requires_only_stage_fields` · `scouting_scores_reject_invalid_ranges`
-**Verify:** `(cd backend && just test-e2e -- test/scouting/prospects.e2e-spec.ts)`
-**Done when:** A minimally complete prospect is represented once and cannot bypass protected identity-field policy.
-
-### 3.1.2 — Control scouting assignments and reassignment
-**Repo:** backend · **Size:** L · **Depends on:** `3.1.1` · **Requirements:** SR-SC-001/007, SYS-TEN-003
-**Files:** `backend/src/modules/scouting/application/assignments.service.ts` · `backend/test/scouting/assignments.e2e-spec.ts`
-**Build:** createAssignment(ctx,input) and assignScout(ctx,id,revision,scoutId) validate active eligible scout/assigner, region, competition, position, inclusive age range, due DATE and bounded notes. Explicit commands advance Planned/Active/Completed/Cancelled according to approved sporting policy. Same-tenant links, current assignment access and atomic audit/outbox are mandatory; reassignment removes prior scout access to confidential drafts unless a policy grants it.
-**Tests:** `scouting_assignment_checks_scout_eligibility` · `scouting_reassignment_revokes_previous_access`
-**Verify:** `(cd backend && just test-e2e -- test/scouting/assignments.e2e-spec.ts)`
-**Done when:** An assignment can be reassigned only to an eligible same-tenant scout with an attributable transition.
-
-### 3.1.3 — Make report review preserve the submitted evidence
-**Repo:** backend · **Size:** L · **Depends on:** `3.1.2` · **Requirements:** SR-SC-003/004/005/007
-**Files:** `backend/src/modules/scouting/application/reports.service.ts` · `backend/test/scouting/reports.e2e-spec.ts`
-**Build:** Implement Draft→Submitted→UnderReview→Approved|Rejected. Submission freezes a report revision; reviewer decisions refer to that revision and cannot alter the scout narrative. Corrections create a new revision/review round. Recommendations are StrongSign/Sign/Monitor/NotSuitable; technical/physical/tactical/mental/overall/potential scores have a versioned scale. Apply current assignment/relationship policy separately from action permission, with separation of submitter and final approver unless the owner approves a documented exception.
-**Tests:** `scouting_review_cannot_mutate_submitted_snapshot` · `scouting_invalid_transition_and_unrelated_reviewer_are_denied`
-**Verify:** `(cd backend && just test-e2e -- test/scouting/reports.e2e-spec.ts)`
-**Done when:** Approval identifies an immutable submitted revision and cannot silently alter its scores or narrative.
-
-### 3.1.4 — Provide private watchlists with deliberate sharing
-**Repo:** backend · **Size:** M · **Depends on:** `3.1.1` · **Requirements:** SR-SC-006, PRD-SC-001
-**Files:** `backend/src/modules/scouting/application/watchlists.service.ts` · `backend/test/scouting/watchlists.e2e-spec.ts`
-**Build:** Add unique(tenantId,userId,playerId) watch entry with controlled priority, notes and revision. Owner-only access is the default; any shared list is an explicit authorized resource, not all scouts receiving every list. Archive/reactivate an entry with history and reauthorize player access on each read; counts and search follow the same projection.
-**Tests:** `scouting_watchlist_is_private_by_default`
-**Verify:** `(cd backend && just test-e2e -- test/scouting/watchlists.e2e-spec.ts)`
-**Done when:** A user cannot list or infer another user’s private watchlist entries.
-
-### 3.1.5 — Convert an approved prospect through an explicit onboarding action
-**Repo:** backend · **Size:** M · **Depends on:** `3.1.3` · **Requirements:** SR-SC-002/007, PRD-PL-002, BR-OBJ-01
-**Files:** `backend/src/modules/scouting/application/onboard-prospect.service.ts` · `backend/test/scouting/onboarding.e2e-spec.ts`
-**Build:** onboardProspect(ctx,reportId,revision,idempotencyKey) requires the approved report revision plus player-onboarding permission, reviews duplicate candidates, and moves the same Player from PROSPECT to ONBOARDING. It creates missing-information tasks rather than inventing identity, consent, guardian authority or a signed contract. Repeating the request returns the existing action receipt.
-**Tests:** `scouting_onboarding_reuses_existing_player` · `scouting_approval_does_not_imply_enrollment_consent`
-**Verify:** `(cd backend && just test-e2e -- test/scouting/onboarding.e2e-spec.ts)`
-**Done when:** Onboarding produces one player lifecycle transition and an auditable missing-information task list.
-
-### 3.1.6 — Build the scouting workspace and review experience
-**Repo:** frontend · **Size:** L · **Depends on:** `3.1.4`, `3.1.5` · **Requirements:** PRD-SC-001, TEST-005/009/010, UX-003/004/008/009/011
-**Files:** `frontend/app/[locale]/scouting/` · `frontend/src/features/scouting/` · `frontend/tests/scouting/workspace.spec.ts`
-**Build:** Build assigned work, prospect intake, report draft/review, watchlists and onboarding action through the generated client. Show scale/version, immutable submission and permitted next actions; stale edits preserve draft text and require reconciliation. Route, query key and caches include tenant and projection. Keep the production flag off pending 3.1.7.
-**Tests:** `scouting_workspace_preserves_review_history_in_both_locales`
-**Verify:** `(cd frontend && npx --no-install playwright test tests/scouting/workspace.spec.ts --project=ar --project=en)`
-**Done when:** An authorized scout and distinct reviewer complete the journey in Arabic and English under the disabled rollout flag.
-
-### 3.1.7 — Authorize scouting activation with an abuse gate
-**Repo:** backend + umbrella · **Size:** L · **Depends on:** `3.1.6` · **Requirements:** SR-NFR-SEC-003, SR-PL-003, TEST-003/006
-**Files:** `backend/test/scouting/activation.e2e-spec.ts` · `docs/implementation/evidence/scouting-activation.md`
-**Build:** Exercise foreign tenant, unrelated assignment, another scout’s draft, rejected/obsolete revision, protected identity fields, attachment keys, search/counts/export and revoked membership across API/UI/jobs. Require sporting owner approval of review scale and activation evidence. The backend flag checks approved activation metadata, not a frontend environment toggle alone.
-**Tests:** `scouting_activation_requires_policy_and_abuse_evidence` · `scouting_drafts_and_protected_files_do_not_leak`
-**Verify:** `(cd backend && just test-e2e -- test/scouting/activation.e2e-spec.ts)`
-**Done when:** The scouting owner accepts the negative-case evidence and the server refuses activation without that record.
+**Effort:** 22 steps (0 S / 5 M / 17 L); sizing capacity up to 312 focused hours +30% reserve = 405.6 hours, 16.2 weeks at 25 focused hours/week. This is a falsifiable planning bound, not a promised date; re-estimate at entry and split any step exceeding 16 hours.
 
 ## Group 3.2 — Affiliations and traceable analytics
 
 ### 3.2.1 — Complete organization, team and competition history
-**Repo:** backend · **Size:** L · **Depends on:** `2.4.4`, `3.1.2` · **Requirements:** SR-PF-001/002, BR-OBJ-04, SR-DB-003
+**Repo:** backend · **Size:** L · **Depends on:** `2.4.4`, `1.11.2` · **Requirements:** SR-PF-001/002, BR-OBJ-04, SR-DB-003
 **Files:** `backend/src/modules/organizations/` · `backend/src/modules/performance/application/affiliations.reader.ts` · `backend/test/analytics/affiliations.e2e-spec.ts`
 **Build:** Extend Phase-1 Organization/affiliation and Phase-2 Competition/Match models; do not duplicate them under analytics. Add team membership periods and transfer provenance needed for season/competition analysis. Validate non-overlap where policy requires a single primary affiliation; retain unknown dates explicitly. Analysts receive a permitted sporting projection, never compensation or contract documents through joins.
 **Tests:** `analytics_affiliations_preserve_historical_club_context`
@@ -105,7 +46,7 @@ Each step’s dependency field is authoritative, including intentional reference
 ## Group 3.3 — Dossiers and scoped sharing
 
 ### 3.3.1 — Render approved dossier snapshots and archival copies
-**Repo:** backend · **Size:** L · **Depends on:** `3.1.7`, `3.2.2` · **Requirements:** SR-PL-009, PRD-PL-003, SR-DOC-005/008, BR-OBJ-07
+**Repo:** backend · **Size:** L · **Depends on:** `1.11.7`, `3.2.2` · **Requirements:** SR-PL-009, PRD-PL-003, SR-DOC-005/008, BR-OBJ-07
 **Files:** `backend/src/modules/dossiers/application/render.service.ts` · `backend/src/worker/dossier.worker.ts` · `backend/test/dossiers/render.e2e-spec.ts`
 **Build:** Create a versioned template with an allowlisted public field/media selection and explicit approval of the resolved snapshot. Store source versions, approver, purpose, immutable artifact hash and FileObject binding. Default excludes passport, contacts, legal, medical and compensation; clinical availability is not public by default. Render in an isolated worker with remote fetch disabled and bounded resources. PDF/A is required only for an approved archival classification and validated with a pinned validator; never label an ordinary PDF PDF/A.
 **Tests:** `dossier_snapshot_excludes_protected_field_canaries` · `dossier_archival_pdf_is_validated_before_labeling`
@@ -233,7 +174,7 @@ Each step’s dependency field is authoritative, including intentional reference
 ## Group 3.7 — Release 3
 
 ### 3.7.1 — Attack the public portal and provider integration boundaries
-**Repo:** backend + umbrella · **Size:** L · **Depends on:** `3.1.7`, `3.3.4`, `3.4.4`, `3.5.2`, `3.6.2` · **Requirements:** TEST-003/006, SR-NFR-SEC-001/003, SR-API-009
+**Repo:** backend + umbrella · **Size:** L · **Depends on:** `1.11.7`, `3.3.4`, `3.4.4`, `3.5.2`, `3.6.2` · **Requirements:** TEST-003/006, SR-NFR-SEC-001/003, SR-API-009
 **Files:** `backend/test/security/phase3-boundaries.e2e-spec.ts` · `docs/implementation/evidence/phase3-security.md`
 **Build:** Run target-version DAST and adversarial cases for capability guessing/leaks, IDOR, expired shares, alternate file versions, callback forgery, provider account mixup, finance projections and scout draft leakage. Use synthetic adversarial tenants and approved staging scope. Record manual assessment findings and remediate blocking findings before release; passing automation is not an ASVS certification.
 **Tests:** `phase_three_public_and_provider_boundaries_resist_abuse`

@@ -78,7 +78,7 @@ Dependencies across modules use exported application services and typed identifi
 | Training | Programs, sessions, enrollment, attendance, completion, certificates | `enroll`, `markAttendance`, `evaluateCompletion`; `2.2.1`, `2.2.3`, `2.3.1`–`2.3.3` |
 | Performance and ratings | Validated observations, imports, versioned rating schemes | `importPerformance`, `calculateRating`; `2.4.1`, `2.4.3`, `2.5.1` |
 | Chat | Conversation membership, ordered messages, read cursors | `sendMessage`, `syncConversation`; `2.6.2`–`2.6.5` |
-| Scouting | Prospects, assignments, report review, watchlists | `submitReport`, `approveReport`, `onboardProspect`; `3.1.1`–`3.1.5` |
+| Scouting | Prospects, assignments, report review, watchlists | `submitReport`, `approveReport`, `onboardProspect`; `1.11.1`–`1.11.5` |
 | Sharing and analytics | Authorized read models, dossier snapshots, grants | `buildDossier`, `resolveShare`; `3.2.2`, `3.3.1`–`3.3.3` |
 | Finance | Financial documents, movements, provider reconciliation | `recordPaymentOutcome`, `reconcilePayment`; `3.4.1`–`3.4.3` |
 | Platform operations | Separate operator identity, approved support access, entitlements | `grantSupportAccess`, `provisionTenant`; `4.1.1`–`4.1.5` |

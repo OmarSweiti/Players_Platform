@@ -187,9 +187,6 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `a_player_reads_only_their_own_medical_record` | 0.6.8 | backend | todo |
 | `the_confidentiality_filter_is_not_caller_controlled` | 0.6.8 | backend | todo |
 | `treatment_sessions_are_archived_not_deleted` | 0.6.8 | backend | todo |
-| `patch_cannot_change_a_scouting_report_status` | 0.6.8 | backend | todo |
-| `only_the_author_edits_a_report_and_only_in_draft` | 0.6.8 | backend | todo |
-| `a_scouting_report_never_carries_identity_fields` | 0.6.8 | backend | todo |
 | `no_route_reads_another_tenants_object` | 0.6.9 | backend | todo |
 | `no_route_mutates_another_tenants_object` | 0.6.9 | backend | todo |
 | `every_route_is_in_the_isolation_inventory` | 0.6.9 | backend | todo |
@@ -338,6 +335,7 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `legal_queue_handles_conflict_and_overdue_in_both_locales` | 1.5.4 | frontend | todo |
 | `legal_concurrent_assignment_returns_revision_conflict` | 1.5.5 | backend | todo |
 | `legal_audit_failure_rolls_back_ticket_mutation` | 1.5.5 | backend | todo |
+| `legal_summaries_join_shared_surfaces_only_under_legal_policy` | 1.5.6 | backend + frontend | todo |
 | `notification_rendering_is_localized_and_confidentiality_safe` | 1.6.1 | backend | todo |
 | `notification_redelivery_preserves_one_in_app_record` | 1.6.1 | backend | todo |
 | `notification_mark_read_is_recipient_scoped_and_idempotent` | 1.6.2 | backend + frontend | todo |
@@ -390,6 +388,29 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `test_security_review_rejects_unreviewed_controls_or_high_findings` | 1.10.14 | umbrella | todo |
 | `locale_switch_preserves_mvp_business_data` | 1.10.15 | umbrella + frontend | todo |
 | `test_language_review_requires_provider_and_business_states` | 1.10.15 | umbrella + frontend | todo |
+| `scouting_prospect_requires_only_stage_fields` | 1.11.1 | backend | todo |
+| `scouting_scores_reject_invalid_ranges` | 1.11.1 | backend | todo |
+| `a_scouting_report_never_carries_identity_fields` | 1.11.1 | backend | todo |
+| `scouting_assignment_checks_scout_eligibility` | 1.11.2 | backend | todo |
+| `scouting_reassignment_revokes_previous_access` | 1.11.2 | backend | todo |
+| `scouting_review_cannot_mutate_submitted_snapshot` | 1.11.3 | backend | todo |
+| `scouting_invalid_transition_and_unrelated_reviewer_are_denied` | 1.11.3 | backend | todo |
+| `patch_cannot_change_a_scouting_report_status` | 1.11.3 | backend | todo |
+| `only_the_author_edits_a_report_and_only_in_draft` | 1.11.3 | backend | todo |
+| `scouting_watchlist_is_private_by_default` | 1.11.4 | backend | todo |
+| `scouting_onboarding_reuses_existing_player` | 1.11.5 | backend | todo |
+| `scouting_approval_does_not_imply_enrollment_consent` | 1.11.5 | backend | todo |
+| `scouting_workspace_preserves_review_history_in_both_locales` | 1.11.6 | frontend | todo |
+| `scouting_activation_requires_policy_and_abuse_evidence` | 1.11.7 | backend + umbrella | todo |
+| `scouting_drafts_and_protected_files_do_not_leak` | 1.11.7 | backend + umbrella | todo |
+| `scouting_summaries_appear_only_where_released_and_permitted` | 1.11.8 | backend + frontend | todo |
+| `scouting_reviewer_sees_reports_awaiting_their_review` | 1.11.8 | backend + frontend | todo |
+| `demo_dataset_is_fictional_and_on_reserved_domains` | 1.12.1 | backend + umbrella | todo |
+| `demo_dataset_reseeds_idempotently_relative_to_today` | 1.12.1 | backend + umbrella | todo |
+| `the_demo_command_starts_every_process_healthy` | 1.12.2 | umbrella + backend + frontend | todo |
+| `the_demo_runs_with_external_networking_disabled` | 1.12.2 | umbrella + backend + frontend | todo |
+| `the_demo_pitch_completes_in_both_locales` | 1.12.3 | umbrella + frontend | todo |
+| `demo_sandbox_is_an_isolated_expiring_tenant` | 1.12.4 | umbrella + backend | todo |
 | `medical_activation_requires_approved_policy` | 2.1.0 | umbrella + backend | todo |
 | `medical_types_preserve_unknown_legacy_values` | 2.1.1 | backend | todo |
 | `medical_record_types_reject_incompatible_fields` | 2.1.1 | backend | todo |
@@ -454,18 +475,6 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `operations_restore_preserves_messages_certificates_and_audit` | 2.10.2 | backend + umbrella | todo |
 | `operations_release_manifest_requires_all_domain_gates` | 2.10.3 | umbrella + backend + frontend | todo |
 | `operations_bilingual_accessibility_journeys_pass` | 2.10.4 | frontend + umbrella | todo |
-| `scouting_prospect_requires_only_stage_fields` | 3.1.1 | backend | todo |
-| `scouting_scores_reject_invalid_ranges` | 3.1.1 | backend | todo |
-| `scouting_assignment_checks_scout_eligibility` | 3.1.2 | backend | todo |
-| `scouting_reassignment_revokes_previous_access` | 3.1.2 | backend | todo |
-| `scouting_review_cannot_mutate_submitted_snapshot` | 3.1.3 | backend | todo |
-| `scouting_invalid_transition_and_unrelated_reviewer_are_denied` | 3.1.3 | backend | todo |
-| `scouting_watchlist_is_private_by_default` | 3.1.4 | backend | todo |
-| `scouting_onboarding_reuses_existing_player` | 3.1.5 | backend | todo |
-| `scouting_approval_does_not_imply_enrollment_consent` | 3.1.5 | backend | todo |
-| `scouting_workspace_preserves_review_history_in_both_locales` | 3.1.6 | frontend | todo |
-| `scouting_activation_requires_policy_and_abuse_evidence` | 3.1.7 | backend + umbrella | todo |
-| `scouting_drafts_and_protected_files_do_not_leak` | 3.1.7 | backend + umbrella | todo |
 | `analytics_affiliations_preserve_historical_club_context` | 3.2.1 | backend | todo |
 | `analytics_comparison_reports_sources_and_missing_data` | 3.2.2 | backend | todo |
 | `analytics_cohort_excludes_unauthorized_players` | 3.2.2 | backend | todo |

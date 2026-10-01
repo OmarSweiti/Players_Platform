@@ -135,9 +135,9 @@ replacement is built.
 | Z-3 | `@Roles` and `ROLE_HIERARCHY` — a second authorization system nothing uses | `roles.decorator.ts`, `user.types.ts:3` | S4 | `0.6.2` |
 | Z-4 | `SUPER_ADMIN` is seeded with every permission, confidential ones included, and with a known address | `permission.service.ts:93`, `seed.ts:42` | S1 | `0.6.1`, `0.6.7`, `0.5.11` |
 | Z-5 | `medical.view_confidential` is defined and never checked; the player role holds `medical.read`; the caller chooses whether confidential records are filtered | `permissions.constants.ts:28`, `permission.service.ts:227`, `medical.controller.ts:70–74` | S1 | `0.6.8` |
-| Z-6 | A scout can set their own report to `APPROVED` through `PATCH` | `update-scouting-report.dto.ts:8`, `update-assignment.dto.ts:8` | S1 | `0.6.8` |
-| Z-7 | The edit check lets anyone edit any draft and the author edit an approved report | `update-scouting-report.use-case.ts:18` | S1 | `0.6.8` |
-| Z-8 | Scouting reports embed the whole player, passport included | `scouting-report.repository.ts:56, 79, 158` | S1 | `0.6.8` |
+| Z-6 | A scout can set their own report to `APPROVED` through `PATCH` | `update-scouting-report.dto.ts:8`, `update-assignment.dto.ts:8` | S1 | `1.11.3` |
+| Z-7 | The edit check lets anyone edit any draft and the author edit an approved report | `update-scouting-report.use-case.ts:18` | S1 | `1.11.3` |
+| Z-8 | Scouting reports embed the whole player, passport included | `scouting-report.repository.ts:56, 79, 158` | S1 | `1.11.1` |
 
 ### Data, audit and storage
 
