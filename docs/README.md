@@ -6,11 +6,14 @@ it, the rules every change follows, and where the work stands. People and AI age
 | Folder | Holds | Start with |
 |---|---|---|
 | [`requirements/`](requirements/README.md) | the owner's four frozen requirement documents (BRD, PRD, SysRD, SRS) — **what** Sadara must be | the README, then the BRD |
-| [`implementation/`](implementation/README.md) | the plan — master plan, engineering law, workflows, one file per phase, progress and handoff — **what to build next and how to prove it** | the README: it shows the live frontier |
+| [`implementation/`](implementation/README.md) | the plan — the demo milestone (the build order), master plan, engineering law, workflows, one file per phase, progress and handoff — **what to build next and how to prove it** | the README: it shows the live frontier |
 | [`reference/`](reference/) | the contracts every microstep relies on: architecture, API, database, security, observability, UI, domain workflows, the verified current state, the test catalog and requirement traceability | whichever the microstep names |
 | [`adr/`](adr/README.md) | architecture decisions: context, decision, alternatives rejected, consequences, when to revisit | the index |
 
 **Where to begin.** New to the project: [`implementation/README.md`](implementation/README.md), then
+[`implementation/demo-milestone.md`](implementation/demo-milestone.md) — Sadara is built to show and to sell,
+and the first milestone is a sales demo built as the real product
+([ADR-0021](adr/0021-a-product-built-to-sell.md)) — then
 [`implementation/00-master-plan.md`](implementation/00-master-plan.md). About to change code: the
 microstep, [`implementation/01-conventions.md`](implementation/01-conventions.md) and
 [`implementation/02-development-workflow.md`](implementation/02-development-workflow.md). An AI agent:
@@ -48,5 +51,7 @@ the same pull request.
 | [0016](adr/0016-observability.md) | Observability | Accepted |
 | [0017](adr/0017-sql-managed-database-objects.md) | Partial indexes, checks, policies, triggers and grants live in SQL | Accepted |
 | [0018](adr/0018-product-name-sadara.md) | The product is named Sadara | Accepted |
-| [0019](adr/0019-owner-approves-signature-policy.md) | The owner approves the signature evidence policy | Accepted · default policy awaits the owner's approval |
+| [0019](adr/0019-owner-approves-signature-policy.md) | The owner approves the signature evidence policy | Accepted · its default ships as the product default; each agency's owner adopts it (0021) |
 | [0020](adr/0020-local-object-store.md) | The local object store is Versity S3 Gateway | Accepted |
+| [0021](adr/0021-a-product-built-to-sell.md) | Sadara is a product built to sell; its first milestone is a sales demo built as the real product | Accepted |
+| [0022](adr/0022-the-sysrd-stack-kept-current.md) | The SysRD's stack, kept current: its versions are floors, and newer stable releases are preferred | Accepted |

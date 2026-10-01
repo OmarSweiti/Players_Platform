@@ -36,7 +36,7 @@ Invitation consumption checks tenant, verified provider identity, target policy,
 
 ## Players, affiliations and lifecycle
 
-Owners: `1.2.1`–`1.2.8`; structured matches `2.4.4`; prospects and onboarding `3.1.1`/`3.1.5`; affiliation analytics `3.2.1`.
+Owners: `1.2.1`–`1.2.8`; structured matches `2.4.4`; prospects and onboarding `1.11.1`/`1.11.5`; affiliation analytics `3.2.1`.
 
 Player identity is stable through `PROSPECT → ONBOARDING → ACTIVE → ARCHIVED`. Exact allowed transitions and restoration rules are explicit policy; an ordinary PATCH cannot set stage. Store stage-specific completeness configuration/version and return missing requirements rather than inventing values. PROSPECT permits minimal recruitment information; ONBOARDING collects required identity, documents and relationship evidence. ACTIVE requires the approved completeness and agency admission guards, never a medical inference or the mere existence of a scouting approval.
 
@@ -157,7 +157,7 @@ Notifications contain safe localized templates and authorized references. Prefer
 
 ## Scouting and prospect onboarding
 
-Owners: `3.1.1`–`3.1.7`; server flag remains off until sporting policy and abuse acceptance.
+Owners: `1.11.1`–`1.11.8` (moved into Phase 1 for the demo milestone, ADR-0021); the server flag stays off until the product owner accepts the review scale and the abuse evidence (`1.11.7`).
 
 Assignments capture scout, assigner, region, competition, target position, age range, due date and controlled status. Existing players and external prospects share Player identity at different stages. Report review is `DRAFT → SUBMITTED → UNDER_REVIEW → APPROVED | REJECTED`. Submission freezes the revision; corrections create another revision/round. Recommendation and score scales are governed, with immutable submitted narrative and attributable review decisions.
 

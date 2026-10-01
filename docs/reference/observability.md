@@ -83,7 +83,7 @@ SR-NFR-REL-001 sets a 99.9% monthly availability target. Define eligible request
 
 SR-NFR-PERF-001 requires p95 at most 500 ms for simple operations and at most 2 seconds for complex dashboards under the agreed capacity envelope. Record dataset size, concurrent users, read/write mix, file sizes, hardware, replica count, process pool budgets, test duration, cold/warm conditions, release/pins and error rate. Report end-to-end latency as well as dependency-excluded budgets. Include primary-database session checks in capacity tests; do not remove them to obtain a favorable result.
 
-`1.10.6` owns the first accepted workload and load scripts; the envelope remains OPEN until the agency approves it. A laptop result is a local experiment, not deployed capacity evidence. Follow-up phases expand the envelope with sockets, imports, media, public shares and additional tenants. Connection budget must reserve operational headroom and account for migrations and IdP database connections, not just the API pool.
+`1.10.6` owns the first accepted workload and load scripts; the envelope is the design target for one small server (ADR-0021), revisited with the first customer's volumes. A laptop result is a local experiment, not deployed capacity evidence. Follow-up phases expand the envelope with sockets, imports, media, public shares and additional tenants. Connection budget must reserve operational headroom and account for migrations and IdP database connections, not just the API pool.
 
 ## Backup and restore contract
 

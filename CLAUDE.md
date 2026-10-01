@@ -1,14 +1,16 @@
 # Sadara Players Platform — read this before you touch anything
 
-A multi-tenant platform for a sports agency — players, documents, contracts, legal, training,
-performance, medical, chat, scouting, notifications and audit — in **Arabic and English**.
+A multi-tenant platform for sports agencies — players, documents, contracts, legal, training,
+performance, medical, chat, scouting, notifications and audit — in **Arabic and English**. It is built
+to show and to sell: there is no client and no real data yet, and the first milestone is a sales demo
+built as the real product ([ADR-0021](docs/adr/0021-a-product-built-to-sell.md)).
 
 ```
 Players_Platform/     ← the umbrella: the plan (docs/), the local stack (infra/), one pinned commit of each app
 ├── docs/                requirements · implementation plan and progress · references · ADRs
 ├── backend/             submodule → Players_Platform_Backend    NestJS 11 · Prisma 7 · PostgreSQL 18
 ├── frontend/            submodule → Players_Platform_Frontend   Next.js 16 · React 19 · TypeScript
-└── infra/               compose: PostgreSQL, Valkey, object store, ClamAV, Mailpit, Keycloak   (from 0.2.1)
+└── infra/               compose: PostgreSQL, Valkey, object store, ClamAV, Mailpit, Keycloak, HTTPS proxy
 ```
 
 ## Start here
@@ -16,6 +18,7 @@ Players_Platform/     ← the umbrella: the plan (docs/), the local stack (infra
 | Read | For |
 |---|---|
 | [`docs/implementation/README.md`](docs/implementation/README.md) | **the frontier — what to do next** — and how to read a microstep |
+| [`docs/implementation/demo-milestone.md`](docs/implementation/demo-milestone.md) | **the build order**: Sadara is built to show and to sell; the first milestone is a sales demo built as the real product ([ADR-0021](docs/adr/0021-a-product-built-to-sell.md)) |
 | [`docs/implementation/handoff.md`](docs/implementation/handoff.md) | whether someone stopped mid-step |
 | [`docs/implementation/01-conventions.md`](docs/implementation/01-conventions.md) | the engineering law: fifteen invariants — keep it open |
 | [`docs/implementation/02-development-workflow.md`](docs/implementation/02-development-workflow.md) | every command, the nine-station microstep lifecycle, the rules for agents |

@@ -1,17 +1,19 @@
 # Agent guide — Sadara Players Platform
 
-You are working on a multi-tenant, bilingual (Arabic and English) platform for a sports agency. This
+You are working on a multi-tenant, bilingual (Arabic and English) platform for sports agencies, built to
+show and to sell; there is no client yet (`docs/adr/0021-a-product-built-to-sell.md`). This
 repository is the **umbrella**: the plan in `docs/`, the local stack in `infra/`, and one pinned commit
 of the backend and the frontend as submodules.
 
 **Before any change**, read in this order:
 
 1. `docs/implementation/README.md` — the frontier: the next ready microstep.
-2. `docs/implementation/handoff.md` — work someone left in flight.
-3. The microstep itself, and every file, requirement and reference it names.
-4. `docs/implementation/01-conventions.md` — the fifteen invariants.
-5. `docs/implementation/02-development-workflow.md` — commands, the microstep lifecycle, the agent rules.
-6. The rules for the area you touch:
+2. `docs/implementation/demo-milestone.md` — the build order: the first sales demo, built as the real product.
+3. `docs/implementation/handoff.md` — work someone left in flight.
+4. The microstep itself, and every file, requirement and reference it names.
+5. `docs/implementation/01-conventions.md` — the fifteen invariants.
+6. `docs/implementation/02-development-workflow.md` — commands, the microstep lifecycle, the agent rules.
+7. The rules for the area you touch:
 
 | You change | Also read |
 |---|---|

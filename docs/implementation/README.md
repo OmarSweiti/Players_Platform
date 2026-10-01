@@ -6,32 +6,37 @@ agent.
 ## Frontier
 
 <!-- plan:frontier:begin -->
-**Phase 0** — 7 of 82 microsteps done (7 of 244 across all phases).
+**Demo milestone** ([build order](demo-milestone.md)) — 7 of 124 microsteps done; 604–1208 engineering hours left before the reserve.
+Next in build order (every dependency done): `0.2.3`, `0.9.1`, `0.4.1`, `0.4.2`, `0.1.7`, `0.5.1`, `0.8.1`.
+**Phase 0** — 7 of 83 microsteps done (7 of 251 across all phases).
 In progress: none.
 Ready now (every dependency done): `0.1.7`, `0.2.3`, `0.4.1`, `0.4.2`, `0.5.1`, `0.8.1`, `0.9.1`.
 Blocked: none.
 <!-- plan:frontier:end -->
 
-*Generated from [`progress.md`](progress.md) by `just plan`; the plan check fails if it is stale. The
-next step is a **ready** one — every dependency done — in the current phase; when several are ready,
-follow the phase file's build order. Read [`handoff.md`](handoff.md) first in case someone stopped
-mid-step.*
+*Generated from [`progress.md`](progress.md) and [`demo-milestone.md`](demo-milestone.md) by `just plan`;
+the plan check fails if it is stale. The next step is the **first ready step in the demo milestone's
+build order** — every dependency done; when it is blocked, take the next one. Read
+[`handoff.md`](handoff.md) first in case someone stopped mid-step.*
 
-**Owner decisions start now**, alongside Phase 0: approving the signature evidence policy, the
-medical-data rules (before Phase 2), and the agency's answers on roles, approval chains and contract
-types — [master plan](00-master-plan.md#long-lead-register).
+**There is no client agency yet** ([ADR-0021](../adr/0021-a-product-built-to-sell.md)): Sadara is built to
+show and to sell, the demo is the real product, and the product's defaults are decided. What still needs
+the owner is in the [long-lead register](00-master-plan.md#long-lead-register): rehearsing the demo
+(`1.12.3`), the medical policy before Phase 2, and the small server before `1.10.1`.
 
 ## Read in this order
 
-1. [`00-master-plan.md`](00-master-plan.md) — the verdict on the requirements, where the code stands,
+1. [`demo-milestone.md`](demo-milestone.md) — the build order: what the first sales demo needs, in what
+   order, the forecast and the cut list.
+2. [`00-master-plan.md`](00-master-plan.md) — the verdict on the requirements, where the code stands,
    the phases, the effort model, the risks, the OPEN register and the errata.
-2. [`01-conventions.md`](01-conventions.md) — the engineering law: fifteen invariants, architecture,
+3. [`01-conventions.md`](01-conventions.md) — the engineering law: fifteen invariants, architecture,
    naming, testing, the microstep definition of done, budgets, migrations.
-3. [`02-development-workflow.md`](02-development-workflow.md) — bring-up, every command, the nine-station
+4. [`02-development-workflow.md`](02-development-workflow.md) — bring-up, every command, the nine-station
    microstep lifecycle, rules for AI agents, manual testing, debugging.
-4. [`03-github-workflow.md`](03-github-workflow.md) — branches, titles, the daily loop, pins and
+5. [`03-github-workflow.md`](03-github-workflow.md) — branches, titles, the daily loop, pins and
    progress, releases.
-5. The current phase file, and the references its microsteps link.
+6. The phase file of the step you take, and the references its microsteps link.
 
 | Phase | File | Status |
 |---|---|---|
@@ -60,7 +65,9 @@ References: [architecture](../reference/architecture.md) · [API](../reference/a
 **Done when:** one objectively checkable sentence.
 ```
 
-- **`N.N.N`** is phase · group · step. IDs are **stable identities, not build order** — never renumbered.
+- **`N.N.N`** is phase · group · step. IDs are **stable identities, not build order**: once a PR, a progress
+  row or a test cites a step, it is never renumbered. The one move so far was made before any work cited
+  the steps: ADR-0021 brought scouting into Phase 1, so 3.1.1–3.1.7 became `1.11.1`–`1.11.7`.
   A step too big to start is split with a letter suffix (0.4.5a, 0.4.5b): the children take over the
   parent's tests (each name moves to exactly one child), every step that depended on the parent is rewired
   to the child it actually needs, and the parent is marked `superseded` with its children named. A new

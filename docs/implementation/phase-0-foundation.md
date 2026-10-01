@@ -5,10 +5,15 @@
 > row-level security, authorization, atomic audit, durable work, a private file pipeline, the API
 > contract and the bilingual shell are in place, tested and green in CI.
 
-**Effort:** 82 microsteps — 22 S, 49 M, 11 L — **328–656 engineering hours** before the 30% reserve
+**Effort:** 83 microsteps — 22 S, 50 M, 11 L — **332–664 engineering hours** before the 30% reserve
 (the size weights are ceilings); [`00-master-plan.md`](00-master-plan.md#effort-model) turns that into a
 forecast and recalibrates it from measured hours after the first five steps. No new product
 features: the demonstrations are about what can no longer go wrong.
+**Two gates.** The [demo milestone](demo-milestone.md) builds the product on the **foundation gate**
+(`0.11.0`), which with the gate itself takes 78 of these steps. The other five are production work:
+guardian relationships (`0.6.5`), the legacy medical routes (`0.6.8`), the restore and failure drills
+(`0.10.3`, `0.10.4`), and the **production gate** (`0.11.1`) itself, without which nothing reaches
+staging or production ([ADR-0021](../adr/0021-a-product-built-to-sell.md)).
 **Baseline:** [`../reference/current-state.md`](../reference/current-state.md) — what the code does today,
 verified on 28 September 2026. Every defect listed there names its owning microstep below.
 
@@ -172,8 +177,9 @@ single "Sign in" entry, wired to the provider in `0.9.5`; the hook that waits fo
 **Repo:** backend · **Size:** S · **Depends on:** `0.2.3` · **Requirements:** SR-MED-007
 **Files:** `src/common/feature-flags/feature-gate.guard.ts` (new), `src/config/env.schema.ts`,
 `src/modules/medical/medical.module.ts`, `src/modules/scouting/scouting.module.ts`, `test/platform/feature-flags.e2e-spec.ts` (new)
-Medical and scouting are partial, carry verified defects (fixed in `0.6.8`) and are rebuilt in Phases 2
-and 3. Until then `FEATURE_MEDICAL` and `FEATURE_SCOUTING` are **off in every environment unless
+Medical and scouting are partial and carry verified defects: medical's are fixed in `0.6.8` and the module
+is rebuilt in Phase 2; scouting is rebuilt in the demo milestone (`1.11.1`–`1.11.8`) and released by
+`1.11.7`. Until then `FEATURE_MEDICAL` and `FEATURE_SCOUTING` are **off in every environment unless
 explicitly set**, and a controller-level gate answers `404` before any repository is touched. A client
 navigation flag is never the control. Per-tenant flags replace these in `1.1.4`.
 **Tests:** `medical_routes_are_not_found_when_disabled` · `scouting_routes_are_not_found_when_disabled` · `a_disabled_module_never_reaches_its_repository`
@@ -455,8 +461,10 @@ later. Each rule emits counts and row identifiers, never personal content: the s
 treatment sessions whose record belongs to another player, attendance joining two programs, orphaned
 references, duplicate normalised emails per tenant, money beyond its currency's scale, timestamps of
 unknown provenance, soft-deleted audit rows, and **whether any real (non-seed) account exists**. A
-non-zero count blocks the dependent migration until the owner approves a correction; nothing is deleted
-to make a constraint pass.
+non-zero count blocks the dependent migration until the violation is corrected; nothing is deleted to
+make a constraint pass. No real data exists ([ADR-0021](../adr/0021-a-product-built-to-sell.md)), so a
+database the report identifies as holding only synthetic seed data may instead be reset and reseeded;
+migrations still move forward only, and a database with any real account follows the correction path.
 **Tests:** `preflight_reports_cross_tenant_edges` · `preflight_reports_same_parent_violations` · `preflight_output_contains_no_personal_data`
 **Verify:** `just preflight && just test-int -- preflight`
 **Done when:** every rule finds its seeded counter-example in the fixture database and reports zero on a
@@ -774,7 +782,7 @@ npm run tenant:provision -- --slug sadara --name "Sadara Sports Agency" --domain
 **Done when:** the three tests pass against the compose Keycloak.
 
 ### 0.5.10 — Invitations
-**Repo:** backend · **Size:** M · **Depends on:** `0.5.9`, `0.5.6` · **Requirements:** —
+**Repo:** backend · **Size:** M · **Depends on:** `0.5.9`, `0.5.6`, `0.5.8` · **Requirements:** —
 **Files:** `prisma/schema.prisma` + migration `…_invitations`, `src/modules/users/**`, `test/users/invitations.e2e-spec.ts` (new)
 `POST /api/v1/users/invitations` (`user.invite`, recent authentication) creates or finds the invitee's
 provider account and an `Invitation` — email, role, seven-day expiry. Its single-use token is generated
@@ -898,22 +906,21 @@ change; platform support access waits for audited, time-boxed grants (`4.1.2`).
 **Verify:** `just test-e2e -- test/authz/platform-access.e2e-spec.ts`
 **Done when:** both tests pass.
 
-### 0.6.8 — The existing medical and scouting routes obey the rules
+### 0.6.8 — The existing medical routes obey the rules
 **Repo:** backend · **Size:** M · **Depends on:** `0.6.4`, `0.6.5` · **Requirements:** BR-RULE-07
-**Files:** `src/modules/medical/**`, `src/modules/scouting/**`, `src/modules/users/domain/default-role-matrix.ts`, `test/legacy-modules/*.e2e-spec.ts`
+**Files:** `src/modules/medical/**`, `src/modules/users/domain/default-role-matrix.ts`, `test/legacy-modules/*.e2e-spec.ts`
 They stay flagged off (`0.1.8`) but must be safe when switched on. Medical: `medical.view_confidential`
 is defined and never checked (`permissions.constants.ts:28`); the player role holds `medical.read`
 (`permission.service.ts:227`) and the caller picks the confidentiality filter
 (`medical.controller.ts:70–74`) — enforce the medical policy, limit players to their own record through
 `0.6.5`, and take the filter away from the caller; treatment sessions are archived, not hard-deleted
-(`treatment-session.repository.ts:202`). Scouting: `status` is writable through `PATCH`
-(`update-scouting-report.dto.ts:8`, `update-assignment.dto.ts:8`), so a scout can approve their own
-report; the edit check `scoutId !== scoutId && status !== 'DRAFT'` (`update-scouting-report.use-case.ts:18`)
-lets anyone edit a draft and the author edit an approved report; reports embed the whole player,
-passport included (`scouting-report.repository.ts:56, 79, 158`) — remove, fix and select.
-**Tests:** `a_coach_cannot_read_a_medical_record` · `a_player_reads_only_their_own_medical_record` · `the_confidentiality_filter_is_not_caller_controlled` · `treatment_sessions_are_archived_not_deleted` · `patch_cannot_change_a_scouting_report_status` · `only_the_author_edits_a_report_and_only_in_draft` · `a_scouting_report_never_carries_identity_fields`
-**Verify:** `FEATURE_MEDICAL=on FEATURE_SCOUTING=on just test-e2e -- test/legacy-modules`
-**Done when:** the seven tests pass.
+(`treatment-session.repository.ts:202`). The legacy scouting module is not patched here: the demo
+milestone rebuilds scouting (`1.11.1`–`1.11.8`), and its defects — a `status` writable through `PATCH`,
+an edit check that lets anyone edit a draft, reports that embed the whole player — are closed by that
+rebuild, which takes over their three tests (`1.11.1`, `1.11.3`).
+**Tests:** `a_coach_cannot_read_a_medical_record` · `a_player_reads_only_their_own_medical_record` · `the_confidentiality_filter_is_not_caller_controlled` · `treatment_sessions_are_archived_not_deleted`
+**Verify:** `FEATURE_MEDICAL=on just test-e2e -- test/legacy-modules`
+**Done when:** the four tests pass.
 
 ### 0.6.9 — The two-tenant isolation suite over every route
 **Repo:** backend · **Size:** L · **Depends on:** `0.6.2`, `0.4.12` · **Requirements:** SR-NFR-SEC-003, TEST-003
@@ -963,7 +970,9 @@ Permission and role changes record the previous and the new state.
 A refused sign-in on an unknown host has no tenant to belong to, and inventing one would falsify the
 record. `SecurityEvent` — global, UUIDv7, append-only by the same grants and triggers — records sign-in
 success and refusal, step-up, logout, back-channel events and session revocations, with the tenant when
-it is known and hashed network data. Reading it is restricted (the tenant's own view arrives in `1.7.1`).
+it is known and hashed network data; this step wires those events into the sign-in callback (`0.5.5`),
+step-up (`0.5.8`) and session revocation (`0.5.7`). Reading it is restricted (the tenant's own view
+arrives in `1.7.1`).
 **Tests:** `a_refused_sign_in_is_recorded_without_a_tenant` · `security_events_are_append_only`
 **Verify:** `just test-int -- security-events`
 **Done when:** both tests pass.
@@ -1101,7 +1110,7 @@ still valid for minutes — cannot change what anyone downloads.
 driven by a barrier between the scan and the copy.
 
 ### 0.8.5 — Download: version-pinned, authorized, short-lived
-**Repo:** backend · **Size:** S · **Depends on:** `0.8.4` · **Requirements:** SR-DOC-002
+**Repo:** backend · **Size:** S · **Depends on:** `0.8.4`, `0.7.4` · **Requirements:** SR-DOC-002
 **Files:** `src/modules/files/presentation/files.controller.ts` (new), `test/files/downloads.e2e-spec.ts` (new)
 `GET /api/v1/files/{id}/download` authorizes through the owner's policy, requires `READY` and a clean
 verdict, and returns a presigned GET for the **exact key and version** that were scanned, valid for 60
@@ -1244,15 +1253,30 @@ with Valkey down, the `auth` rate-limit category **fails closed**.
 
 ---
 
-## Group 0.11 — The Phase-0 gate
+## Group 0.11 — The gates: the foundation, then production
 
-### 0.11.1 — Run the Phase-0 gate and record the evidence
-**Repo:** umbrella + backend + frontend · **Size:** M · **Depends on:** `0.1.2`, `0.1.3`, `0.1.4`, `0.1.6`, `0.1.7`, `0.2.6`, `0.2.7`, `0.2.8`, `0.3.6`, `0.3.9`, `0.4.6`, `0.4.9`, `0.4.10`, `0.4.11`, `0.5.7`, `0.5.8`, `0.5.11`, `0.6.7`, `0.6.8`, `0.6.9`, `0.7.3`, `0.7.4`, `0.7.7`, `0.7.8`, `0.8.5`, `0.9.6`, `0.10.2`, `0.10.3`, `0.10.4` · **Requirements:** BR-OBJ-09, TEST-006
+### 0.11.0 — The foundation gate: what every product feature builds on
+**Repo:** umbrella + backend + frontend · **Size:** M · **Depends on:** `0.1.2`, `0.1.3`, `0.2.6`, `0.2.8`, `0.2.9`, `0.3.6`, `0.4.6`, `0.4.9`, `0.4.10`, `0.4.11`, `0.5.7`, `0.5.11`, `0.6.7`, `0.6.9`, `0.7.3`, `0.7.7`, `0.7.8`, `0.8.5`, `0.9.6`, `0.10.2` · **Requirements:** BR-OBJ-09
 **Files:** umbrella `docs/implementation/progress.md`, `docs/implementation/handoff.md`, the gate PR's body
-Run every command of the exit gate below on `development` in each repository and perform the
-demonstrations by hand on a freshly seeded stack; record the application commits, the CI runs and the
-results in the gate PR; move the pins; regenerate the frontier; review the risk and long-lead registers
-and re-forecast Phase 1 from the measured hours. A demonstration that fails keeps the phase open.
+Product features start here, not after the production gate ([ADR-0021](../adr/0021-a-product-built-to-sell.md)).
+Run the exit-gate commands below except `just drill`, on `development` in each repository, and perform
+demonstrations 1–10 by hand on a freshly seeded stack. Record the application commits, the CI
+runs and the results in the gate PR; move the pins; regenerate the frontier; re-forecast the
+[demo milestone](demo-milestone.md#forecast-and-checkpoints) from the measured hours. What this gate
+leaves out stays in `0.11.1`, before anything reaches staging or production.
+**Verify:** the exit-gate commands below, without `just drill`
+**Done when:** the gate PR is merged with those commands green and demonstrations 1–10 recorded.
+
+### 0.11.1 — Run the Phase-0 production gate and record the evidence
+**Repo:** umbrella + backend + frontend · **Size:** M · **Depends on:** `0.11.0`, `0.6.8`, `0.10.3`, `0.10.4` · **Requirements:** BR-OBJ-09, TEST-006
+**Files:** umbrella `docs/implementation/progress.md`, `docs/implementation/handoff.md`, the gate PR's body
+The production gate: the foundation gate (`0.11.0`) has already opened the product's features; this one
+adds guardian relationships, the legacy medical routes and the restore and failure drills, and nothing reaches staging or production without it
+(`1.10.1` onwards). Run every command of the exit gate below on `development` in each repository and
+perform every demonstration by hand on a freshly seeded stack; record the application commits, the CI
+runs and the results in the gate PR; move the pins; regenerate the frontier; review the risk and
+long-lead registers and re-forecast what remains from the measured hours. A demonstration that fails
+keeps the gate open.
 **Verify:** the exit-gate commands below
 **Done when:** the gate PR is merged with every command green and every demonstration recorded.
 
@@ -1272,7 +1296,8 @@ just check && npx playwright test                                   # ar + en pr
 just check && just guards && just drill                             # pins, plan, links, local restore
 ```
 
-**Demonstrations**, by hand on a freshly seeded stack, recorded in the gate PR:
+**Demonstrations**, by hand on a freshly seeded stack, recorded in the gate PR. The foundation gate
+(`0.11.0`) records 1–10; the production gate (`0.11.1`) records all eleven.
 
 1. The route inventory has no local credential route; `POST /api/v1/auth/login` does not exist as a
    password endpoint, and a request with a token signed by `default-secret` is simply unauthenticated.

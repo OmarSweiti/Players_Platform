@@ -21,7 +21,8 @@ Use next-intl locale routing under `frontend/app/[locale]/`, allowing only `ar` 
 | `/{locale}/legal`, `/legal/{id}` | Ticket queue, restricted notes and attachments | `1.5.4` |
 | `/{locale}/notifications`, `/audit` | Safe notifications and restricted evidence search | `1.6.2`, `1.7.1` |
 | `/{locale}/training`, `/performance`, `/ratings`, `/medical`, `/chat` | Phase-2 workspaces | `2.2.5`, `2.4.2`, `2.5.2`, `2.1.7`, `2.6.6` |
-| `/{locale}/scouting`, `/reports`, `/finance` | Phase-3 workspaces | `3.1.6`, `3.2.2`, `3.4.4` |
+| `/{locale}/scouting` | the scouting workspace (Phase 1, demo milestone) | `1.11.6` |
+| `/{locale}/reports`, `/finance` | Phase-3 workspaces | `3.2.2`, `3.4.4` |
 
 There is no `/dashboard` prefix. Public dossier/certificate verification routes are separate minimal surfaces defined by their domain steps, not copies of the authenticated shell. Navigation is built from released features and effective capabilities, while the API independently authorizes every request. No placeholder business metrics or fabricated live records.
 
