@@ -116,9 +116,9 @@ run early.
 stale.*
 
 <!-- plan:milestone:begin -->
-**Demo milestone** — 12 of 125 microsteps done; 594–1188 engineering hours left before the reserve.
+**Demo milestone** — 13 of 125 microsteps done; 590–1180 engineering hours left before the reserve.
 
-Next in build order (every dependency done): `0.2.10`, `0.9.1`, `0.1.7`, `0.4.1`, `0.3.1`, `0.3.7`, `0.3.8`, `0.4.2`. … and 2 more.
+Next in build order (every dependency done): `0.9.1`, `0.1.7`, `0.4.1`, `0.3.1`, `0.3.7`, `0.3.8`, `0.4.2`, `0.5.1`. … and 1 more.
 
 | Stage | Step | Title | Repo | Size | Status |
 |---|---|---|---|---|---|
@@ -134,7 +134,7 @@ Next in build order (every dependency done): `0.2.10`, `0.9.1`, `0.1.7`, `0.4.1`
 | A | 0.1.4 | Stop secrets and personal data reaching logs and error responses | backend + frontend | M | done |
 | A | 0.1.5 | Refuse to boot without real configuration | backend | S | done |
 | A | 0.1.8 | Quarantine unfinished modules behind server-side flags | backend | S | done |
-| A | 0.2.10 | Module boundaries, checked from the first module | backend + frontend | M | todo |
+| A | 0.2.10 | Module boundaries, checked from the first module | backend + frontend | M | done |
 | A | 0.9.1 | The route map | frontend | M | todo |
 | A | 0.9.2 | Arabic and English, RTL and LTR | frontend | M | todo |
 | A | 0.9.3 | Logical CSS and bidirectional isolation | frontend | S | todo |
