@@ -116,9 +116,9 @@ run early.
 stale.*
 
 <!-- plan:milestone:begin -->
-**Demo milestone** — 17 of 125 microsteps done; 578–1156 engineering hours left before the reserve.
+**Demo milestone** — 19 of 125 microsteps done; 566–1132 engineering hours left before the reserve.
 
-Next in build order (every dependency done): `0.4.1`, `0.3.1`, `0.3.7`, `0.3.8`, `0.4.2`, `0.5.1`, `0.8.1`.
+Next in build order (every dependency done): `0.2.7`, `0.3.1`, `0.3.7`, `0.3.8`, `0.4.2`, `0.4.4`, `0.4.7`, `0.4.8`. … and 4 more.
 
 | Stage | Step | Title | Repo | Size | Status |
 |---|---|---|---|---|---|
@@ -139,8 +139,8 @@ Next in build order (every dependency done): `0.4.1`, `0.3.1`, `0.3.7`, `0.3.8`,
 | A | 0.9.1 | The route map | frontend | M | done |
 | A | 0.9.2 | Arabic and English, RTL and LTR | frontend | M | done |
 | A | 0.9.3 | Logical CSS and bidirectional isolation | frontend | S | done |
-| B | 0.4.1 | Preflight: report every integrity violation before constraining anything | backend | M | todo |
-| B | 0.1.6 | Retire the local credential system | backend | L | todo |
+| B | 0.4.1 | Preflight: report every integrity violation before constraining anything | backend | M | done |
+| B | 0.1.6 | Retire the local credential system | backend | L | done |
 | B | 0.2.7 | Declared dependencies only; one naming scheme | backend + frontend | S | todo |
 | B | 0.2.9 | NestJS 12, TypeScript 6 and an ES-module test setup, together | backend | L | todo |
 | C | 0.3.1 | One error format: RFC 9457 problem details | backend | M | todo |
