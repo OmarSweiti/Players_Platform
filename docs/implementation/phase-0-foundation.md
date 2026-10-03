@@ -414,8 +414,9 @@ exactly one validation mechanism is registered.
 
 ### 0.3.3 — Versioned routes under /api/v1
 **Repo:** backend + frontend · **Size:** S · **Depends on:** `0.3.1` · **Requirements:** —
-**Files:** backend `src/main.ts`, `src/config/app.config.ts`, `test/platform/versioning.e2e-spec.ts` (new); frontend API base URL
-URI versioning makes every route `/api/v1/…` (today `/api/…`, `main.ts:40–41`); health stays unversioned.
+**Files:** backend `src/app.setup.ts`, `src/health/health.controller.ts`, `test/harness/routes.ts` (new),
+`test/platform/versioning.e2e-spec.ts` (new); frontend `src/shared/lib/constants.ts` (the API base URL)
+URI versioning makes every route `/api/v1/…` (today `/api/…`, `main.ts:40–41`); health stays unversioned, at `/api/health`.
 **Tests:** `routes_are_served_under_v1`
 **Verify:** `just test-e2e -- test/platform/versioning.e2e-spec.ts`
 **Done when:** no route answers outside `/api/v1` except the health endpoints.
@@ -423,11 +424,14 @@ URI versioning makes every route `/api/v1/…` (today `/api/…`, `main.ts:40–
 ### 0.3.4 — One success envelope, registered once
 **Repo:** backend · **Size:** S · **Depends on:** `0.3.1` · **Requirements:** SYS-ARC-003
 **Files:** `src/common/interceptors/envelope.interceptor.ts` (replaces `transform.interceptor.ts`),
-`src/main.ts`, `src/app.module.ts`, the medical and scouting controllers, `test/platform/responses.e2e-spec.ts` (new)
+`src/app.setup.ts`, `src/app.module.ts`, the medical and scouting controllers, `test/harness/fixtures.ts`,
+`test/platform/responses.e2e-spec.ts` (new)
 Success is `{ data }` — collections `{ data, page }` (`0.3.5`) — applied by one interceptor registered in
 one place. Delete the second registration, the 38 hand-built `{ statusCode, data }` bodies and every
 "not found" returned as a 200. Responses are built from response DTOs, never Prisma rows, so a schema
-refactor is not an API change. `204`, downloads and errors are never wrapped.
+refactor is not an API change — every route built from here on; medical and scouting, off everywhere (`0.1.8`),
+keep their repositories' rows until their rebuilds (`1.11.x`, `2.1.x`) build DTOs with the field classification.
+`204`, downloads and errors are never wrapped; a command with nothing to return answers `{ "data": null }`.
 **Tests:** `a_single_resource_is_wrapped_once` · `a_not_found_is_never_a_200` · `timestamps_are_iso_utc`
 **Verify:** `just test-e2e -- test/platform/responses.e2e-spec.ts && ! grep -rn "statusCode: HttpStatus" src/modules`
 **Done when:** every existing route answers `{ data }` exactly once and no success body carries an error.

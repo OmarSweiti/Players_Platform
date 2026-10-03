@@ -66,7 +66,7 @@ The four source documents and their checksums: [`../requirements/README.md`](../
 | UX-012 | PRD | 0.9.6, 1.1.7, 1.10.8, 2.10.4 | 0/4 |
 | SYS-ARC-001 | SysRD | 0.2.10, 1.2.1 | 1/2 |
 | SYS-ARC-002 | SysRD | 0.2.10, 1.2.1 | 1/2 |
-| SYS-ARC-003 | SysRD | 0.3.4 | 0/1 |
+| SYS-ARC-003 | SysRD | 0.3.4 | 1/1 |
 | SYS-ARC-004 | SysRD | 0.2.10, 4.3.3 | 1/2 |
 | SYS-ARC-005 | SysRD | 0.7.6, 1.10.2, 2.6.1 | 0/3 |
 | SYS-TEN-001 | SysRD | 0.4.3, 4.1.3 | 0/2 |
