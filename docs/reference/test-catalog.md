@@ -235,11 +235,11 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `an_unscanned_file_cannot_be_downloaded` | 0.8.5 | backend | todo |
 | `every_internal_link_resolves` | 0.9.1 | frontend | done |
 | `an_unknown_route_renders_not_found` | 0.9.1 | frontend | done |
-| `the_catalogs_have_identical_keys` | 0.9.2 | frontend | todo |
-| `the_arabic_layout_renders_rtl_on_the_server` | 0.9.2 | frontend | todo |
-| `no_user_facing_literal_remains` | 0.9.2 | frontend | todo |
-| `the_lint_refuses_a_physical_margin` | 0.9.3 | frontend | todo |
-| `a_mixed_identifier_does_not_reorder_in_arabic` | 0.9.3 | frontend | todo |
+| `the_catalogs_have_identical_keys` | 0.9.2 | frontend | done |
+| `the_arabic_layout_renders_rtl_on_the_server` | 0.9.2 | frontend | done |
+| `no_user_facing_literal_remains` | 0.9.2 | frontend | done |
+| `the_lint_refuses_a_physical_margin` | 0.9.3 | frontend | done |
+| `a_mixed_identifier_does_not_reorder_in_arabic` | 0.9.3 | frontend | done |
 | `a_contract_change_breaks_the_typecheck` | 0.9.4 | frontend | todo |
 | `problem_details_expose_code_and_field_errors` | 0.9.4 | frontend | todo |
 | `no_request_carries_a_tenant_header` | 0.9.4 | frontend | todo |

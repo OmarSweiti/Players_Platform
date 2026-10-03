@@ -1188,11 +1188,16 @@ every unmatched address: a catch-all under `[locale]` would match every link and
 
 ### 0.9.2 — Arabic and English, RTL and LTR
 **Repo:** frontend · **Size:** M · **Depends on:** `0.9.1` · **Requirements:** SR-CORE-007, SR-NFR-I18N-001, UX-008, TEST-010
-**Files:** `src/i18n/**`, `messages/{ar,en}.json` (new), `app/[locale]/layout.tsx`, `app/layout.tsx`, `proxy.ts`
+**Files:** `src/i18n/**` (routing, request config, typed message keys), `messages/{ar,en}.json` (new),
+`app/[locale]/layout.tsx`, `app/layout.tsx`, `app/globals.css` (the font stack), `next.config.ts` (the
+next-intl plugin), `proxy.ts`, every component with a user-facing string, `tests/e2e/i18n.spec.ts` (new)
 `next-intl` with locale routing; `<html lang dir>` rendered on the server (no flash of the wrong
 direction); an Arabic-capable, licensed typeface beside the Latin one; every string in the catalogs, with
 ICU plurals that cover Arabic's categories; numbers, dates and money through `Intl` with the locale.
-Switching language never changes a business value.
+Switching language never changes a business value. The typefaces are IBM Plex Sans Arabic and Geist,
+both under the SIL Open Font License 1.1 and self-hosted by `next/font`; the font stack names each face
+before its metric-matched fallback, which is local Arial and would otherwise draw Arabic text. The
+home page's placeholder metrics and inert quick actions were removed rather than translated.
 **Tests:** `the_catalogs_have_identical_keys` · `the_arabic_layout_renders_rtl_on_the_server` · `no_user_facing_literal_remains`
 **Verify:** `npx vitest run src/i18n && npx playwright test i18n`
 **Done when:** the sign-in page renders in Arabic with `dir="rtl"` and in English with `dir="ltr"` from
@@ -1203,7 +1208,9 @@ project (today it finds the English "Sign In" in both).
 **Repo:** frontend · **Size:** S · **Depends on:** `0.9.2` · **Requirements:** —
 **Files:** `eslint.config.mjs` (a rule), components with physical utilities, `src/shared/ui/bidi.tsx` (new)
 A lint rule refuses physical-direction utilities (`ml-`, `pr-`, `left-`, `text-right`, `rounded-l-`, …);
-the 17 existing ones, in seven files, move to logical equivalents. Identifiers, emails, URLs and mixed
+the existing ones move to logical equivalents — 17 in seven files on 28 September, four in three files
+once `0.1.7` had deleted the old pages — and the mobile sidebar slides in from the start side in both
+directions. Identifiers, emails, URLs and mixed
 Latin numbers render inside a bidi-isolating component so they never reorder in Arabic text;
 directional icons mirror, media controls do not.
 **Tests:** `the_lint_refuses_a_physical_margin` · `a_mixed_identifier_does_not_reorder_in_arabic`

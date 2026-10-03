@@ -13,7 +13,7 @@ Use next-intl locale routing under `frontend/app/[locale]/`, allowing only `ar` 
 | Route family | Purpose | Initial owner |
 |---|---|---|
 | `/{locale}` | Authorized home and actionable deadlines | `0.9.6`, `1.8.2` |
-| `/{locale}/login` | Explain agency context and redirect to `/api/v1/auth/login` | `0.1.7`, `0.9.5` |
+| `/{locale}/sign-in` | Explain agency context and redirect to `/api/v1/auth/login` | `0.1.7`, `0.9.5` |
 | `/{locale}/settings/profile`, `/settings/sessions` | Preferences, IdP account/recovery links, real session list/revocation | `1.1.3` |
 | `/{locale}/settings/users`, `/settings/tenant` | Invitations, membership changes, locale/zone/currency and feature settings | `1.1.1`, `1.1.2`, `1.1.4`, `1.1.6` |
 | `/{locale}/players`, `/players/{id}` | Directory and permission-shaped Player 360 | `1.2.4`, `1.2.7` |
@@ -87,7 +87,7 @@ Dates: civil `YYYY-MM-DD` values remain the same day in every locale/timezone. I
 
 Amounts: parse/format exact decimal strings using currency definitions, never JS Number arithmetic. Show the currency code where a symbol is ambiguous. Display payable precision according to the currency exponent; never silently round an entered charge. Locale-specific grouping and decimal separators require explicit parsing rules and confirmation. Use stable ASCII digits in identifiers and transport values; ordinary displayed numbers follow the approved locale/numbering preference.
 
-Use an Arabic-capable font with documented licensing and tested shaping. Font loading and fallback must not clip Arabic marks or materially shift critical controls. Browser, email and PDF rendering each need their own shaping/layout evidence; browser success does not qualify a certificate PDF. Theme, contrast and dark-mode behavior use one consistent token system, preserving existing suitable components rather than introducing an unrelated redesign.
+Use an Arabic-capable font with documented licensing and tested shaping. The web app uses IBM Plex Sans Arabic beside Geist, both under the SIL Open Font License 1.1 and self-hosted (`0.9.2`); a browser test asks Chrome which fonts draw Arabic and Latin text. Font loading and fallback must not clip Arabic marks or materially shift critical controls. Browser, email and PDF rendering each need their own shaping/layout evidence; browser success does not qualify a certificate PDF. Theme, contrast and dark-mode behavior use one consistent token system, preserving existing suitable components rather than introducing an unrelated redesign.
 
 ## Accessibility acceptance
 

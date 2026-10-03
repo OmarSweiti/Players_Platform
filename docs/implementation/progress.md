@@ -94,8 +94,8 @@ edit only Status and Evidence.
 | 0.8.4 | Scan, then promote to an immutable version | backend + umbrella | todo |  |
 | 0.8.5 | Download: version-pinned, authorized, short-lived | backend | todo |  |
 | 0.9.1 | The route map | frontend | done | https://github.com/OmarSweiti/Players_Platform_Frontend/pull/41 |
-| 0.9.2 | Arabic and English, RTL and LTR | frontend | todo |  |
-| 0.9.3 | Logical CSS and bidirectional isolation | frontend | todo |  |
+| 0.9.2 | Arabic and English, RTL and LTR | frontend | done | https://github.com/OmarSweiti/Players_Platform_Frontend/pull/42 |
+| 0.9.3 | Logical CSS and bidirectional isolation | frontend | done | https://github.com/OmarSweiti/Players_Platform_Frontend/pull/43 |
 | 0.9.4 | A typed client generated from the contract, on the same origin | frontend | todo |  |
 | 0.9.5 | Sessions in the browser | frontend | todo |  |
 | 0.9.6 | The application shell | frontend | todo |  |

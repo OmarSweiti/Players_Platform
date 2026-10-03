@@ -116,9 +116,9 @@ run early.
 stale.*
 
 <!-- plan:milestone:begin -->
-**Demo milestone** — 15 of 125 microsteps done; 584–1168 engineering hours left before the reserve.
+**Demo milestone** — 17 of 125 microsteps done; 578–1156 engineering hours left before the reserve.
 
-Next in build order (every dependency done): `0.9.2`, `0.4.1`, `0.3.1`, `0.3.7`, `0.3.8`, `0.4.2`, `0.5.1`, `0.8.1`.
+Next in build order (every dependency done): `0.4.1`, `0.3.1`, `0.3.7`, `0.3.8`, `0.4.2`, `0.5.1`, `0.8.1`.
 
 | Stage | Step | Title | Repo | Size | Status |
 |---|---|---|---|---|---|
@@ -137,8 +137,8 @@ Next in build order (every dependency done): `0.9.2`, `0.4.1`, `0.3.1`, `0.3.7`,
 | A | 0.2.10 | Module boundaries, checked from the first module | backend + frontend | M | done |
 | A | 0.1.7 | Retire the local sign-in pages | frontend | S | done |
 | A | 0.9.1 | The route map | frontend | M | done |
-| A | 0.9.2 | Arabic and English, RTL and LTR | frontend | M | todo |
-| A | 0.9.3 | Logical CSS and bidirectional isolation | frontend | S | todo |
+| A | 0.9.2 | Arabic and English, RTL and LTR | frontend | M | done |
+| A | 0.9.3 | Logical CSS and bidirectional isolation | frontend | S | done |
 | B | 0.4.1 | Preflight: report every integrity violation before constraining anything | backend | M | todo |
 | B | 0.1.6 | Retire the local credential system | backend | L | todo |
 | B | 0.2.7 | Declared dependencies only; one naming scheme | backend + frontend | S | todo |
