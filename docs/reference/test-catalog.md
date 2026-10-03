@@ -49,17 +49,17 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `no_log_line_contains_a_token_or_password` | 0.1.4 | backend + frontend | done |
 | `urls_are_logged_without_query_strings` | 0.1.4 | backend + frontend | done |
 | `the_web_client_never_logs_a_request_body` | 0.1.4 | backend + frontend | done |
-| `boot_fails_without_a_required_secret` | 0.1.5 | backend | todo |
-| `boot_errors_name_the_variable_but_not_its_value` | 0.1.5 | backend | todo |
-| `swagger_is_served_only_in_development` | 0.1.5 | backend | todo |
+| `boot_fails_without_a_required_secret` | 0.1.5 | backend | done |
+| `boot_errors_name_the_variable_but_not_its_value` | 0.1.5 | backend | done |
+| `swagger_is_served_only_in_development` | 0.1.5 | backend | done |
 | `no_local_credential_route_remains` | 0.1.6 | backend | todo |
 | `protected_routes_refuse_without_a_session` | 0.1.6 | backend | todo |
 | `credential_columns_are_gone` | 0.1.6 | backend | todo |
 | `no_route_renders_a_password_field` | 0.1.7 | frontend | todo |
 | `no_page_generates_security_codes` | 0.1.7 | frontend | todo |
-| `medical_routes_are_not_found_when_disabled` | 0.1.8 | backend | todo |
-| `scouting_routes_are_not_found_when_disabled` | 0.1.8 | backend | todo |
-| `a_disabled_module_never_reaches_its_repository` | 0.1.8 | backend | todo |
+| `medical_routes_are_not_found_when_disabled` | 0.1.8 | backend | done |
+| `scouting_routes_are_not_found_when_disabled` | 0.1.8 | backend | done |
+| `a_disabled_module_never_reaches_its_repository` | 0.1.8 | backend | done |
 | `harness_boots_against_an_isolated_schema` | 0.2.3 | backend | done |
 | `two_harness_runs_never_share_a_schema` | 0.2.3 | backend | done |
 | `the_unit_runner_renders_a_component` | 0.2.4 | frontend | done |

@@ -177,7 +177,8 @@ single "Sign in" entry, wired to the provider in `0.9.5`; the hook that waits fo
 
 ### 0.1.8 — Quarantine unfinished modules behind server-side flags
 **Repo:** backend · **Size:** S · **Depends on:** `0.2.3` · **Requirements:** SR-MED-007
-**Files:** `src/common/feature-flags/feature-gate.guard.ts` (new), `src/config/env.schema.ts`,
+**Files:** `src/common/feature-flags/feature-gate.guard.ts` (new), `src/config/env.schema.ts`, `.env.example`,
+`src/app.module.ts` (the gate is the first global guard, so it answers before authentication),
 `src/modules/medical/medical.module.ts`, `src/modules/scouting/scouting.module.ts`, `test/platform/feature-flags.e2e-spec.ts` (new)
 Medical and scouting are partial and carry verified defects: medical's are fixed in `0.6.8` and the module
 is rebuilt in Phase 2; scouting is rebuilt in the demo milestone (`1.11.1`–`1.11.8`) and released by
