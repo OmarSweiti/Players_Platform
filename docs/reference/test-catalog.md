@@ -69,13 +69,13 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `the_test_runner_loads_es_module_packages` | 0.2.9 | backend | done |
 | `module_boundary_gate_rejects_repository_and_framework_leaks` | 0.2.10 | backend + frontend | done |
 | `browser_boundary_gate_rejects_server_only_imports` | 0.2.10 | backend + frontend | done |
-| `validation_errors_list_their_fields` | 0.3.1 | backend | todo |
-| `unknown_errors_leak_nothing` | 0.3.1 | backend | todo |
-| `every_error_carries_the_request_id` | 0.3.1 | backend | todo |
-| `a_missing_record_is_a_404_not_a_500` | 0.3.1 | backend | todo |
-| `an_unknown_property_is_refused` | 0.3.2 | backend | todo |
-| `a_malformed_uuid_is_a_validation_error` | 0.3.2 | backend | todo |
-| `an_unknown_query_parameter_is_refused` | 0.3.2 | backend | todo |
+| `validation_errors_list_their_fields` | 0.3.1 | backend | done |
+| `unknown_errors_leak_nothing` | 0.3.1 | backend | done |
+| `every_error_carries_the_request_id` | 0.3.1 | backend | done |
+| `a_missing_record_is_a_404_not_a_500` | 0.3.1 | backend | done |
+| `an_unknown_property_is_refused` | 0.3.2 | backend | done |
+| `a_malformed_uuid_is_a_validation_error` | 0.3.2 | backend | done |
+| `an_unknown_query_parameter_is_refused` | 0.3.2 | backend | done |
 | `routes_are_served_under_v1` | 0.3.3 | backend + frontend | todo |
 | `a_single_resource_is_wrapped_once` | 0.3.4 | backend | todo |
 | `a_not_found_is_never_a_200` | 0.3.4 | backend | todo |

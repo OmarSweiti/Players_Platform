@@ -84,9 +84,9 @@ The four source documents and their checksums: [`../requirements/README.md`](../
 | SYS-ASY-005 | SysRD | 0.7.5, 3.4.2, 4.4.1 | 0/3 |
 | SR-CORE-001 | SRD | 0.5.5 | 0/1 |
 | SR-CORE-002 | SRD | 0.3.9, 4.6.1 | 0/2 |
-| SR-CORE-003 | SRD | 0.3.1, 4.6.1 | 0/2 |
+| SR-CORE-003 | SRD | 0.3.1, 4.6.1 | 1/2 |
 | SR-CORE-004 | SRD | 0.3.5, 1.2.4, 4.6.1 | 0/3 |
-| SR-CORE-005 | SRD | 0.3.2 | 0/1 |
+| SR-CORE-005 | SRD | 0.3.2 | 1/1 |
 | SR-CORE-006 | SRD | 0.4.8, 1.1.2 | 0/2 |
 | SR-CORE-007 | SRD | 0.9.2, 1.1.3, 1.1.7 | 1/3 |
 | SR-CORE-008 | SRD | 0.10.1, 1.10.4, 2.6.1 | 0/3 |
@@ -211,7 +211,7 @@ The four source documents and their checksums: [`../requirements/README.md`](../
 | SR-AUD-007 | SRD | 1.3.4, 1.10.5, 3.7.4, 4.1.6, 4.3.2 | 0/5 |
 | SR-API-001 | SRD | 0.6.2, 4.4.2 | 0/2 |
 | SR-API-002 | SRD | 0.6.3, 4.4.2 | 0/2 |
-| SR-API-003 | SRD | 0.3.2 | 0/1 |
+| SR-API-003 | SRD | 0.3.2 | 1/1 |
 | SR-API-004 | SRD | 0.3.5, 1.2.4 | 0/2 |
 | SR-API-005 | SRD | 0.3.6, 1.4.3, 1.5.5 | 0/3 |
 | SR-API-006 | SRD | 1.9.1, 2.4.3, 2.9.1, 3.4.6, 3.6.2 | 0/5 |

@@ -380,13 +380,16 @@ option sets, and 46 plain `Error` throws become 500s. One of each, registered on
 ### 0.3.1 — One error format: RFC 9457 problem details
 **Repo:** backend · **Size:** M · **Depends on:** `0.2.3` · **Requirements:** SR-CORE-003
 **Files:** `src/common/filters/problem-details.filter.ts` (replaces `http-exception.filter.ts`),
-`src/common/errors/{error-codes,domain-error}.ts` (new), every use case that throws a plain `Error`,
-`test/platform/errors.e2e-spec.ts` (new)
-Every error is `application/problem+json` — `type`, `title`, `status`, `code`, `message`, `requestId`,
+`src/common/errors/{error-codes,domain-error,locale,schema-issues}.ts` (new), `src/common/logging/request-id.ts` (new),
+`src/infrastructure/prisma/prisma-errors.ts` (new), `src/app.setup.ts`, `src/app.module.ts`, every use case that
+throws a plain `Error`, `test/platform/errors.e2e-spec.ts` (new)
+Every error is `application/problem+json` — `type`, `title`, `status`, `detail`, `instance`, `code`, `message`, `requestId`,
 `fieldErrors` (an empty array when no field is implicated) — registered once in the bootstrap shared by production and tests. The 46 plain
-`throw new Error(…)` in the modules become typed domain errors; Prisma `P2002` maps to `409 CONFLICT`,
-`P2025` to `404 NOT_FOUND`, `P2003` to `409 CONFLICT`; anything unknown to `500 INTERNAL_ERROR`
-with nothing internal in it. Codes are stable forever and clients branch on `code`, never on `message`.
+`throw new Error(…)` in the modules (45 by the time the step ran) become typed domain errors; Prisma `P2002` maps to `409 CONFLICT`,
+`P2025` to `404 NOT_FOUND`, `P2003` to `409 CONFLICT`; the body parsers' `413` and `415` keep their status; anything unknown to `500 INTERNAL_ERROR`
+with nothing internal in it. Only a typed domain error says more than its code: a framework exception's own message is discarded,
+since Nest's quotes the URL or the body. Messages are in Arabic and English, chosen by `Accept-Language`; every
+request gets an id (`X-Request-Id`), which 0.10.1 hands to the structured logs. Codes are stable forever and clients branch on `code`, never on `message`.
 **Tests:** `validation_errors_list_their_fields` · `unknown_errors_leak_nothing` · `every_error_carries_the_request_id` · `a_missing_record_is_a_404_not_a_500`
 **Verify:** `just test-e2e -- test/platform/errors.e2e-spec.ts && ! grep -rn "throw new Error(" src/modules`
 **Done when:** a thrown `Error('boom at /srv/secret')` returns `INTERNAL_ERROR` without the path, with a
@@ -395,14 +398,15 @@ request id equal to the response header, and no module throws a plain `Error`.
 ### 0.3.2 — Strict validation, registered once
 **Repo:** backend · **Size:** S · **Depends on:** `0.3.1`, `0.2.9` · **Requirements:** SR-CORE-005, SR-API-003
 **Files:** `src/app.setup.ts`, `src/app.module.ts`, `src/common/validation/**` (new), `src/common/pipes/validation.pipe.ts`
-(delete), the query schemas, `test/platform/validation.e2e-spec.ts` (new)
+(delete), the medical and scouting DTOs and controllers, `package.json`, `test/platform/validation.e2e-spec.ts` (new)
 One validation mechanism — NestJS 12's Standard Schema pipe with Zod 4 schemas
 ([ADR-0024](../adr/0024-zod-schemas-and-vitest-on-nestjs-12.md)): bodies are strict objects, so an unknown
 property is refused; strings trimmed and bounded; arrays bounded; queries coerced explicitly — instead of
 today's two class-validator pipes (`app.setup.ts:54`, beside the Standard Schema pipe `0.2.9` registered,
 and `APP_PIPE` in `app.module.ts:56`, with different options). Every query is a typed DTO (the medical controller takes
-`@Query() query: any`, `medical.controller.ts:65, 92, 208`); every path id passes `ParseUUIDPipe`; an
-empty `PATCH` is a `400`.
+`@Query() query: any`, `medical.controller.ts:65, 92, 208`); every path id is a UUID — through a strict
+path schema, the same mechanism, rather than `ParseUUIDPipe`; an empty `PATCH` is a `400`. `class-validator`,
+`class-transformer` and `@nestjs/mapped-types` leave the dependencies.
 **Tests:** `an_unknown_property_is_refused` · `a_malformed_uuid_is_a_validation_error` · `an_unknown_query_parameter_is_refused`
 **Verify:** `just test-e2e -- test/platform/validation.e2e-spec.ts`
 **Done when:** a body carrying an extra `tenantId` or `role` is refused with `VALIDATION_FAILED`, and
@@ -460,7 +464,9 @@ with an atomic increment. Immutable records (versions, decisions) accept no `PAT
 **Files:** `src/health/health.controller.ts`, `test/platform/health.e2e-spec.ts` (new)
 `GET /health/live` answers while the process runs; `GET /health/ready` checks PostgreSQL and Valkey (and
 the identity provider's configuration once `0.5.4` lands) — today it returns "ready" unconditionally
-(`health.controller.ts:20–27`). Neither reveals versions or configuration.
+(`health.controller.ts:20–27`). Neither reveals versions or configuration. These are the first routes outside
+the `/api` prefix, where an unknown path still gets Express's own HTML 404 today (0.3.1): this step makes
+every error a problem, wherever the path.
 **Tests:** `readiness_fails_when_the_database_is_down` · `readiness_fails_when_valkey_is_down`
 **Verify:** `just test-e2e -- test/platform/health.e2e-spec.ts`
 **Done when:** readiness reports `503` with the database or Valkey stopped, and `200` when both return.
@@ -1284,11 +1290,13 @@ operating system. Landmarks, headings, visible focus and keyboard operation from
 
 ### 0.10.1 — Structured logs with request correlation
 **Repo:** backend · **Size:** M · **Depends on:** `0.3.1` · **Requirements:** SR-CORE-008, SYS-TEN-007
-**Files:** `src/infrastructure/logging/**` (new), `src/main.ts`, `src/common/interceptors/logging.interceptor.ts` (delete), `test/platform/logging.integration-spec.ts` (new)
+**Files:** `src/infrastructure/logging/**` (new), `src/main.ts`, `src/common/interceptors/logging.interceptor.ts` (delete),
+`src/common/logging/request-id.ts`, `test/platform/logging.integration-spec.ts` (new)
 `nestjs-pino` JSON logs carrying `requestId`, opaque tenant and member ids, the **route template**,
 status and duration. A well-formed incoming `X-Request-Id` is kept, otherwise a UUIDv7 is generated;
 it is returned on the response and travels into jobs, so one id follows a request through the worker.
-The hand-rolled interceptor and its random ids go.
+The hand-rolled interceptor goes, and the request-id middleware of `0.3.1` (a UUIDv4 for every request,
+which problems and the access log already carry) hands its id over to the logger's.
 **Tests:** `a_request_id_reaches_the_worker_log` · `logs_carry_route_templates_not_urls`
 **Verify:** `just test-int -- logging`
 **Done when:** both tests pass.
