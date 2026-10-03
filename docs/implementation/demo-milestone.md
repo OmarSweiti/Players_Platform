@@ -95,7 +95,7 @@ run early.
 <!-- milestone:steps:begin -->
 | Stage | Steps, in build order |
 |---|---|
-| A — Harnesses, containment and the bilingual groundwork | `0.1.1` · `0.1.2` · `0.1.3` · `0.2.1` · `0.2.2` · `0.2.4` · `0.2.5` · `0.2.3` · `0.1.4` · `0.1.5` · `0.1.8` · `0.2.8` · `0.2.10` · `0.9.1` · `0.9.2` · `0.9.3` |
+| A — Harnesses, containment and the bilingual groundwork | `0.1.1` · `0.1.2` · `0.1.3` · `0.2.1` · `0.2.2` · `0.2.4` · `0.2.5` · `0.2.3` · `0.2.8` · `0.1.4` · `0.1.5` · `0.1.8` · `0.2.10` · `0.9.1` · `0.9.2` · `0.9.3` |
 | B — Clear the old code, then move to NestJS 12 | `0.1.7` · `0.4.1` · `0.1.6` · `0.2.7` · `0.2.9` |
 | C — The API platform on NestJS 12, and the typed web client | `0.3.1` · `0.3.2` · `0.3.3` · `0.3.4` · `0.3.5` · `0.3.6` · `0.3.7` · `0.3.8` · `0.3.9` · `0.9.4` · `0.10.1` |
 | D — The data foundation: tenancy, row-level security, types | `0.4.2` · `0.4.3` · `0.4.4` · `0.4.5` · `0.4.6` · `0.4.7` · `0.4.8` · `0.4.9` · `0.4.10` · `0.4.11` · `0.4.12` |
@@ -116,9 +116,9 @@ run early.
 stale.*
 
 <!-- plan:milestone:begin -->
-**Demo milestone** — 7 of 125 microsteps done; 608–1216 engineering hours left before the reserve.
+**Demo milestone** — 8 of 125 microsteps done; 604–1208 engineering hours left before the reserve.
 
-Next in build order (every dependency done): `0.2.3`, `0.9.1`, `0.1.7`, `0.4.1`, `0.4.2`, `0.5.1`, `0.8.1`.
+Next in build order (every dependency done): `0.2.8`, `0.1.4`, `0.1.5`, `0.1.8`, `0.2.10`, `0.9.1`, `0.1.7`, `0.4.1`. … and 6 more.
 
 | Stage | Step | Title | Repo | Size | Status |
 |---|---|---|---|---|---|
@@ -129,11 +129,11 @@ Next in build order (every dependency done): `0.2.3`, `0.9.1`, `0.1.7`, `0.4.1`,
 | A | 0.2.2 | PostgreSQL 18 in CI and in the replay recipe | backend | S | done |
 | A | 0.2.4 | The web test harness: Vitest, Testing Library, MSW, Playwright in Arabic and English, axe | frontend | M | done |
 | A | 0.2.5 | Lint and format gates in both applications | backend + frontend | M | done |
-| A | 0.2.3 | The API test harness on a real database | backend | M | todo |
+| A | 0.2.3 | The API test harness on a real database | backend | M | done |
+| A | 0.2.8 | Integration and end-to-end tests in CI | backend | S | todo |
 | A | 0.1.4 | Stop secrets and personal data reaching logs and error responses | backend + frontend | M | todo |
 | A | 0.1.5 | Refuse to boot without real configuration | backend | S | todo |
 | A | 0.1.8 | Quarantine unfinished modules behind server-side flags | backend | S | todo |
-| A | 0.2.8 | Integration and end-to-end tests in CI | backend | S | todo |
 | A | 0.2.10 | Module boundaries, checked from the first module | backend + frontend | M | todo |
 | A | 0.9.1 | The route map | frontend | M | todo |
 | A | 0.9.2 | Arabic and English, RTL and LTR | frontend | M | todo |

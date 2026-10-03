@@ -31,7 +31,7 @@ edit only Status and Evidence.
 | 0.1.8 | Quarantine unfinished modules behind server-side flags | backend | todo |  |
 | 0.2.1 | The local stack: PostgreSQL 18, S3-compatible storage, Valkey, ClamAV, Mailpit, Keycloak | umbrella + frontend | done | https://github.com/OmarSweiti/Players_Platform/pull/11 · https://github.com/OmarSweiti/Players_Platform_Frontend/pull/31 |
 | 0.2.2 | PostgreSQL 18 in CI and in the replay recipe | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/31 |
-| 0.2.3 | The API test harness on a real database | backend | todo |  |
+| 0.2.3 | The API test harness on a real database | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/39 |
 | 0.2.4 | The web test harness: Vitest, Testing Library, MSW, Playwright in Arabic and English, axe | frontend | done | https://github.com/OmarSweiti/Players_Platform_Frontend/pull/23 |
 | 0.2.5 | Lint and format gates in both applications | backend + frontend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/32 · https://github.com/OmarSweiti/Players_Platform_Backend/pull/33 · https://github.com/OmarSweiti/Players_Platform_Frontend/pull/22 · https://github.com/OmarSweiti/Players_Platform_Frontend/pull/27 · https://github.com/OmarSweiti/Players_Platform_Frontend/pull/29 |
 | 0.2.6 | A production build that starts, in a container | backend | todo |  |
