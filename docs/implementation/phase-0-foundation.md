@@ -295,7 +295,9 @@ Declare what the code imports (`@nestjs/mapped-types` in four DTOs; `dotenv` in 
 remove what nothing imports — backend `socket.io`, `@nestjs/websockets`, `@nestjs/platform-socket.io`,
 `redis`, `ioredis`, `multer`, `@types/multer`, `dayjs`, and the credential libraries `0.1.6` orphaned;
 frontend 12 of 27 dependencies (seven Radix packages, `@tsparticles/*`, `framer-motion`, `date-fns`,
-`zustand`). A dependency returns with the step that first imports it. Every `@nestjs/*` package sits on
+`zustand`) — 16 of 28 by the time the step ran, since `0.1.7` had retired the last users of
+`react-hook-form`, `@hookform/resolvers`, `zod` and `qrcode.react`. A dependency returns with the step that
+first imports it; `.depcheckrc.yml` in each application names the few used where depcheck cannot see. Every `@nestjs/*` package sits on
 **one** major version — today `@nestjs/event-emitter` is on 12 (its peers accept 11) while the rest of the
 family is on 11; `0.2.9` moves the family to 12 together. Use cases are `*.usecase.ts` (the
 11 `*.use-case.ts` files are renamed in one mechanical commit); the product is **Sadara** everywhere —
