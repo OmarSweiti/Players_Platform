@@ -26,12 +26,12 @@ edit only Status and Evidence.
 | 0.1.3 | The plan checks itself in CI | umbrella | done | https://github.com/OmarSweiti/Players_Platform/pull/6 |
 | 0.1.4 | Stop secrets and personal data reaching logs and error responses | backend + frontend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/43 · https://github.com/OmarSweiti/Players_Platform_Backend/pull/45 · https://github.com/OmarSweiti/Players_Platform_Frontend/pull/38 |
 | 0.1.5 | Refuse to boot without real configuration | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/44 |
-| 0.1.6 | Retire the local credential system | backend | todo |  |
+| 0.1.6 | Retire the local credential system | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/50 |
 | 0.1.7 | Retire the local sign-in pages | frontend | done | https://github.com/OmarSweiti/Players_Platform_Frontend/pull/40 |
 | 0.1.8 | Quarantine unfinished modules behind server-side flags | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/46 |
 | 0.2.1 | The local stack: PostgreSQL 18, S3-compatible storage, Valkey, ClamAV, Mailpit, Keycloak | umbrella + frontend | done | https://github.com/OmarSweiti/Players_Platform/pull/11 · https://github.com/OmarSweiti/Players_Platform_Frontend/pull/31 |
 | 0.2.2 | PostgreSQL 18 in CI and in the replay recipe | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/31 |
-| 0.2.3 | The API test harness on a real database | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/39 |
+| 0.2.3 | The API test harness on a real database | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/39 · https://github.com/OmarSweiti/Players_Platform_Backend/pull/49 |
 | 0.2.4 | The web test harness: Vitest, Testing Library, MSW, Playwright in Arabic and English, axe | frontend | done | https://github.com/OmarSweiti/Players_Platform_Frontend/pull/23 |
 | 0.2.5 | Lint and format gates in both applications | backend + frontend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/32 · https://github.com/OmarSweiti/Players_Platform_Backend/pull/33 · https://github.com/OmarSweiti/Players_Platform_Frontend/pull/22 · https://github.com/OmarSweiti/Players_Platform_Frontend/pull/27 · https://github.com/OmarSweiti/Players_Platform_Frontend/pull/29 |
 | 0.2.6 | A production build that starts, in a container | backend | todo |  |
@@ -48,7 +48,7 @@ edit only Status and Evidence.
 | 0.3.7 | Liveness and real readiness | backend | todo |  |
 | 0.3.8 | Rate limits by category, shared through Valkey | backend | todo |  |
 | 0.3.9 | The committed OpenAPI contract and the breaking-change check | backend | todo |  |
-| 0.4.1 | Preflight: report every integrity violation before constraining anything | backend | todo |  |
+| 0.4.1 | Preflight: report every integrity violation before constraining anything | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/48 |
 | 0.4.2 | Database roles: owner, migrator, runtime | backend + umbrella | todo |  |
 | 0.4.3 | Explicit tenant context and the tenant transaction | backend | todo |  |
 | 0.4.4 | Composite and same-parent foreign keys | backend | todo |  |

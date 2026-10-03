@@ -23,7 +23,7 @@ Then two terminals, each starting at the umbrella root:
 
 ```bash
 # terminal 1 — the API (on :3000, served at https://<tenant>.localhost/api/ by the proxy)
-cd backend && cp .env.example .env    # first time: set the two signing keys (openssl rand -base64 48)
+cd backend && cp .env.example .env
 just migrate && just seed && npm run start:dev
 # terminal 2 — the web app (on :3001, served at https://<tenant>.localhost/ by the proxy)
 cd frontend && npm run dev

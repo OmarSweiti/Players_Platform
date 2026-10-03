@@ -140,7 +140,9 @@ export type Env = z.infer<typeof Env>;
 **Files:** `src/modules/auth/**` (the controller's 16 routes, the use cases, DTOs, strategies and guards — delete),
 `src/common/guards/tenant.guard.ts`, `src/modules/auth/config/throttler-config.module.ts` (delete),
 `src/common/guards/session.guard.ts` (new placeholder), `src/app.module.ts`, `prisma/schema.prisma`,
-migration `…_retire_local_credentials`, `test/auth/retirement.e2e-spec.ts` (new)
+migration `…_retire_local_credentials`, `src/config/env.schema.ts` and `.env.example` (the JWT keys go),
+`src/database/seed.ts` (no password), `scripts/preflight.sql` (secret material read from the catalog),
+`test/harness/session.ts` (new: a stand-in for sessions in tests), `test/auth/retirement.e2e-spec.ts` (new)
 The local sign-in does not work end to end and carries more than a dozen verified defects —
 self-registration with any role, `'default-tenant'` in a UUID column, refresh that reads a body the
 browser never sends, placeholder sessions, 2FA that is never asked for and stored in plaintext,
@@ -492,7 +494,8 @@ sees nor protects them ([ADR-0017](../adr/0017-sql-managed-database-objects.md))
 
 ### 0.4.1 — Preflight: report every integrity violation before constraining anything
 **Repo:** backend · **Size:** M · **Depends on:** `0.2.2` · **Requirements:** SR-DB-003
-**Files:** `scripts/preflight.sql` (new), `scripts/preflight.ts` (new), `justfile` (`preflight`), `test/db/preflight.integration-spec.ts` (new)
+**Files:** `scripts/preflight.sql` (new), `scripts/preflight.ts` (new), `justfile` (`preflight`, and `scripts/` joins the
+lint and format gates), `.github/workflows/ci.yml`, `test/db/preflight.integration-spec.ts` (new)
 A read-only report, run before every constraint migration in this group and before any data migration
 later. Each rule emits counts and row identifiers, never personal content: the six cross-tenant edges,
 treatment sessions whose record belongs to another player, attendance joining two programs, orphaned

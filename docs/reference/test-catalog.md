@@ -52,9 +52,9 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `boot_fails_without_a_required_secret` | 0.1.5 | backend | done |
 | `boot_errors_name_the_variable_but_not_its_value` | 0.1.5 | backend | done |
 | `swagger_is_served_only_in_development` | 0.1.5 | backend | done |
-| `no_local_credential_route_remains` | 0.1.6 | backend | todo |
-| `protected_routes_refuse_without_a_session` | 0.1.6 | backend | todo |
-| `credential_columns_are_gone` | 0.1.6 | backend | todo |
+| `no_local_credential_route_remains` | 0.1.6 | backend | done |
+| `protected_routes_refuse_without_a_session` | 0.1.6 | backend | done |
+| `credential_columns_are_gone` | 0.1.6 | backend | done |
 | `no_route_renders_a_password_field` | 0.1.7 | frontend | done |
 | `no_page_generates_security_codes` | 0.1.7 | frontend | done |
 | `medical_routes_are_not_found_when_disabled` | 0.1.8 | backend | done |
@@ -94,9 +94,9 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `a_spoofed_forwarded_for_header_is_ignored` | 0.3.8 | backend | todo |
 | `the_committed_contract_matches_the_code` | 0.3.9 | backend | todo |
 | `problem_details_are_declared_for_every_operation` | 0.3.9 | backend | todo |
-| `preflight_reports_cross_tenant_edges` | 0.4.1 | backend | todo |
-| `preflight_reports_same_parent_violations` | 0.4.1 | backend | todo |
-| `preflight_output_contains_no_personal_data` | 0.4.1 | backend | todo |
+| `preflight_reports_cross_tenant_edges` | 0.4.1 | backend | done |
+| `preflight_reports_same_parent_violations` | 0.4.1 | backend | done |
+| `preflight_output_contains_no_personal_data` | 0.4.1 | backend | done |
 | `the_runtime_role_owns_no_table` | 0.4.2 | backend + umbrella | todo |
 | `the_runtime_role_cannot_run_ddl` | 0.4.2 | backend + umbrella | todo |
 | `the_runtime_role_cannot_bypass_rls` | 0.4.2 | backend + umbrella | todo |
