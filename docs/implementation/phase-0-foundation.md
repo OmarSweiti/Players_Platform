@@ -330,9 +330,12 @@ no longer holds those majors.
 
 ### 0.2.10 — Module boundaries, checked from the first module
 **Repo:** backend + frontend · **Size:** M · **Depends on:** `0.2.3`, `0.2.4` · **Requirements:** SYS-ARC-001, SYS-ARC-002, SYS-ARC-004, SR-NFR-MNT-001
-**Files:** backend `.dependency-cruiser.cjs` (new), `src/architecture/boundaries.spec.ts` (new), `justfile`,
-`.github/workflows/ci.yml`; frontend `.dependency-cruiser.cjs` (new), `src/architecture/boundaries.test.ts`
-(new), `justfile`, `.github/workflows/ci.yml`
+**Files:** backend `.dependency-cruiser.cjs` (new), `.dependency-cruiser-known-violations.json` (new),
+`scripts/check-boundaries.mjs` (new), `src/architecture/boundaries.spec.ts` (new), `test/architecture/fixtures/**`
+(new), `justfile`, `.github/workflows/ci.yml`; frontend `.dependency-cruiser.cjs` (new),
+`.dependency-cruiser-known-violations.json` (new), `scripts/{check-boundaries,client-boundary}.mjs` (new),
+`src/architecture/boundaries.test.ts` (new), `tests/architecture/fixtures/**` (new), `justfile`,
+`.github/workflows/ci.yml`
 Moved forward from `1.10.10` so that every module is born inside its boundaries instead of being fenced
 in after the features exist. dependency-cruiser, pinned, runs in `just check` and CI's `test` job in both
 applications, independently of the linter. Backend: a module's `domain/` imports no Nest, Prisma, HTTP or
@@ -341,8 +344,11 @@ repository, Prisma model or infrastructure; `presentation/` never imports `infra
 composition roots wire adapters. Frontend: a feature is imported only through its `index.ts`;
 `src/shared` imports no feature; `src/server` and anything marked `server-only` never reach a client
 bundle ([ADR-0025](../adr/0025-the-web-app-data-path.md)). Each rule has a deliberately invalid fixture
-import that must fail. A new process or service still needs an ADR with a measured reason
-([ADR-0001](../adr/0001-modular-monolith.md)).
+import that must fail. Violations in code a later step rewrites are recorded in a baseline that only
+shrinks, as the lint baseline is (`0.2.5`): 30 in the backend's auth, medical and scouting, 8 deep imports
+into the web app's auth feature. The browser boundary needs the `'use client'` directive, which
+dependency-cruiser's rules cannot see, so a script walks the same graph from every client module. A new
+process or service still needs an ADR with a measured reason ([ADR-0001](../adr/0001-modular-monolith.md)).
 **Tests:** `module_boundary_gate_rejects_repository_and_framework_leaks` · `browser_boundary_gate_rejects_server_only_imports`
 **Verify:** `(cd backend && npx --no-install vitest run src/architecture && just check) && (cd frontend && npx --no-install vitest run src/architecture && just check)`
 **Done when:** CI refuses each forbidden import in both applications, proven by its fixture.

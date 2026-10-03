@@ -38,7 +38,7 @@ edit only Status and Evidence.
 | 0.2.7 | Declared dependencies only; one naming scheme | backend + frontend | todo |  |
 | 0.2.8 | Integration and end-to-end tests in CI | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/41 |
 | 0.2.9 | NestJS 12, TypeScript 6 and an ES-module test setup, together | backend | todo |  |
-| 0.2.10 | Module boundaries, checked from the first module | backend + frontend | todo |  |
+| 0.2.10 | Module boundaries, checked from the first module | backend + frontend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/47 · https://github.com/OmarSweiti/Players_Platform_Frontend/pull/39 |
 | 0.3.1 | One error format: RFC 9457 problem details | backend | todo |  |
 | 0.3.2 | Strict validation, registered once | backend | todo |  |
 | 0.3.3 | Versioned routes under /api/v1 | backend + frontend | todo |  |
