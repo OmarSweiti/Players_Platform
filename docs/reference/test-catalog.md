@@ -76,10 +76,10 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `an_unknown_property_is_refused` | 0.3.2 | backend | done |
 | `a_malformed_uuid_is_a_validation_error` | 0.3.2 | backend | done |
 | `an_unknown_query_parameter_is_refused` | 0.3.2 | backend | done |
-| `routes_are_served_under_v1` | 0.3.3 | backend + frontend | todo |
-| `a_single_resource_is_wrapped_once` | 0.3.4 | backend | todo |
-| `a_not_found_is_never_a_200` | 0.3.4 | backend | todo |
-| `timestamps_are_iso_utc` | 0.3.4 | backend | todo |
+| `routes_are_served_under_v1` | 0.3.3 | backend + frontend | done |
+| `a_single_resource_is_wrapped_once` | 0.3.4 | backend | done |
+| `a_not_found_is_never_a_200` | 0.3.4 | backend | done |
+| `timestamps_are_iso_utc` | 0.3.4 | backend | done |
 | `a_limit_above_100_is_refused` | 0.3.5 | backend | todo |
 | `cursors_stay_stable_under_inserts` | 0.3.5 | backend | todo |
 | `a_cursor_from_another_query_is_refused` | 0.3.5 | backend | todo |
