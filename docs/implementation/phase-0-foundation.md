@@ -317,16 +317,26 @@ containers, in addition to the unit tests.
 
 ### 0.2.9 — NestJS 12, TypeScript 6 and an ES-module test setup, together
 **Repo:** backend · **Size:** L · **Depends on:** `0.2.3`, `0.2.5`, `0.2.7` · **Requirements:** SR-NFR-MNT-002
-**Files:** `package.json`, `package-lock.json`, `tsconfig.json`, `vitest.config.mts`, `src/main.ts`, `.github/dependabot.yml`
+**Files:** `package.json`, `package-lock.json`, `tsconfig.json`, `src/app.setup.ts`, `src/common/logging/route-template.ts`,
+`src/common/filters/http-exception.filter.ts`, `src/common/feature-flags/feature-gate.guard.ts`,
+`src/infrastructure/events/events.module.ts`, `test/harness/app.ts`, `test/platform/nestjs-12.e2e-spec.ts` (new),
+`.github/dependabot.yml`
 Dependabot offered the NestJS 12 family, `bullmq` 6, TypeScript 7 and ESLint 10 on 28 September; they were
 merged with failing checks and reverted (backend #26), because NestJS 12 ships as ES modules and the Jest
 setup cannot load them. This step makes the move deliberately and in one piece: every `@nestjs/*` package
-to 12 with `bullmq` 6; TypeScript 6 — TypeScript 7 waits until typescript-eslint supports it; the
+to 12 with `bullmq` 6, which makes `ioredis` an optional peer that host/port connections need, so it is
+declared again; TypeScript 6 — TypeScript 7 waits until typescript-eslint supports it; the
 TypeScript 6 settings decided explicitly (whether to turn `strict` on, given the `any`s of B-9; `types`,
-`rootDir`); Nest's Standard Schema validation registered for the Zod schemas that `0.3.2` writes
-([ADR-0024](../adr/0024-zod-schemas-and-vitest-on-nestjs-12.md)); the Vitest harness of `0.2.3` proven
-to load the ES-module packages; then the Dependabot holds on those majors are lifted. `@nestjs/swagger` 12
+`rootDir`) — decided: `strict` with no exception, since the `any`s of B-9 are explicit and `noImplicitAny`
+finds nothing (they stay in the lint baseline of `0.2.5` until their code is rewritten), `types: ["node"]`,
+`rootDir: "./"`; Nest's Standard Schema validation registered for the Zod schemas that `0.3.2` writes
+([ADR-0024](../adr/0024-zod-schemas-and-vitest-on-nestjs-12.md)), in `app.setup.ts`, the pipeline that
+`main.ts` and the test harness share; the Vitest harness of `0.2.3` proven
+to load the ES-module packages; then the Dependabot holds on those majors are lifted, and `bullmq` majors
+travel in the NestJS group. `@nestjs/swagger` 12
 depends on a fixed js-yaml, so the `overrides` entry that patched it under 11 (backend #42) is removed.
+NestJS 12 mounts its not-found handler under the global prefix, where `request.path` is relative, so error
+bodies and the feature gate of `0.1.8` read the full path from the original URL, without the query.
 **Tests:** `the_app_boots_on_nestjs_12` · `the_test_runner_loads_es_module_packages`
 **Verify:** `rm -rf node_modules && npm ci && just check && just test-e2e`
 **Done when:** every `@nestjs/*` package is on 12, TypeScript is on 6, CI is green, and `dependabot.yml`
@@ -384,13 +394,13 @@ request id equal to the response header, and no module throws a plain `Error`.
 
 ### 0.3.2 — Strict validation, registered once
 **Repo:** backend · **Size:** S · **Depends on:** `0.3.1`, `0.2.9` · **Requirements:** SR-CORE-005, SR-API-003
-**Files:** `src/main.ts`, `src/app.module.ts`, `src/common/validation/**` (new), `src/common/pipes/validation.pipe.ts`
+**Files:** `src/app.setup.ts`, `src/app.module.ts`, `src/common/validation/**` (new), `src/common/pipes/validation.pipe.ts`
 (delete), the query schemas, `test/platform/validation.e2e-spec.ts` (new)
 One validation mechanism — NestJS 12's Standard Schema pipe with Zod 4 schemas
 ([ADR-0024](../adr/0024-zod-schemas-and-vitest-on-nestjs-12.md)): bodies are strict objects, so an unknown
 property is refused; strings trimmed and bounded; arrays bounded; queries coerced explicitly — instead of
-today's two class-validator pipes (`main.ts:45` and `APP_PIPE` in `app.module.ts:56`, with different
-options). Every query is a typed DTO (the medical controller takes
+today's two class-validator pipes (`app.setup.ts:54`, beside the Standard Schema pipe `0.2.9` registered,
+and `APP_PIPE` in `app.module.ts:56`, with different options). Every query is a typed DTO (the medical controller takes
 `@Query() query: any`, `medical.controller.ts:65, 92, 208`); every path id passes `ParseUUIDPipe`; an
 empty `PATCH` is a `400`.
 **Tests:** `an_unknown_property_is_refused` · `a_malformed_uuid_is_a_validation_error` · `an_unknown_query_parameter_is_refused`
