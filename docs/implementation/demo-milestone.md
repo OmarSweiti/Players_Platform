@@ -95,8 +95,8 @@ run early.
 <!-- milestone:steps:begin -->
 | Stage | Steps, in build order |
 |---|---|
-| A — Harnesses, containment and the bilingual groundwork | `0.1.1` · `0.1.2` · `0.1.3` · `0.2.1` · `0.2.2` · `0.2.4` · `0.2.5` · `0.2.3` · `0.2.8` · `0.1.4` · `0.1.5` · `0.1.8` · `0.2.10` · `0.9.1` · `0.9.2` · `0.9.3` |
-| B — Clear the old code, then move to NestJS 12 | `0.1.7` · `0.4.1` · `0.1.6` · `0.2.7` · `0.2.9` |
+| A — Harnesses, containment and the bilingual groundwork | `0.1.1` · `0.1.2` · `0.1.3` · `0.2.1` · `0.2.2` · `0.2.4` · `0.2.5` · `0.2.3` · `0.2.8` · `0.1.4` · `0.1.5` · `0.1.8` · `0.2.10` · `0.1.7` · `0.9.1` · `0.9.2` · `0.9.3` |
+| B — Clear the old code, then move to NestJS 12 | `0.4.1` · `0.1.6` · `0.2.7` · `0.2.9` |
 | C — The API platform on NestJS 12, and the typed web client | `0.3.1` · `0.3.2` · `0.3.3` · `0.3.4` · `0.3.5` · `0.3.6` · `0.3.7` · `0.3.8` · `0.3.9` · `0.9.4` · `0.10.1` |
 | D — The data foundation: tenancy, row-level security, types | `0.4.2` · `0.4.3` · `0.4.4` · `0.4.5` · `0.4.6` · `0.4.7` · `0.4.8` · `0.4.9` · `0.4.10` · `0.4.11` · `0.4.12` |
 | E — Identity and access: sign-in, sessions, authorization | `0.5.1` · `0.5.2` · `0.5.3` · `0.5.4` · `0.5.5` · `0.5.6` · `0.5.7` · `0.5.8` · `0.5.9` · `0.5.10` · `0.5.11` · `0.6.1` · `0.6.2` · `0.6.3` · `0.6.4` · `0.6.6` · `0.6.7` · `0.6.9` |
@@ -116,9 +116,9 @@ run early.
 stale.*
 
 <!-- plan:milestone:begin -->
-**Demo milestone** — 13 of 125 microsteps done; 590–1180 engineering hours left before the reserve.
+**Demo milestone** — 15 of 125 microsteps done; 584–1168 engineering hours left before the reserve.
 
-Next in build order (every dependency done): `0.9.1`, `0.1.7`, `0.4.1`, `0.3.1`, `0.3.7`, `0.3.8`, `0.4.2`, `0.5.1`. … and 1 more.
+Next in build order (every dependency done): `0.9.2`, `0.4.1`, `0.3.1`, `0.3.7`, `0.3.8`, `0.4.2`, `0.5.1`, `0.8.1`.
 
 | Stage | Step | Title | Repo | Size | Status |
 |---|---|---|---|---|---|
@@ -135,10 +135,10 @@ Next in build order (every dependency done): `0.9.1`, `0.1.7`, `0.4.1`, `0.3.1`,
 | A | 0.1.5 | Refuse to boot without real configuration | backend | S | done |
 | A | 0.1.8 | Quarantine unfinished modules behind server-side flags | backend | S | done |
 | A | 0.2.10 | Module boundaries, checked from the first module | backend + frontend | M | done |
-| A | 0.9.1 | The route map | frontend | M | todo |
+| A | 0.1.7 | Retire the local sign-in pages | frontend | S | done |
+| A | 0.9.1 | The route map | frontend | M | done |
 | A | 0.9.2 | Arabic and English, RTL and LTR | frontend | M | todo |
 | A | 0.9.3 | Logical CSS and bidirectional isolation | frontend | S | todo |
-| B | 0.1.7 | Retire the local sign-in pages | frontend | S | todo |
 | B | 0.4.1 | Preflight: report every integrity violation before constraining anything | backend | M | todo |
 | B | 0.1.6 | Retire the local credential system | backend | L | todo |
 | B | 0.2.7 | Declared dependencies only; one naming scheme | backend + frontend | S | todo |
