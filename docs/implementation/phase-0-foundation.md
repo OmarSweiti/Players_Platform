@@ -5,12 +5,12 @@
 > row-level security, authorization, atomic audit, durable work, a private file pipeline, the API
 > contract and the bilingual shell are in place, tested and green in CI.
 
-**Effort:** 83 microsteps — 22 S, 50 M, 11 L — **332–664 engineering hours** before the 30% reserve
+**Effort:** 84 microsteps — 22 S, 51 M, 11 L — **336–672 engineering hours** before the 30% reserve
 (the size weights are ceilings); [`00-master-plan.md`](00-master-plan.md#effort-model) turns that into a
 forecast and recalibrates it from measured hours after the first five steps. No new product
 features: the demonstrations are about what can no longer go wrong.
 **Two gates.** The [demo milestone](demo-milestone.md) builds the product on the **foundation gate**
-(`0.11.0`), which with the gate itself takes 78 of these steps. The other five are production work:
+(`0.11.0`), which with the gate itself takes 79 of these steps. The other five are production work:
 guardian relationships (`0.6.5`), the legacy medical routes (`0.6.8`), the restore and failure drills
 (`0.10.3`, `0.10.4`), and the **production gate** (`0.11.1`) itself, without which nothing reaches
 staging or production ([ADR-0021](../adr/0021-a-product-built-to-sell.md)).
@@ -129,7 +129,7 @@ export const Env = z.object({ NODE_ENV: z.enum(['development', 'test', 'staging'
 export type Env = z.infer<typeof Env>;
 ```
 **Tests:** `boot_fails_without_a_required_secret` · `boot_errors_name_the_variable_but_not_its_value` · `swagger_is_served_only_in_development`
-**Verify:** `npx jest src/config && ! grep -rn "default-secret" src && test -z "$(grep -rln 'process\.env' src | grep -v '^src/config/')"`
+**Verify:** `npx vitest run src/config && ! grep -rn "default-secret" src && test -z "$(grep -rln 'process\.env' src | grep -v '^src/config/')"`
 **Done when:** the API refuses to start with any required variable missing, and nothing outside
 `src/config/` reads the environment.
 
@@ -222,11 +222,13 @@ qualification is already on record: PostgreSQL 18.6 with Prisma 7.10.0 applied a
 
 ### 0.2.3 — The API test harness on a real database
 **Repo:** backend · **Size:** M · **Depends on:** `0.2.2` · **Requirements:** TEST-001, TEST-002
-**Files:** `jest.config.ts` (new), `test/jest-e2e.json`, `test/harness/{app,db,fixtures}.ts` (new),
-`justfile` (`test-int`, `test-e2e`), `package.json`; `src/app.controller.ts`, `src/app.service.ts`,
-`src/app.controller.spec.ts`, `test/app.e2e-spec.ts` (delete)
-Jest projects with disjoint globs: `unit` (`src/**/*.spec.ts`), `integration`
-(`test/**/*.integration-spec.ts`) and `e2e` (`test/**/*.e2e-spec.ts`). The harness boots the
+**Files:** `vitest.config.mts` (new), `test/harness/{app,db,fixtures}.ts` (new),
+`justfile` (`test`, `test-int`, `test-e2e`), `package.json` (Jest and `ts-jest` out); `src/app.controller.ts`,
+`src/app.service.ts`, `src/app.controller.spec.ts`, `test/app.e2e-spec.ts`, `test/jest-e2e.json` (delete)
+Vitest projects with disjoint globs ([ADR-0024](../adr/0024-zod-schemas-and-vitest-on-nestjs-12.md)):
+`unit` (`src/**/*.spec.ts`), `integration` (`test/**/*.integration-spec.ts`) and `e2e`
+(`test/**/*.e2e-spec.ts`), compiled by SWC so Nest's decorator metadata survives. Vitest loads ES-module
+packages natively, which NestJS 12 needs (`0.2.9`). The harness boots the
 app per file against `DATABASE_URL_TEST`, applies migrations into a fresh schema per run
 (`sadara_test_<random>`), and creates tenants and members **directly** — never through the seed. Once
 `0.4.2` lands, tests connect as the runtime role, never the owner. The starter `AppController` (not even
@@ -307,18 +309,39 @@ containers, in addition to the unit tests.
 
 ### 0.2.9 — NestJS 12, TypeScript 6 and an ES-module test setup, together
 **Repo:** backend · **Size:** L · **Depends on:** `0.2.3`, `0.2.5`, `0.2.7` · **Requirements:** SR-NFR-MNT-002
-**Files:** `package.json`, `package-lock.json`, `tsconfig.json`, `jest.config.ts`, `test/jest-e2e.json`, `.github/dependabot.yml`
+**Files:** `package.json`, `package-lock.json`, `tsconfig.json`, `vitest.config.mts`, `src/main.ts`, `.github/dependabot.yml`
 Dependabot offered the NestJS 12 family, `bullmq` 6, TypeScript 7 and ESLint 10 on 28 September; they were
 merged with failing checks and reverted (backend #26), because NestJS 12 ships as ES modules and the Jest
 setup cannot load them. This step makes the move deliberately and in one piece: every `@nestjs/*` package
-to 12 with `bullmq` 6; TypeScript 6 — TypeScript 7 waits until `ts-jest` and typescript-eslint support it;
-the TypeScript 6 settings decided explicitly (whether to turn `strict` on, `types`, `rootDir`); a test
-runner that loads ES-module packages; then the Dependabot holds on those majors are lifted.
+to 12 with `bullmq` 6; TypeScript 6 — TypeScript 7 waits until typescript-eslint supports it; the
+TypeScript 6 settings decided explicitly (whether to turn `strict` on, given the `any`s of B-9; `types`,
+`rootDir`); Nest's Standard Schema validation registered for the Zod schemas that `0.3.2` writes
+([ADR-0024](../adr/0024-zod-schemas-and-vitest-on-nestjs-12.md)); the Vitest harness of `0.2.3` proven
+to load the ES-module packages; then the Dependabot holds on those majors are lifted.
 **Tests:** `the_app_boots_on_nestjs_12` · `the_test_runner_loads_es_module_packages`
 **Verify:** `rm -rf node_modules && npm ci && just check && just test-e2e`
 **Done when:** every `@nestjs/*` package is on 12, TypeScript is on 6, CI is green, and `dependabot.yml`
 no longer holds those majors.
 
+
+### 0.2.10 — Module boundaries, checked from the first module
+**Repo:** backend + frontend · **Size:** M · **Depends on:** `0.2.3`, `0.2.4` · **Requirements:** SYS-ARC-001, SYS-ARC-002, SYS-ARC-004, SR-NFR-MNT-001
+**Files:** backend `.dependency-cruiser.cjs` (new), `src/architecture/boundaries.spec.ts` (new), `justfile`,
+`.github/workflows/ci.yml`; frontend `.dependency-cruiser.cjs` (new), `src/architecture/boundaries.test.ts`
+(new), `justfile`, `.github/workflows/ci.yml`
+Moved forward from `1.10.10` so that every module is born inside its boundaries instead of being fenced
+in after the features exist. dependency-cruiser, pinned, runs in `just check` and CI's `test` job in both
+applications, independently of the linter. Backend: a module's `domain/` imports no Nest, Prisma, HTTP or
+provider SDK; another module is reached only through its exported application interface — never its
+repository, Prisma model or infrastructure; `presentation/` never imports `infrastructure/`; only the
+composition roots wire adapters. Frontend: a feature is imported only through its `index.ts`;
+`src/shared` imports no feature; `src/server` and anything marked `server-only` never reach a client
+bundle ([ADR-0025](../adr/0025-the-web-app-data-path.md)). Each rule has a deliberately invalid fixture
+import that must fail. A new process or service still needs an ADR with a measured reason
+([ADR-0001](../adr/0001-modular-monolith.md)).
+**Tests:** `module_boundary_gate_rejects_repository_and_framework_leaks` · `browser_boundary_gate_rejects_server_only_imports`
+**Verify:** `(cd backend && npx --no-install vitest run src/architecture && just check) && (cd frontend && npx --no-install vitest run src/architecture && just check)`
+**Done when:** CI refuses each forbidden import in both applications, proven by its fixture.
 ---
 
 ## Group 0.3 — The API platform
@@ -345,18 +368,20 @@ with nothing internal in it. Codes are stable forever and clients branch on `cod
 request id equal to the response header, and no module throws a plain `Error`.
 
 ### 0.3.2 — Strict validation, registered once
-**Repo:** backend · **Size:** S · **Depends on:** `0.3.1` · **Requirements:** SR-CORE-005, SR-API-003
-**Files:** `src/main.ts`, `src/app.module.ts`, `src/common/pipes/validation.pipe.ts`, query DTOs,
-`test/platform/validation.e2e-spec.ts` (new)
-One global pipe — `whitelist`, `forbidNonWhitelisted`, `transform`, `forbidUnknownValues`, trimmed
-strings, bounded string and array lengths — instead of today's two (`main.ts:45` and `APP_PIPE` in
-`app.module.ts:56`, with different options). Every query is a typed DTO (the medical controller takes
+**Repo:** backend · **Size:** S · **Depends on:** `0.3.1`, `0.2.9` · **Requirements:** SR-CORE-005, SR-API-003
+**Files:** `src/main.ts`, `src/app.module.ts`, `src/common/validation/**` (new), `src/common/pipes/validation.pipe.ts`
+(delete), the query schemas, `test/platform/validation.e2e-spec.ts` (new)
+One validation mechanism — NestJS 12's Standard Schema pipe with Zod 4 schemas
+([ADR-0024](../adr/0024-zod-schemas-and-vitest-on-nestjs-12.md)): bodies are strict objects, so an unknown
+property is refused; strings trimmed and bounded; arrays bounded; queries coerced explicitly — instead of
+today's two class-validator pipes (`main.ts:45` and `APP_PIPE` in `app.module.ts:56`, with different
+options). Every query is a typed DTO (the medical controller takes
 `@Query() query: any`, `medical.controller.ts:65, 92, 208`); every path id passes `ParseUUIDPipe`; an
 empty `PATCH` is a `400`.
 **Tests:** `an_unknown_property_is_refused` · `a_malformed_uuid_is_a_validation_error` · `an_unknown_query_parameter_is_refused`
 **Verify:** `just test-e2e -- test/platform/validation.e2e-spec.ts`
 **Done when:** a body carrying an extra `tenantId` or `role` is refused with `VALIDATION_FAILED`, and
-exactly one validation pipe is registered.
+exactly one validation mechanism is registered.
 
 ### 0.3.3 — Versioned routes under /api/v1
 **Repo:** backend + frontend · **Size:** S · **Depends on:** `0.3.1` · **Requirements:** —
@@ -390,7 +415,7 @@ export interface Page<T> { data: T[]; page: { nextCursor: string | null; hasMore
 export function paginate<T>(query: PageQuery, fetch: (args: KeysetArgs) => Promise<T[]>): Promise<Page<T>>;
 ```
 **Tests:** `a_limit_above_100_is_refused` · `cursors_stay_stable_under_inserts` · `a_cursor_from_another_query_is_refused` · `an_unlisted_filter_is_refused`
-**Verify:** `npx jest src/common/pagination src/common/filtering`
+**Verify:** `npx vitest run src/common/pagination src/common/filtering`
 **Done when:** the four tests pass.
 
 ### 0.3.6 — Optimistic concurrency: revisions, ETag, If-Match
@@ -431,7 +456,8 @@ lives at the identity provider (`0.5.1`).
 **Repo:** backend · **Size:** M · **Depends on:** `0.3.2`, `0.3.3`, `0.3.4`, `0.3.5` · **Requirements:** SR-CORE-002, TEST-004
 **Files:** `scripts/export-openapi.ts` (new), `openapi/openapi.json` (new, committed), `nest-cli.json`,
 `src/main.ts`, `.github/workflows/ci.yml`, `justfile`
-The `@nestjs/swagger` CLI plugin describes the DTOs; the document registers the session-cookie scheme
+`@nestjs/swagger` 12 generates the document, OpenAPI 3.1, from the same Zod schemas through its
+`standardSchemaConverter` ([ADR-0024](../adr/0024-zod-schemas-and-vitest-on-nestjs-12.md)); the document registers the session-cookie scheme
 and the CSRF header (today two controllers reference an unregistered `bearer` scheme, `main.ts:59–69`)
 and is titled **Sadara API**. `npm run openapi` writes it without starting a server; CI fails if the
 committed file differs from the generated one and runs `oasdiff breaking` against `development`'s copy —
@@ -565,7 +591,7 @@ travels as `{ "amount": "1250.500", "currency": "JOD" }` ([ADR-0006](../adr/0006
 export class Money { static parse(amount: string, currency: CurrencyCode): Money; add(other: Money): Money; toWire(): { amount: string; currency: CurrencyCode }; format(locale: 'ar' | 'en'): string }
 ```
 **Tests:** `jod_amounts_keep_three_decimals` · `excess_scale_is_refused_not_rounded` · `money_never_passes_through_a_javascript_number` · `every_active_iso_4217_currency_is_seeded_with_its_decimals`
-**Verify:** `npx jest src/common/money && just migrations`
+**Verify:** `npx vitest run src/common/money && just migrations`
 **Done when:** `Money.parse('1.255', 'JOD').toWire()` round-trips exactly, `Money.parse('1.255', 'USD')`
 is refused, and no money column keeps scale 2.
 
@@ -707,12 +733,12 @@ the compose Keycloak.
 **Files:** `src/modules/identity/presentation/auth.controller.ts` (new), `src/modules/identity/application/sign-in.usecase.ts` (new), `test/auth/sign-in.e2e-spec.ts` (new)
 `GET /api/v1/auth/login?returnTo=` stores a one-time login transaction (state, nonce, PKCE verifier,
 tenant, validated same-origin `returnTo`) in Valkey for ten minutes — losing it only aborts a sign-in —
-and **binds it to the initiating browser** with a short-lived `__Host-sadara_preauth` cookie (HttpOnly,
+and **binds it to the initiating browser** with a short-lived `__Host-Http-sadara_preauth` cookie (HttpOnly,
 Secure, SameSite=Lax, `Path=/`, no `Domain`) that grants no access and is cleared at the callback; for a step-up the existing session plays that role. It then
 redirects to the provider with the tenant's locale. `GET /api/v1/auth/callback` requires the pre-auth cookie to match, consumes the state
 once, exchanges the code, verifies the ID token, and looks up the membership of **that identity in the
 host's tenant**: none, archived or inactive means a refusal page and no session (and a security event,
-`0.7.3`); otherwise this step creates the `UserSession` row, issues the `__Host-sadara_session` cookie and returns
+`0.7.3`); otherwise this step creates the `UserSession` row, issues the `__Host-Http-sadara_session` cookie ([ADR-0023](../adr/0023-session-cookies-per-rfc-10017.md)) and returns
 the browser to `returnTo`. Authenticating later requests with it, expiry and CSRF are `0.5.6`.
 **Tests:** `a_member_signs_in_end_to_end` · `a_non_member_gets_no_session` · `a_replayed_or_mismatched_state_is_refused` · `a_callback_from_another_browser_is_refused` · `return_to_cannot_leave_the_origin`
 **Verify:** `just test-e2e -- test/auth/sign-in.e2e-spec.ts`
@@ -723,18 +749,19 @@ callback completed in a browser that did not start the sign-in creates no sessio
 **Repo:** backend · **Size:** L · **Depends on:** `0.5.5`, `0.3.8` · **Requirements:** SR-AUTH-003, SR-ACL-007
 **Files:** `src/modules/identity/application/session.service.ts` (new), `src/common/guards/session.guard.ts`
 (replaces the placeholder), `src/common/security/csrf.guard.ts` (new), `test/auth/sessions.e2e-spec.ts` (new)
-The session `0.5.5` issued is one random 256-bit value in `__Host-sadara_session` (HttpOnly, Secure,
-SameSite=Lax, Path=/); PostgreSQL holds only its hash. This step makes it authenticate requests. **Every request checks the session, the membership and the
+The session `0.5.5` issued is one random 256-bit value in `__Host-Http-sadara_session` (HttpOnly, Secure,
+SameSite=Lax, Path=/ — [ADR-0023](../adr/0023-session-cookies-per-rfc-10017.md)); PostgreSQL holds only its hash. This step makes it authenticate requests. **Every request checks the session, the membership and the
 tenant against PostgreSQL** — not a cache — so revocation and deactivation take effect on the very next
 request; a cache may come later only with a tested consistency protocol. Idle expiry 30 minutes, absolute
-12 hours (provisional — OPEN). Writes need the session's synchronizer token in `X-CSRF-Token` **and** an
-`Origin` equal to the configured origin; non-JSON bodies are refused. The token is derived, not stored —
+12 hours (provisional — OPEN). Writes need the session's synchronizer token in `X-CSRF-Token`, an
+`Origin` equal to the configured origin, **and** `Sec-Fetch-Site: same-origin` when the browser sends
+fetch metadata; non-JSON bodies are refused. The token is derived, not stored —
 an HMAC of the session's token hash under a keyed, rotatable secret — so it stays the same in every tab
 until the session rotates. `GET /api/v1/auth/session` returns
 the member, the tenant and the CSRF token. The guard mints the `AuthorizedTenantContext`.
-**Tests:** `the_session_cookie_is_host_only_httponly_and_secure` · `a_write_without_the_csrf_token_is_refused` · `a_write_from_another_origin_is_refused` · `a_revoked_session_fails_on_the_next_request` · `a_deactivated_member_loses_access_on_the_next_request`
+**Tests:** `the_session_cookie_is_host_only_httponly_and_secure` · `a_write_without_the_csrf_token_is_refused` · `a_write_from_another_origin_is_refused` · `a_cross_site_fetch_is_refused_even_with_the_token` · `a_revoked_session_fails_on_the_next_request` · `a_deactivated_member_loses_access_on_the_next_request`
 **Verify:** `just test-e2e -- test/auth/sessions.e2e-spec.ts`
-**Done when:** the five tests pass.
+**Done when:** the six tests pass.
 
 ### 0.5.7 — Sign-out, back-channel logout and session management
 **Repo:** backend · **Size:** M · **Depends on:** `0.5.6` · **Requirements:** SR-AUTH-007
@@ -860,7 +887,7 @@ export type Decision = { allow: true } | { allow: false; reason: DenyReason };
 export function authorize(ctx: AuthorizedTenantContext, action: Action, resource: ResourceView): Decision;
 ```
 **Tests:** `a_read_denied_by_policy_is_not_found` · `policies_apply_to_direct_use_case_calls`
-**Verify:** `npx jest src/common/policy`
+**Verify:** `npx vitest run src/common/policy`
 **Done when:** both tests pass and every existing use case that loads a resource calls `authorize`.
 
 ### 0.6.4 — Confidential projections, checked against an independent classification
@@ -1010,6 +1037,8 @@ transaction and claims due events `FOR UPDATE SKIP LOCKED`, then publishes them.
 business reference; its handler restores that tenant's context and runs in its own tenant transaction.
 Retries back off exponentially to a bound, then mark `DEAD` with the last error; shutdown drains
 in-flight jobs.
+Valkey runs with append-only persistence and `maxmemory-policy noeviction`, as BullMQ requires — in the
+local stack already (`infra/compose.yaml`) and in every hosted environment.
 **Tests:** `a_crashed_worker_redelivers_and_the_handler_stays_idempotent` · `retries_stop_at_the_bound_and_mark_dead` · `a_job_runs_only_in_its_own_tenant` · `the_registry_role_reads_nothing_but_tenant_ids`
 **Verify:** `just test-int -- worker`
 **Done when:** the four tests pass and `just up` runs `api` and `worker` as separate processes.
@@ -1152,7 +1181,8 @@ Switching language never changes a business value.
 **Tests:** `the_catalogs_have_identical_keys` · `the_arabic_layout_renders_rtl_on_the_server` · `no_user_facing_literal_remains`
 **Verify:** `npx vitest run src/i18n && npx playwright test i18n`
 **Done when:** the sign-in page renders in Arabic with `dir="rtl"` and in English with `dir="ltr"` from
-the server, and the literal check passes.
+the server, the literal check passes, and the sign-in journey of `0.2.4` asserts Arabic text in the `ar`
+project (today it finds the English "Sign In" in both).
 
 ### 0.9.3 — Logical CSS and bidirectional isolation
 **Repo:** frontend · **Size:** S · **Depends on:** `0.9.2` · **Requirements:** —
@@ -1168,12 +1198,14 @@ directional icons mirror, media controls do not.
 ### 0.9.4 — A typed client generated from the contract, on the same origin
 **Repo:** frontend · **Size:** M · **Depends on:** backend `0.3.9`, `0.9.1`, umbrella `0.2.1` · **Requirements:** —
 **Files:** `src/shared/api/{client,problem}.ts` (new), `src/shared/api/schema.d.ts` (generated),
-`src/shared/lib/api-client.ts` (delete), `package.json`
+`src/server/api/**` (new), `src/shared/lib/api-client.ts` (delete), `package.json`
 `openapi-typescript` generates types from the backend's committed contract at the pinned backend
 version, and `openapi-fetch` calls **`/api/v1` on the web app's own origin** — the local HTTPS proxy
 (`0.2.1`) in development, the same path routing in every hosted environment — so the session cookie is
-never cross-site. Server components call the API's internal address and forward the session cookie only
-there.
+never cross-site. Reads go through a server-only layer, `src/server/api/` (`import 'server-only'`), which
+calls the API's internal address with the session cookie and `cache: 'no-store'`; the browser uses the
+same generated client against `/api/v1` for writes and interactive reads, and no Server Action carries a
+business write ([ADR-0025](../adr/0025-the-web-app-data-path.md)).
 Problem details become a typed `ApiProblem`. The client never sends a tenant header — today it sends
 `X-Tenant-ID` from `localStorage` (`api-client.ts:58–61`) — and `axios` goes.
 **Tests:** `a_contract_change_breaks_the_typecheck` · `problem_details_expose_code_and_field_errors` · `no_request_carries_a_tenant_header`
@@ -1187,7 +1219,11 @@ Problem details become a typed `ApiProblem`. The client never sends a tenant hea
 token come from `GET /api/v1/auth/session` — never from reading cookies, which JavaScript cannot see. A
 `401` returns to sign-in with the return path; writes carry the CSRF token; TanStack Query keys include
 the tenant and the projection, and logout or a tenant change clears every cached query before navigating
-to the provider's sign-out. `proxy.ts` looks at cookie presence only to route, never to decide.
+to the provider's sign-out. The authenticated layout checks the session on the server through
+`src/server/api/` and renders nothing protected without it; TanStack Query serves interactive screens
+only, prefetched on the server and hydrated; nothing tenant-scoped is cached by Next
+([ADR-0025](../adr/0025-the-web-app-data-path.md)). `proxy.ts` looks at cookie presence only to route,
+never to decide.
 **Tests:** `no_session_secret_is_readable_by_javascript` · `an_expired_session_returns_to_sign_in_with_the_return_path` · `logout_clears_every_cached_query`
 **Verify:** `npx playwright test tests/e2e/session.spec.ts`
 **Done when:** a seeded member signs in through the local Keycloak in Arabic and English, and the three
@@ -1195,8 +1231,9 @@ tests pass.
 
 ### 0.9.6 — The application shell
 **Repo:** frontend · **Size:** M · **Depends on:** `0.9.3`, `0.9.5` · **Requirements:** UX-010, UX-011, UX-012, SR-NFR-A11Y-001
-**Files:** `src/components/shell/**`, `src/shared/ui/states/**` (new), `app/globals.css`
-Design tokens; navigation built from the member's effective permissions (display only); shared empty,
+**Files:** `src/components/shell/**`, `src/shared/ui/**`, `src/shared/ui/states/**` (new), `components.json` (new), `app/globals.css`
+Components from shadcn/ui through its CLI in right-to-left mode (`rtl: true`), regenerating today's
+hand-copied primitives ([ADR-0025](../adr/0025-the-web-app-data-path.md)); design tokens; navigation built from the member's effective permissions (display only); shared empty,
 loading, error, offline and retry states; light and dark themes with the `dark:` variant bound to the
 theme class (`@custom-variant dark`) — today `globals.css:49` styles `.dark` while `dark:` follows the
 operating system. Landmarks, headings, visible focus and keyboard operation from the start.
@@ -1256,7 +1293,7 @@ with Valkey down, the `auth` rate-limit category **fails closed**.
 ## Group 0.11 — The gates: the foundation, then production
 
 ### 0.11.0 — The foundation gate: what every product feature builds on
-**Repo:** umbrella + backend + frontend · **Size:** M · **Depends on:** `0.1.2`, `0.1.3`, `0.2.6`, `0.2.8`, `0.2.9`, `0.3.6`, `0.4.6`, `0.4.9`, `0.4.10`, `0.4.11`, `0.5.7`, `0.5.11`, `0.6.7`, `0.6.9`, `0.7.3`, `0.7.7`, `0.7.8`, `0.8.5`, `0.9.6`, `0.10.2` · **Requirements:** BR-OBJ-09
+**Repo:** umbrella + backend + frontend · **Size:** M · **Depends on:** `0.1.2`, `0.1.3`, `0.2.10`, `0.2.6`, `0.2.8`, `0.2.9`, `0.3.6`, `0.4.6`, `0.4.9`, `0.4.10`, `0.4.11`, `0.5.7`, `0.5.11`, `0.6.7`, `0.6.9`, `0.7.3`, `0.7.7`, `0.7.8`, `0.8.5`, `0.9.6`, `0.10.2` · **Requirements:** BR-OBJ-09
 **Files:** umbrella `docs/implementation/progress.md`, `docs/implementation/handoff.md`, the gate PR's body
 Product features start here, not after the production gate ([ADR-0021](../adr/0021-a-product-built-to-sell.md)).
 Run the exit-gate commands below except `just drill`, on `development` in each repository, and perform

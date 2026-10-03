@@ -6,9 +6,9 @@ agent.
 ## Frontier
 
 <!-- plan:frontier:begin -->
-**Demo milestone** ([build order](demo-milestone.md)) — 7 of 124 microsteps done; 604–1208 engineering hours left before the reserve.
-Next in build order (every dependency done): `0.2.3`, `0.9.1`, `0.4.1`, `0.4.2`, `0.1.7`, `0.5.1`, `0.8.1`.
-**Phase 0** — 7 of 83 microsteps done (7 of 251 across all phases).
+**Demo milestone** ([build order](demo-milestone.md)) — 7 of 125 microsteps done; 608–1216 engineering hours left before the reserve.
+Next in build order (every dependency done): `0.2.3`, `0.9.1`, `0.1.7`, `0.4.1`, `0.4.2`, `0.5.1`, `0.8.1`.
+**Phase 0** — 7 of 84 microsteps done (7 of 252 across all phases).
 In progress: none.
 Ready now (every dependency done): `0.1.7`, `0.2.3`, `0.4.1`, `0.4.2`, `0.5.1`, `0.8.1`, `0.9.1`.
 Blocked: none.

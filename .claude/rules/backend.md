@@ -17,7 +17,7 @@ The law is `docs/implementation/01-conventions.md`; the contracts are `docs/refe
   resource calls `authorize(ctx, action, resource)` before returning or changing it; a denied read is
   `404`. Repositories **select** fields — never `include` a whole relation into a response. A new
   response field goes into the field-classification fixture in the same PR.
-- **Shape.** Controllers are thin: validate (DTOs with `whitelist` + `forbidNonWhitelisted`), call one use
+- **Shape.** Controllers are thin: validate (Zod schemas, strict objects — ADR-0024), call one use
   case, return a response DTO — never a Prisma row. Errors are typed domain errors mapped to RFC 9457;
   never `throw new Error`. Workflow state changes only through transition commands. Generic create and
   update DTOs never carry `status`, `role`, `tenantId`, actors or evidence state; a dedicated command DTO

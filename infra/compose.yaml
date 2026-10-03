@@ -28,7 +28,8 @@ services:
 
   valkey:
     image: valkey/valkey:9.1.2-alpine@sha256:48332870af354a799964c0012ae1194a0bf2bf894eb508f945810596dc2d8d11
-    command: ["valkey-server", "--save", "60", "1"]
+    # BullMQ needs durable queues and no eviction: append-only persistence and noeviction (0.7.6)
+    command: ["valkey-server", "--save", "60", "1", "--appendonly", "yes", "--maxmemory-policy", "noeviction"]
     ports: ["127.0.0.1:${VALKEY_PORT:-6379}:6379"]
     volumes: [valkey:/data]
     healthcheck:

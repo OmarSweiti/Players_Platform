@@ -124,14 +124,19 @@ suite fails; "verified locally" is still in progress.
 - **Modules own their tables.** `src/modules/<domain>/{presentation,application,domain,infrastructure}`.
   Another module is reached through its application service or an event — never by importing its
   repository or touching its tables.
-- **Layers point inward.** Presentation (controllers, DTOs) → application (use cases, policies) →
+- **Layers point inward.** Presentation (controllers, Zod request and response schemas — [ADR-0024](../adr/0024-zod-schemas-and-vitest-on-nestjs-12.md)) → application (use cases, policies) →
   domain (pure rules and types) ← infrastructure (repositories, adapters). A `domain/` folder exists
   when an aggregate has real invariants; there is no ceremony class for a plain record.
 - **A use case owns its transaction** and receives the tenant context and the principal as plain
   arguments — never an HTTP request object.
 - **The frontend:** routes in `app/[locale]/…`; feature logic in `src/features/<feature>/`; shared UI in
-  `src/shared/ui/`; server-only code in `src/server/`. Server state through TanStack Query with keys that
-  include the tenant; forms with React Hook Form and zod, the server still validating.
+  `src/shared/ui/`; server-only code in `src/server/`. Reads on the server through `src/server/api/`;
+  TanStack Query for interactive screens, with keys that include the tenant; writes only through the
+  API, never a Server Action; nothing tenant-scoped cached by Next
+  ([ADR-0025](../adr/0025-the-web-app-data-path.md)); forms with React Hook Form and zod, the server still
+  validating.
+- **Boundaries are checked, not hoped for:** dependency-cruiser enforces both lists above in CI from
+  `0.2.10`.
 
 ## Naming
 
@@ -158,9 +163,9 @@ and return an empty success. `202` means a job was accepted, not that its effect
 
 | Layer | Runner | Proves | Lives in |
 |---|---|---|---|
-| Unit (backend) | Jest | pure rules: state transitions, policies, money, dates, normalisation — property tests where inputs vary | beside the code: `backend/src/**/*.spec.ts` |
-| Integration | Jest on real PostgreSQL 18 | constraints, RLS, grants, triggers, transactions, concurrency, audit, outbox, storage adapters — **as the runtime role** | `backend/test/**/*.integration-spec.ts` |
-| API | Jest + supertest | contracts, status codes, problem details, authorization, the isolation suite | `backend/test/**/*.e2e-spec.ts` |
+| Unit (backend) | Vitest | pure rules: state transitions, policies, money, dates, normalisation — property tests where inputs vary | beside the code: `backend/src/**/*.spec.ts` |
+| Integration | Vitest on real PostgreSQL 18 | constraints, RLS, grants, triggers, transactions, concurrency, audit, outbox, storage adapters — **as the runtime role** | `backend/test/**/*.integration-spec.ts` |
+| API | Vitest + supertest | contracts, status codes, problem details, authorization, the isolation suite | `backend/test/**/*.e2e-spec.ts` |
 | Unit (frontend) | Vitest + Testing Library | components, hooks, formatting, catalogs | beside the code: `frontend/src/**/*.test.{ts,tsx}` |
 | Browser | Playwright (`ar`, `en`) + axe | the critical journeys, RTL, accessibility, session behaviour | `frontend/tests/**/*.spec.ts` |
 

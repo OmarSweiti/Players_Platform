@@ -111,6 +111,7 @@ replacement is built.
 | T-6 | An attendance row can join an enrollment and a session of two different programs | `schema.prisma:931–932` | S3 | `0.4.4` |
 | T-7 | Filter indexes on tenant tables do not lead with `tenantId`; `tenants.slug` is indexed twice | `schema.prisma:278, 318` and [`database.md`](database.md) | S4 | `0.4.6` |
 | T-8 | The web client sends `X-Tenant-ID` from `localStorage` | frontend `src/shared/lib/api-client.ts:58–61` | S3 | `0.9.4` |
+| T-9 | The access log attributes each request to the tenant named in the untrusted `x-tenant-id` header | `logging.interceptor.ts:23` | S3 | `0.10.1` |
 
 ### API platform
 
@@ -138,6 +139,7 @@ replacement is built.
 | Z-6 | A scout can set their own report to `APPROVED` through `PATCH` | `update-scouting-report.dto.ts:8`, `update-assignment.dto.ts:8` | S1 | `1.11.3` |
 | Z-7 | The edit check lets anyone edit any draft and the author edit an approved report | `update-scouting-report.use-case.ts:18` | S1 | `1.11.3` |
 | Z-8 | Scouting reports embed the whole player, passport included | `scouting-report.repository.ts:56, 79, 158` | S1 | `1.11.1` |
+| Z-9 | `PATCH sessions/:id/status` and `DELETE sessions/:id` call the repository from the controller, skipping the use case's completed-session and conductor checks | `medical.controller.ts:331, 348` | S2 | `0.6.8` |
 
 ### Data, audit and storage
 
@@ -163,6 +165,8 @@ replacement is built.
 | B-6 | The seed names tenants after real clubs on a real-looking domain | `seed.ts:81–91` | S3 | `0.5.11` |
 | B-7 | 748 lint problems; lint is not a gate | `npx eslint .` | S4 | `0.2.5` |
 | B-8 | CI replays migrations on PostgreSQL 17; the baseline is 18 | `.github/workflows/ci.yml` | S4 | `0.2.2` |
+| B-9 | 82 uses of `any` (scouting 37, medical 29) with `noImplicitAny` off | `tsconfig.json`; `grep -rn ": any" src` | S4 | `0.2.9` |
+| B-10 | BullMQ and the event emitter run inside the API process with no processor or listener; `EventService` and `StorageService` are injected nowhere | `events.module.ts:9–20` | S4 | `0.7.5`, `0.7.6`, `0.8.1` |
 
 ### Frontend
 
@@ -178,6 +182,12 @@ replacement is built.
 | F-8 | The reset form's `.refine` returns an object on mismatch, which counts as valid | `app/(auth)/reset-password/reset-password-content.tsx:22–29` | S3 | `0.1.7` |
 | F-9 | 12 of 27 dependencies never imported | `package.json` | S4 | `0.2.7` |
 | F-10 | No tests; 21 lint problems; route protection is cookie presence (`proxy.ts:36–44`), a navigation aid mistaken for a check | as named | S4 | `0.2.4`, `0.2.5`, `0.9.5` |
+| F-11 | `(dashboard)/page.tsx` is a server component that calls the client hook `useAuth()`; it survives only because the starter page shadows `/`, so deleting the starter breaks `/` | `app/(dashboard)/page.tsx:1–4` | S2 | `0.9.1` |
+| F-12 | Every 401 triggers a token refresh and a "session expired" redirect — including the login endpoint's own invalid-credentials 401, so a wrong password reads as an expired session | `src/shared/lib/api-client.ts:105–144, 191–212` | S3 | `0.1.7`, `0.9.4` |
+| F-13 | The mobile navigation drawer is always empty: it renders `<Sidebar/>`, which is `hidden lg:flex`, inside an `lg:hidden` wrapper | `src/components/layout/sidebar.tsx:38`; `app/(dashboard)/layout.tsx:28–35` | S3 | `0.9.6` |
+| F-14 | Hand-written API types disagree with the API: `AuthResponse` expects tokens in the body; `PaginatedResponse` is defined three times in two shapes; modules unwrap `{ data }` once or twice | `src/features/auth/types/auth.types.ts:25–29`, `src/shared/types/` | S3 | `0.9.4` |
+| F-15 | About 1,140 lines of modules nothing reachable imports (`permissions.ts`, `role-utils.ts`, `api-medical.ts`, `api-scouting.ts` and their types, `site.ts`, `empty-state.tsx`) | as named | S4 | `0.2.7` |
+| F-16 | Every product route is prerendered as a static page: no server-side session check, no `loading`, `error` or `not-found` state, and the authenticated layout is a client component for one `useState` | `.next/prerender-manifest.json`; `app/(dashboard)/layout.tsx:1` | S3 | `0.9.5`, `0.9.6` |
 
 ---
 

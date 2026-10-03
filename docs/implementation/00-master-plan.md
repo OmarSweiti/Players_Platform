@@ -95,7 +95,7 @@ stays in the tree, quarantined until then, and the partial scouting code until i
 
 **The build order is the [demo milestone](demo-milestone.md).** The phases still say what each release
 contains; the milestone says what to build first ([ADR-0021](../adr/0021-a-product-built-to-sell.md)):
-78 Phase-0 steps through the **foundation gate** (`0.11.0`), then 46 Phase-1 steps — the features a
+79 Phase-0 steps through the **foundation gate** (`0.11.0`), then 46 Phase-1 steps — the features a
 pitch shows, scouting, and the demo itself (`1.12.1`–`1.12.3`). The **production gate** (`0.11.1`),
 legal tickets, exports and production readiness follow, before anything is hosted for real users.
 
@@ -111,13 +111,13 @@ half the weighted total to the full total. Do **not** divide by an assumed AI sp
 
 | Phase | Microsteps | S · M · L | Hours before reserve | With 30% reserve, at 25 h/week |
 |---|---:|---|---:|---:|
-| 0 | 83 | 22 · 50 · 11 | 332–664 | 17–35 weeks |
-| 1 | 77 | 0 · 22 · 55 | 528–1056 | 27–55 weeks |
+| 0 | 84 | 22 · 51 · 11 | 336–672 | 17–35 weeks |
+| 1 | 76 (+1 superseded) | 0 · 22 · 54 | 520–1040 | 27–54 weeks |
 | 2 | 44 | 0 · 13 · 31 | 300–600 | 16–31 weeks |
 | 3 | 22 | 0 · 5 · 17 | 156–312 | 8–16 weeks |
 | 4 | 25 | 0 · 3 · 22 | 188–376 | 10–20 weeks |
-| **All** | **251** | 22 · 93 · 136 | 1504–3008 | 78–156 weeks |
-| *[Demo milestone](demo-milestone.md)* | *124 (7 done)* | *20 · 53 · 44 left* | *604–1208 left* | *31–63 weeks by this model; about 19 at the measured pace* |
+| **All** | **251** (+1 superseded) | 22 · 94 · 135 | 1500–3000 | 78–156 weeks |
+| *[Demo milestone](demo-milestone.md)* | *125 (7 done)* | *20 · 54 · 44 left* | *608–1216 left* | *32–63 weeks by this model; about 19 at the measured pace* |
 
 Phase 0's sizes were set step by step against the code; the later phases were sized conservatively —
 almost every full-stack step as L — and will come down as their phase-entry refinement splits and
@@ -153,6 +153,23 @@ register](#long-lead-register), not in these numbers.
 | **The demo date slips** | a checkpoint forecast passes 26 weeks for the [demo milestone](demo-milestone.md) | cut from the milestone in the order of its cut list, by the owner's decision; never cut a foundation step, a test or an invariant · owner, at each checkpoint |
 | **Dependency churn** — Next.js, NestJS, Prisma, TypeScript, ESLint majors | a major release, or a Dependabot PR whose `test` is red | grouped monthly Dependabot; majors one at a time, migration notes read, the app exercised; a major the toolchain cannot support yet is held in `dependabot.yml` with its blocking error quoted (TypeScript 7, ESLint 10, NestJS 12) and moved by a planned step (`0.2.9` for the backend) as soon as it can; a red Dependabot PR is never merged through the bypass; a monthly currency review keeps the SysRD's stack current ([ADR-0022](../adr/0022-the-sysrd-stack-kept-current.md)) · monthly |
 | **Unstaffed reliability target** | a restore misses its RPO/RTO; a critical alert goes unacknowledged | delay the release, revise operating support, repeat the drill · `1.10.12`, `1.10.13` |
+
+---
+
+## Technology watch
+
+Releases that would change a decision, checked at each monthly currency review
+([ADR-0022](../adr/0022-the-sysrd-stack-kept-current.md)). Recorded 3 October 2026 from the architecture
+review's sources.
+
+| Watch | Why it matters | Affects | Act when |
+|---|---|---|---|
+| Prisma 8 (a release candidate; on npm, `prisma@latest` currently installs the candidate while `@prisma/client@latest` is 7.10) | schema-declared row-level security (`@@rls`) could replace part of the SQL-managed policies ([ADR-0017](../adr/0017-sql-managed-database-objects.md)); the catalog tests stay either way | `0.4.5`, every migration step | 8.0 is stable: plan the upgrade as a step; until then versions stay pinned and the Dependabot hold refuses the candidate |
+| OpenTelemetry for NestJS 12 | `instrumentation-nestjs-core` supports only NestJS below 12, and Express spans need the ES-module loader hook | `1.10.4` | a release supports 12; until then register the loader hook and verify the spans |
+| Keycloak Organizations | maps an agency to an organization with its own login provider — a selling point for agencies with their own Microsoft or Google accounts | Phase 4 onboarding (`4.1.x`) | a prospect asks for its own login provider |
+| BullMQ 6's PostgreSQL backend, pg-boss | queues inside PostgreSQL would remove Valkey from a small server | `0.7.6` | measured need; the outbox design is unaffected |
+| OpenAPI 3.2 | generators' support is still partial; the contract stays 3.1 | `0.3.9`, `0.9.4` | the generators in use support 3.2 |
+| `__Http-` cookie prefixes in Safari | unverified; browsers without it still apply the `__Host-` rules | `0.5.6` | — (ADR-0023 is safe either way) |
 
 ---
 
