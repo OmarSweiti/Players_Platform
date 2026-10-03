@@ -55,8 +55,8 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `no_local_credential_route_remains` | 0.1.6 | backend | todo |
 | `protected_routes_refuse_without_a_session` | 0.1.6 | backend | todo |
 | `credential_columns_are_gone` | 0.1.6 | backend | todo |
-| `no_route_renders_a_password_field` | 0.1.7 | frontend | todo |
-| `no_page_generates_security_codes` | 0.1.7 | frontend | todo |
+| `no_route_renders_a_password_field` | 0.1.7 | frontend | done |
+| `no_page_generates_security_codes` | 0.1.7 | frontend | done |
 | `medical_routes_are_not_found_when_disabled` | 0.1.8 | backend | done |
 | `scouting_routes_are_not_found_when_disabled` | 0.1.8 | backend | done |
 | `a_disabled_module_never_reaches_its_repository` | 0.1.8 | backend | done |
@@ -233,8 +233,8 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `a_download_is_pinned_to_the_scanned_version` | 0.8.5 | backend | todo |
 | `a_download_for_another_tenant_is_not_found` | 0.8.5 | backend | todo |
 | `an_unscanned_file_cannot_be_downloaded` | 0.8.5 | backend | todo |
-| `every_internal_link_resolves` | 0.9.1 | frontend | todo |
-| `an_unknown_route_renders_not_found` | 0.9.1 | frontend | todo |
+| `every_internal_link_resolves` | 0.9.1 | frontend | done |
+| `an_unknown_route_renders_not_found` | 0.9.1 | frontend | done |
 | `the_catalogs_have_identical_keys` | 0.9.2 | frontend | todo |
 | `the_arabic_layout_renders_rtl_on_the_server` | 0.9.2 | frontend | todo |
 | `no_user_facing_literal_remains` | 0.9.2 | frontend | todo |

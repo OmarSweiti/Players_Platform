@@ -27,7 +27,7 @@ edit only Status and Evidence.
 | 0.1.4 | Stop secrets and personal data reaching logs and error responses | backend + frontend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/43 · https://github.com/OmarSweiti/Players_Platform_Backend/pull/45 · https://github.com/OmarSweiti/Players_Platform_Frontend/pull/38 |
 | 0.1.5 | Refuse to boot without real configuration | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/44 |
 | 0.1.6 | Retire the local credential system | backend | todo |  |
-| 0.1.7 | Retire the local sign-in pages | frontend | todo |  |
+| 0.1.7 | Retire the local sign-in pages | frontend | done | https://github.com/OmarSweiti/Players_Platform_Frontend/pull/40 |
 | 0.1.8 | Quarantine unfinished modules behind server-side flags | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/46 |
 | 0.2.1 | The local stack: PostgreSQL 18, S3-compatible storage, Valkey, ClamAV, Mailpit, Keycloak | umbrella + frontend | done | https://github.com/OmarSweiti/Players_Platform/pull/11 · https://github.com/OmarSweiti/Players_Platform_Frontend/pull/31 |
 | 0.2.2 | PostgreSQL 18 in CI and in the replay recipe | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/31 |
@@ -93,7 +93,7 @@ edit only Status and Evidence.
 | 0.8.3 | Upload: authorize, presign into quarantine, finalize with content checks | backend | todo |  |
 | 0.8.4 | Scan, then promote to an immutable version | backend + umbrella | todo |  |
 | 0.8.5 | Download: version-pinned, authorized, short-lived | backend | todo |  |
-| 0.9.1 | The route map | frontend | todo |  |
+| 0.9.1 | The route map | frontend | done | https://github.com/OmarSweiti/Players_Platform_Frontend/pull/41 |
 | 0.9.2 | Arabic and English, RTL and LTR | frontend | todo |  |
 | 0.9.3 | Logical CSS and bidirectional isolation | frontend | todo |  |
 | 0.9.4 | A typed client generated from the contract, on the same origin | frontend | todo |  |

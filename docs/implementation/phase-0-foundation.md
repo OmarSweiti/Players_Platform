@@ -164,7 +164,8 @@ and no credential column exists.
 **Repo:** frontend · **Size:** S · **Depends on:** `0.2.4` · **Requirements:** —
 **Files:** `app/(auth)/register/**`, `app/(auth)/forgot-password/**`, `app/(auth)/reset-password/**`,
 `app/(auth)/verify-email/**`, `app/(dashboard)/settings/2fa/**` (delete), `app/(auth)/login/page.tsx`,
-`src/features/auth/**`, `tests/e2e/retirement.spec.ts` (new)
+`src/features/auth/**`, `src/components/providers/auth-provider.tsx` (signed out until `0.9.5`), `proxy.ts`
+(its public routes), `tests/e2e/retirement.spec.ts` (new)
 The pages the backend no longer serves go too, and with them three defects: the login form sends
 `rememberMe`, which the API rejects (`app/(auth)/login/page.tsx:16`); the 2FA page invents "backup codes"
 in the browser that nothing stores (`settings/2fa/page.tsx:59`); the reset form's `.refine` returns an
@@ -1171,12 +1172,16 @@ from training data.*
 
 ### 0.9.1 — The route map
 **Repo:** frontend · **Size:** M · **Depends on:** `0.2.4` · **Requirements:** —
-**Files:** `app/page.tsx` (delete), `app/(dashboard)/**` → `app/[locale]/(app)/**`, `app/[locale]/(public)/**`,
-`src/shared/lib/constants.ts` (delete the route table), `next.config.ts`, `loading.tsx` / `error.tsx` / `not-found.tsx` per segment
+**Files:** `app/page.tsx` and the starter images (delete), `app/(dashboard)/**` → `app/[locale]/(app)/**`,
+`app/[locale]/(public)/**`, `app/[locale]/layout.tsx` (refuses an unsupported locale), `app/not-found.tsx`,
+`src/i18n/locales.ts`, `src/shared/ui/route-states.tsx`, `src/shared/lib/constants.ts` (delete the route table),
+`next.config.ts`, `proxy.ts` (a path without a locale gains the default), `justfile` and `ci.yml` (`next typegen`
+before the type-check), `loading.tsx` / `error.tsx` / `not-found.tsx` per segment, `tests/e2e/routes.spec.ts` (new)
 One tree under the locale: `/{locale}` (home), `/{locale}/sign-in`, and features by noun —
 `/{locale}/players`, `/{locale}/contracts`, `/{locale}/legal`, `/{locale}/settings` — with no `/dashboard`
 prefix. `typedRoutes` is on, so a link to a route that does not exist fails the type-check; every segment
-has its loading, error and not-found state.
+has its loading, error and not-found state. The root layout stays at `app/`, so `app/not-found.tsx` answers
+every unmatched address: a catch-all under `[locale]` would match every link and disarm `typedRoutes`.
 **Tests:** `every_internal_link_resolves` · `an_unknown_route_renders_not_found`
 **Verify:** `npx tsc --noEmit && npm run build && npx playwright test routes`
 **Done when:** the build lists no route outside `/[locale]` and no starter content remains.
