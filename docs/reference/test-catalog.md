@@ -67,6 +67,8 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `the_built_image_answers_liveness` | 0.2.6 | backend | todo |
 | `the_app_boots_on_nestjs_12` | 0.2.9 | backend | todo |
 | `the_test_runner_loads_es_module_packages` | 0.2.9 | backend | todo |
+| `module_boundary_gate_rejects_repository_and_framework_leaks` | 0.2.10 | backend + frontend | todo |
+| `browser_boundary_gate_rejects_server_only_imports` | 0.2.10 | backend + frontend | todo |
 | `validation_errors_list_their_fields` | 0.3.1 | backend | todo |
 | `unknown_errors_leak_nothing` | 0.3.1 | backend | todo |
 | `every_error_carries_the_request_id` | 0.3.1 | backend | todo |
@@ -147,6 +149,7 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `the_session_cookie_is_host_only_httponly_and_secure` | 0.5.6 | backend | todo |
 | `a_write_without_the_csrf_token_is_refused` | 0.5.6 | backend | todo |
 | `a_write_from_another_origin_is_refused` | 0.5.6 | backend | todo |
+| `a_cross_site_fetch_is_refused_even_with_the_token` | 0.5.6 | backend | todo |
 | `a_revoked_session_fails_on_the_next_request` | 0.5.6 | backend | todo |
 | `a_deactivated_member_loses_access_on_the_next_request` | 0.5.6 | backend | todo |
 | `logout_revokes_the_session_server_side` | 0.5.7 | backend | todo |
@@ -379,8 +382,6 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `mvp_acceptance_enforces_negative_business_paths` | 1.10.9 | umbrella + backend + frontend | todo |
 | `mvp_staff_journeys_complete_in_both_locales` | 1.10.9 | umbrella + backend + frontend | todo |
 | `test_release_evidence_rejects_unapproved_or_mismatched_pins` | 1.10.9 | umbrella + backend + frontend | todo |
-| `module_boundary_gate_rejects_repository_and_framework_leaks` | 1.10.10 | backend + frontend | todo |
-| `browser_boundary_gate_rejects_server_only_imports` | 1.10.10 | backend + frontend | todo |
 | `test_deployment_refuses_unreviewed_pins_and_unsafe_migration` | 1.10.11 | umbrella | todo |
 | `test_alert_drill_requires_delivery_and_human_acknowledgment` | 1.10.12 | umbrella | todo |
 | `restored_mvp_preserves_tenant_audit_and_file_integrity` | 1.10.13 | umbrella + backend | todo |

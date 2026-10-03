@@ -15,10 +15,13 @@ The UI contract is `docs/reference/ui-ux.md`.
   `messages/en.json`, with ICU plurals. Logical CSS only (`ms-`, `pe-`, `start-`, `text-start`) — lint
   refuses physical directions. Identifiers, emails and mixed-script numbers go inside the bidi-isolating
   component.
-- **Data.** Call the API only through the client generated from the committed OpenAPI contract, on the
-  same origin (`/api/v1`, served by the local HTTPS proxy in development). Never send a tenant header; never read or store a session secret in
-  JavaScript or web storage; attach the CSRF token to writes. TanStack Query keys include the tenant and
-  the projection; logout and tenant change clear the cache.
+- **Data** (ADR-0025). Read on the server through the server-only layer `src/server/api/`; call the API
+  only through the client generated from the committed OpenAPI contract, on the same origin (`/api/v1`,
+  served by the local HTTPS proxy in development). Writes go only through the API — never a Server
+  Action. Never send a tenant header; never read or store a session secret in JavaScript or web storage;
+  attach the CSRF token to writes. TanStack Query only on interactive screens, prefetched on the server;
+  its keys include the tenant and the projection; logout and tenant change clear the cache. Nothing
+  tenant-scoped is cached by Next (`use cache`, fetch caching, static rendering).
 - **Authorization is the API's.** Navigation built from effective permissions is display only; never
   hide a field instead of the API omitting it.
 - **Forms:** React Hook Form with zod for feedback; the server still validates. Money is a decimal

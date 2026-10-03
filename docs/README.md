@@ -35,7 +35,7 @@ the same pull request.
 |---|---|---|
 | [0001](adr/0001-modular-monolith.md) | A modular monolith in three processes | Accepted |
 | [0002](adr/0002-identity-oidc.md) | Identity through an external OIDC provider; the local credential system retired | Accepted · name superseded by 0018 |
-| [0003](adr/0003-browser-sessions.md) | Browser sessions owned by the API, on one origin | Accepted · name superseded by 0018 |
+| [0003](adr/0003-browser-sessions.md) | Browser sessions owned by the API, on one origin | Accepted · name superseded by 0018; cookie names by 0023 |
 | [0004](adr/0004-tenancy-defense-in-depth.md) | Tenancy in depth, enforced by the database | Accepted · name superseded by 0018 |
 | [0005](adr/0005-authorization.md) | A permission catalog, object policies, confidential projections | Accepted |
 | [0006](adr/0006-money.md) | Money as NUMERIC(19,4) with currency rules | Accepted |
@@ -50,8 +50,11 @@ the same pull request.
 | [0015](adr/0015-documentation-as-plan.md) | The documentation is the plan of record | Accepted |
 | [0016](adr/0016-observability.md) | Observability | Accepted |
 | [0017](adr/0017-sql-managed-database-objects.md) | Partial indexes, checks, policies, triggers and grants live in SQL | Accepted |
-| [0018](adr/0018-product-name-sadara.md) | The product is named Sadara | Accepted |
+| [0018](adr/0018-product-name-sadara.md) | The product is named Sadara | Accepted · cookie identifiers superseded by 0023 |
 | [0019](adr/0019-owner-approves-signature-policy.md) | The owner approves the signature evidence policy | Accepted · its default ships as the product default; each agency's owner adopts it (0021) |
 | [0020](adr/0020-local-object-store.md) | The local object store is Versity S3 Gateway | Accepted |
 | [0021](adr/0021-a-product-built-to-sell.md) | Sadara is a product built to sell; its first milestone is a sales demo built as the real product | Accepted |
 | [0022](adr/0022-the-sysrd-stack-kept-current.md) | The SysRD's stack, kept current: its versions are floors, and newer stable releases are preferred | Accepted |
+| [0023](adr/0023-session-cookies-per-rfc-10017.md) | The session cookies follow RFC 10017 (`__Host-Http-` names; `SameSite=Lax` kept, with fetch-metadata checks) | Accepted |
+| [0024](adr/0024-zod-schemas-and-vitest-on-nestjs-12.md) | On NestJS 12: Zod schemas for validation and the contract, Vitest for tests | Accepted |
+| [0025](adr/0025-the-web-app-data-path.md) | The web app reads on the server, writes through the API, and caches nothing tenant-scoped | Accepted |

@@ -38,6 +38,7 @@ edit only Status and Evidence.
 | 0.2.7 | Declared dependencies only; one naming scheme | backend + frontend | todo |  |
 | 0.2.8 | Integration and end-to-end tests in CI | backend | todo |  |
 | 0.2.9 | NestJS 12, TypeScript 6 and an ES-module test setup, together | backend | todo |  |
+| 0.2.10 | Module boundaries, checked from the first module | backend + frontend | todo |  |
 | 0.3.1 | One error format: RFC 9457 problem details | backend | todo |  |
 | 0.3.2 | Strict validation, registered once | backend | todo |  |
 | 0.3.3 | Versioned routes under /api/v1 | backend + frontend | todo |  |
@@ -163,7 +164,7 @@ edit only Status and Evidence.
 | 1.10.7 | Security scanning and evidence collection | umbrella + backend | todo |  |
 | 1.10.8 | Accessibility and responsive browser acceptance | frontend + umbrella | todo |  |
 | 1.10.9 | Accept, promote and launch | umbrella + backend + frontend | todo |  |
-| 1.10.10 | Enforce module and process boundaries | backend + frontend | todo |  |
+| 1.10.10 | Enforce module and process boundaries | backend + frontend | superseded | moved into the foundation as 0.2.10 (3 October 2026) |
 | 1.10.11 | Staging deployment and forward migration orchestration | umbrella | todo |  |
 | 1.10.12 | Alerting, availability and operational response | umbrella | todo |  |
 | 1.10.13 | Independent restore and incident rehearsal | umbrella + backend | todo |  |
