@@ -90,7 +90,7 @@ The four source documents and their checksums: [`../requirements/README.md`](../
 | SR-CORE-006 | SRD | 0.4.8, 1.1.2 | 0/2 |
 | SR-CORE-007 | SRD | 0.9.2, 1.1.3, 1.1.7 | 0/3 |
 | SR-CORE-008 | SRD | 0.10.1, 1.10.4, 2.6.1 | 0/3 |
-| SR-CORE-009 | SRD | 0.1.4, 1.10.3, 4.4.3, 4.5.1 | 0/4 |
+| SR-CORE-009 | SRD | 0.1.4, 1.10.3, 4.4.3, 4.5.1 | 1/4 |
 | SR-CORE-010 | SRD | 0.7.7, 3.4.2, 3.5.1, 4.1.3 | 0/4 |
 | SR-AUTH-001 | SRD | 0.5.4, 4.2.1 | 0/2 |
 | SR-AUTH-002 | SRD | 0.5.8, 1.1.2, 1.1.3, 4.2.1, 4.2.2 | 0/5 |
@@ -229,7 +229,7 @@ The four source documents and their checksums: [`../requirements/README.md`](../
 | SR-NFR-REL-001 | SRD | 1.10.1, 1.10.11, 1.10.12 | 0/3 |
 | SR-NFR-REL-002 | SRD | 1.10.5, 1.10.13, 2.10.2, 3.7.4, 4.3.4 | 0/5 |
 | SR-NFR-OBS-001 | SRD | 0.3.7, 1.10.4, 1.10.12 | 0/3 |
-| SR-NFR-MNT-001 | SRD | 0.2.8, 0.2.10 | 0/2 |
+| SR-NFR-MNT-001 | SRD | 0.2.8, 0.2.10 | 1/2 |
 | SR-NFR-MNT-002 | SRD | 0.2.9, 1.2.2, 1.4.8, 1.10.2, 1.10.11, 1.12.2 | 0/6 |
 | SR-DB-001 | SRD | 0.2.1 | 1/1 |
 | SR-DB-002 | SRD | 0.4.11 | 0/1 |

@@ -46,9 +46,9 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `an_unowned_requirement_is_refused` | 0.1.3 | umbrella | done |
 | `an_edited_frozen_requirement_is_refused` | 0.1.3 | umbrella | done |
 | `a_broken_link_or_anchor_is_refused` | 0.1.3 | umbrella | done |
-| `no_log_line_contains_a_token_or_password` | 0.1.4 | backend + frontend | todo |
-| `urls_are_logged_without_query_strings` | 0.1.4 | backend + frontend | todo |
-| `the_web_client_never_logs_a_request_body` | 0.1.4 | backend + frontend | todo |
+| `no_log_line_contains_a_token_or_password` | 0.1.4 | backend + frontend | done |
+| `urls_are_logged_without_query_strings` | 0.1.4 | backend + frontend | done |
+| `the_web_client_never_logs_a_request_body` | 0.1.4 | backend + frontend | done |
 | `boot_fails_without_a_required_secret` | 0.1.5 | backend | todo |
 | `boot_errors_name_the_variable_but_not_its_value` | 0.1.5 | backend | todo |
 | `swagger_is_served_only_in_development` | 0.1.5 | backend | todo |

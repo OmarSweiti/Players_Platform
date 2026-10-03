@@ -98,8 +98,10 @@ and links, and `guards` proves the checker still refuses each case.
 ### 0.1.4 — Stop secrets and personal data reaching logs and error responses
 **Repo:** backend + frontend · **Size:** M · **Depends on:** `0.2.3`, `0.2.4` · **Requirements:** SR-CORE-009
 **Files:** backend `src/infrastructure/mail/mail.service.ts`, `src/common/interceptors/logging.interceptor.ts`,
-`src/common/filters/http-exception.filter.ts`, every use case that logs an email; frontend
-`src/shared/lib/api-client.ts`; backend `test/security/log-leaks.e2e-spec.ts` (new)
+`src/common/filters/http-exception.filter.ts`, `src/common/logging/` (new), `src/infrastructure/prisma/prisma.service.ts`
+(Prisma's own error log printed the failing call and its values), every use case that logs an email,
+`test/harness/log-capture.ts` (new); frontend `src/shared/lib/api-client.ts`; backend
+`test/security/log-leaks.e2e-spec.ts` (new)
 Today the mail stub writes whole emails — raw reset and verification links included — to the debug log
 in every environment (`mail.service.ts:21–22`); the access log records full URLs, so `?token=…` lands in
 it (`logging.interceptor.ts:24`); unhandled exceptions are `console.error`'d raw and Prisma errors echo
@@ -317,7 +319,8 @@ to 12 with `bullmq` 6; TypeScript 6 — TypeScript 7 waits until typescript-esli
 TypeScript 6 settings decided explicitly (whether to turn `strict` on, given the `any`s of B-9; `types`,
 `rootDir`); Nest's Standard Schema validation registered for the Zod schemas that `0.3.2` writes
 ([ADR-0024](../adr/0024-zod-schemas-and-vitest-on-nestjs-12.md)); the Vitest harness of `0.2.3` proven
-to load the ES-module packages; then the Dependabot holds on those majors are lifted.
+to load the ES-module packages; then the Dependabot holds on those majors are lifted. `@nestjs/swagger` 12
+depends on a fixed js-yaml, so the `overrides` entry that patched it under 11 (backend #42) is removed.
 **Tests:** `the_app_boots_on_nestjs_12` · `the_test_runner_loads_es_module_packages`
 **Verify:** `rm -rf node_modules && npm ci && just check && just test-e2e`
 **Done when:** every `@nestjs/*` package is on 12, TypeScript is on 6, CI is green, and `dependabot.yml`

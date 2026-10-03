@@ -24,7 +24,7 @@ edit only Status and Evidence.
 | 0.1.1 | The documentation set lands; the legacy documents are retired | umbrella + backend + frontend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/19 · https://github.com/OmarSweiti/Players_Platform_Frontend/pull/20 · https://github.com/OmarSweiti/Players_Platform/pull/6 |
 | 0.1.2 | Agent entry files and scoped rules | umbrella + backend + frontend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/19 · https://github.com/OmarSweiti/Players_Platform_Frontend/pull/20 · https://github.com/OmarSweiti/Players_Platform/pull/6 |
 | 0.1.3 | The plan checks itself in CI | umbrella | done | https://github.com/OmarSweiti/Players_Platform/pull/6 |
-| 0.1.4 | Stop secrets and personal data reaching logs and error responses | backend + frontend | todo |  |
+| 0.1.4 | Stop secrets and personal data reaching logs and error responses | backend + frontend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/43 · https://github.com/OmarSweiti/Players_Platform_Frontend/pull/38 |
 | 0.1.5 | Refuse to boot without real configuration | backend | todo |  |
 | 0.1.6 | Retire the local credential system | backend | todo |  |
 | 0.1.7 | Retire the local sign-in pages | frontend | todo |  |
@@ -36,7 +36,7 @@ edit only Status and Evidence.
 | 0.2.5 | Lint and format gates in both applications | backend + frontend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/32 · https://github.com/OmarSweiti/Players_Platform_Backend/pull/33 · https://github.com/OmarSweiti/Players_Platform_Frontend/pull/22 · https://github.com/OmarSweiti/Players_Platform_Frontend/pull/27 · https://github.com/OmarSweiti/Players_Platform_Frontend/pull/29 |
 | 0.2.6 | A production build that starts, in a container | backend | todo |  |
 | 0.2.7 | Declared dependencies only; one naming scheme | backend + frontend | todo |  |
-| 0.2.8 | Integration and end-to-end tests in CI | backend | todo |  |
+| 0.2.8 | Integration and end-to-end tests in CI | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/41 |
 | 0.2.9 | NestJS 12, TypeScript 6 and an ES-module test setup, together | backend | todo |  |
 | 0.2.10 | Module boundaries, checked from the first module | backend + frontend | todo |  |
 | 0.3.1 | One error format: RFC 9457 problem details | backend | todo |  |
