@@ -8,7 +8,7 @@ built as the real product ([ADR-0021](docs/adr/0021-a-product-built-to-sell.md))
 ```
 Players_Platform/     ← the umbrella: the plan (docs/), the local stack (infra/), one pinned commit of each app
 ├── docs/                requirements · implementation plan and progress · references · ADRs
-├── backend/             submodule → Players_Platform_Backend    NestJS 11 · Prisma 7 · PostgreSQL 18
+├── backend/             submodule → Players_Platform_Backend    NestJS 12 · Prisma 7 · PostgreSQL 18
 ├── frontend/            submodule → Players_Platform_Frontend   Next.js 16 · React 19 · TypeScript
 └── infra/               compose: PostgreSQL, Valkey, object store, ClamAV, Mailpit, Keycloak, HTTPS proxy
 ```
