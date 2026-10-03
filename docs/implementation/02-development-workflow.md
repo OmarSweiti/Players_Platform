@@ -23,12 +23,15 @@ Then two terminals, each starting at the umbrella root:
 
 ```bash
 # terminal 1 — the API (on :3000, served at https://<tenant>.localhost/api/ by the proxy)
-cd backend && cp .env.example .env && just migrate && just seed && npm run start:dev
+cd backend && cp .env.example .env    # first time: set the two signing keys (openssl rand -base64 48)
+just migrate && just seed && npm run start:dev
 # terminal 2 — the web app (on :3001, served at https://<tenant>.localhost/ by the proxy)
 cd frontend && npm run dev
 ```
 
-`just migrate` applies migrations as the migrator role (from `0.4.2`); `just seed` loads the synthetic
+The API validates its environment at boot and refuses to start, naming the variable, when one is
+missing or invalid (`0.1.5`); `.env.example` describes each. `just migrate` applies migrations as the
+migrator role (from `0.4.2`); `just seed` loads the synthetic
 tenants and members (from `0.5.11`). Open **`https://sadara.localhost`** — the host selects the tenant —
 and sign in as a development member from the realm (the list is in `infra/keycloak/README.md`). The
 browser only ever talks to one origin, over HTTPS, so the session cookie behaves exactly as in production.
