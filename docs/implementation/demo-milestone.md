@@ -116,9 +116,9 @@ run early.
 stale.*
 
 <!-- plan:milestone:begin -->
-**Demo milestone** — 8 of 125 microsteps done; 604–1208 engineering hours left before the reserve.
+**Demo milestone** — 10 of 125 microsteps done; 598–1196 engineering hours left before the reserve.
 
-Next in build order (every dependency done): `0.2.8`, `0.1.4`, `0.1.5`, `0.1.8`, `0.2.10`, `0.9.1`, `0.1.7`, `0.4.1`. … and 6 more.
+Next in build order (every dependency done): `0.1.5`, `0.1.8`, `0.2.10`, `0.9.1`, `0.1.7`, `0.4.1`, `0.3.1`, `0.3.7`. … and 4 more.
 
 | Stage | Step | Title | Repo | Size | Status |
 |---|---|---|---|---|---|
@@ -130,8 +130,8 @@ Next in build order (every dependency done): `0.2.8`, `0.1.4`, `0.1.5`, `0.1.8`,
 | A | 0.2.4 | The web test harness: Vitest, Testing Library, MSW, Playwright in Arabic and English, axe | frontend | M | done |
 | A | 0.2.5 | Lint and format gates in both applications | backend + frontend | M | done |
 | A | 0.2.3 | The API test harness on a real database | backend | M | done |
-| A | 0.2.8 | Integration and end-to-end tests in CI | backend | S | todo |
-| A | 0.1.4 | Stop secrets and personal data reaching logs and error responses | backend + frontend | M | todo |
+| A | 0.2.8 | Integration and end-to-end tests in CI | backend | S | done |
+| A | 0.1.4 | Stop secrets and personal data reaching logs and error responses | backend + frontend | M | done |
 | A | 0.1.5 | Refuse to boot without real configuration | backend | S | todo |
 | A | 0.1.8 | Quarantine unfinished modules behind server-side flags | backend | S | todo |
 | A | 0.2.10 | Module boundaries, checked from the first module | backend + frontend | M | todo |
