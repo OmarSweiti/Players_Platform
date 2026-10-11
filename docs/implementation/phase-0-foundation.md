@@ -438,14 +438,20 @@ keep their repositories' rows until their rebuilds (`1.11.x`, `2.1.x`) build DTO
 
 ### 0.3.5 — Cursor pagination and allowlisted filters
 **Repo:** backend · **Size:** M · **Depends on:** `0.3.2`, `0.3.4` · **Requirements:** SR-CORE-004, SR-API-004
-**Files:** `src/common/pagination/**`, `src/common/filtering/**` (new)
+**Files:** `src/common/pagination/{cursor,paginate,keyset}.ts`, `src/common/filtering/list-query.ts` (new),
+`test/platform/pagination.integration-spec.ts` (new)
 Keyset pagination over `(createdAt, id)`: `limit` default 25, maximum 100 — above it is a `400`, never a
 silent cap. The cursor is opaque and bound to tenant, sort and filter hash, so a cursor from another
-query is `INVALID_CURSOR`. Filters and sort fields come from a per-endpoint allowlist; no totals unless
-an endpoint needs one, and then counted within the caller's visible scope.
+query is `INVALID_CURSOR`; the hash is recomputed from trusted request state on every use, never read
+from the cursor. Filters and sort fields come from a per-endpoint allowlist (`listQuery`); one sort,
+newest first, until an endpoint needs another with its tiebreaker; no totals unless an endpoint needs
+one, and then counted within the caller's visible scope.
 ```ts
 export interface Page<T> { data: T[]; page: { nextCursor: string | null; hasMore: boolean } }
-export function paginate<T>(query: PageQuery, fetch: (args: KeysetArgs) => Promise<T[]>): Promise<Page<T>>;
+export function paginate<T extends Keyset>(
+  query: { limit: number; cursor?: string; scope: CursorScope }, // scope: tenantId, filters, sort
+  fetch: (args: KeysetArgs) => Promise<T[]>, // KeysetArgs: take, after; keysetWhere(after) for Prisma
+): Promise<Page<T>>;
 ```
 **Tests:** `a_limit_above_100_is_refused` · `cursors_stay_stable_under_inserts` · `a_cursor_from_another_query_is_refused` · `an_unlisted_filter_is_refused`
 **Verify:** `npx vitest run src/common/pagination src/common/filtering`
@@ -453,7 +459,8 @@ export function paginate<T>(query: PageQuery, fetch: (args: KeysetArgs) => Promi
 
 ### 0.3.6 — Optimistic concurrency: revisions, ETag, If-Match
 **Repo:** backend · **Size:** M · **Depends on:** `0.3.4` · **Requirements:** SR-API-005
-**Files:** `src/common/concurrency/**` (new), `test/platform/concurrency.e2e-spec.ts` (new)
+**Files:** `src/common/concurrency/{revision.ts,if-match.decorator.ts}` (new), `src/app.setup.ts` (CORS lets a
+browser send `If-Match` and read `ETag` and `X-Request-Id`), `test/platform/concurrency.e2e-spec.ts` (new)
 Editable aggregates carry `revision Int @default(1)`, added by each domain step as it builds its tables.
 The helper returns a strong, opaque `ETag` bound to the representation, its revision and the caller's
 projection, requires `If-Match` on edits and transitions — missing is

@@ -116,9 +116,9 @@ run early.
 stale.*
 
 <!-- plan:milestone:begin -->
-**Demo milestone** — 25 of 125 microsteps done; 546–1092 engineering hours left before the reserve.
+**Demo milestone** — 27 of 125 microsteps done; 538–1076 engineering hours left before the reserve.
 
-Next in build order (every dependency done): `0.3.5`, `0.3.6`, `0.3.7`, `0.3.8`, `0.10.1`, `0.4.2`, `0.4.4`, `0.4.7`. … and 5 more.
+Next in build order (every dependency done): `0.3.7`, `0.3.8`, `0.3.9`, `0.10.1`, `0.4.2`, `0.4.4`, `0.4.7`, `0.4.8`. … and 4 more.
 
 | Stage | Step | Title | Repo | Size | Status |
 |---|---|---|---|---|---|
@@ -147,8 +147,8 @@ Next in build order (every dependency done): `0.3.5`, `0.3.6`, `0.3.7`, `0.3.8`,
 | C | 0.3.2 | Strict validation, registered once | backend | S | done |
 | C | 0.3.3 | Versioned routes under /api/v1 | backend + frontend | S | done |
 | C | 0.3.4 | One success envelope, registered once | backend | S | done |
-| C | 0.3.5 | Cursor pagination and allowlisted filters | backend | M | todo |
-| C | 0.3.6 | Optimistic concurrency: revisions, ETag, If-Match | backend | M | todo |
+| C | 0.3.5 | Cursor pagination and allowlisted filters | backend | M | done |
+| C | 0.3.6 | Optimistic concurrency: revisions, ETag, If-Match | backend | M | done |
 | C | 0.3.7 | Liveness and real readiness | backend | S | todo |
 | C | 0.3.8 | Rate limits by category, shared through Valkey | backend | M | todo |
 | C | 0.3.9 | The committed OpenAPI contract and the breaking-change check | backend | M | todo |

@@ -31,7 +31,7 @@ edit only Status and Evidence.
 | 0.1.8 | Quarantine unfinished modules behind server-side flags | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/46 |
 | 0.2.1 | The local stack: PostgreSQL 18, S3-compatible storage, Valkey, ClamAV, Mailpit, Keycloak | umbrella + frontend | done | https://github.com/OmarSweiti/Players_Platform/pull/11 · https://github.com/OmarSweiti/Players_Platform_Frontend/pull/31 |
 | 0.2.2 | PostgreSQL 18 in CI and in the replay recipe | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/31 |
-| 0.2.3 | The API test harness on a real database | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/39 · https://github.com/OmarSweiti/Players_Platform_Backend/pull/49 |
+| 0.2.3 | The API test harness on a real database | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/39 · https://github.com/OmarSweiti/Players_Platform_Backend/pull/49 · https://github.com/OmarSweiti/Players_Platform_Backend/pull/62 |
 | 0.2.4 | The web test harness: Vitest, Testing Library, MSW, Playwright in Arabic and English, axe | frontend | done | https://github.com/OmarSweiti/Players_Platform_Frontend/pull/23 |
 | 0.2.5 | Lint and format gates in both applications | backend + frontend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/32 · https://github.com/OmarSweiti/Players_Platform_Backend/pull/33 · https://github.com/OmarSweiti/Players_Platform_Frontend/pull/22 · https://github.com/OmarSweiti/Players_Platform_Frontend/pull/27 · https://github.com/OmarSweiti/Players_Platform_Frontend/pull/29 |
 | 0.2.6 | A production build that starts, in a container | backend | todo |  |
@@ -43,8 +43,8 @@ edit only Status and Evidence.
 | 0.3.2 | Strict validation, registered once | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/57 |
 | 0.3.3 | Versioned routes under /api/v1 | backend + frontend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/58 · https://github.com/OmarSweiti/Players_Platform_Frontend/pull/47 |
 | 0.3.4 | One success envelope, registered once | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/59 |
-| 0.3.5 | Cursor pagination and allowlisted filters | backend | todo |  |
-| 0.3.6 | Optimistic concurrency: revisions, ETag, If-Match | backend | todo |  |
+| 0.3.5 | Cursor pagination and allowlisted filters | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/60 |
+| 0.3.6 | Optimistic concurrency: revisions, ETag, If-Match | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/61 |
 | 0.3.7 | Liveness and real readiness | backend | todo |  |
 | 0.3.8 | Rate limits by category, shared through Valkey | backend | todo |  |
 | 0.3.9 | The committed OpenAPI contract and the breaking-change check | backend | todo |  |
