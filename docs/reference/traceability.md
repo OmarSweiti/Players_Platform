@@ -228,7 +228,7 @@ The four source documents and their checksums: [`../requirements/README.md`](../
 | SR-NFR-I18N-001 | SRD | 0.9.2, 1.1.7, 1.10.15 | 1/3 |
 | SR-NFR-REL-001 | SRD | 1.10.1, 1.10.11, 1.10.12 | 0/3 |
 | SR-NFR-REL-002 | SRD | 1.10.5, 1.10.13, 2.10.2, 3.7.4, 4.3.4 | 0/5 |
-| SR-NFR-OBS-001 | SRD | 0.3.7, 1.10.4, 1.10.12 | 0/3 |
+| SR-NFR-OBS-001 | SRD | 0.3.7, 1.10.4, 1.10.12 | 1/3 |
 | SR-NFR-MNT-001 | SRD | 0.2.8, 0.2.10 | 2/2 |
 | SR-NFR-MNT-002 | SRD | 0.2.9, 1.2.2, 1.4.8, 1.10.2, 1.10.11, 1.12.2 | 1/6 |
 | SR-DB-001 | SRD | 0.2.1 | 1/1 |
