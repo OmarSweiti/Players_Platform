@@ -87,8 +87,8 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `a_stale_if_match_is_refused_with_412` | 0.3.6 | backend | done |
 | `a_missing_if_match_is_refused_with_428` | 0.3.6 | backend | done |
 | `two_concurrent_edits_produce_one_winner` | 0.3.6 | backend | done |
-| `readiness_fails_when_the_database_is_down` | 0.3.7 | backend | todo |
-| `readiness_fails_when_valkey_is_down` | 0.3.7 | backend | todo |
+| `readiness_fails_when_the_database_is_down` | 0.3.7 | backend | done |
+| `readiness_fails_when_valkey_is_down` | 0.3.7 | backend | done |
 | `each_category_applies_its_own_limit` | 0.3.8 | backend | todo |
 | `limits_hold_across_two_api_instances` | 0.3.8 | backend | todo |
 | `a_spoofed_forwarded_for_header_is_ignored` | 0.3.8 | backend | todo |

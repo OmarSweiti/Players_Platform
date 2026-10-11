@@ -472,12 +472,15 @@ with an atomic increment. Immutable records (versions, decisions) accept no `PAT
 
 ### 0.3.7 — Liveness and real readiness
 **Repo:** backend · **Size:** S · **Depends on:** `0.2.3` · **Requirements:** SR-NFR-OBS-001
-**Files:** `src/health/health.controller.ts`, `test/platform/health.e2e-spec.ts` (new)
+**Files:** `src/health/{health.controller,health.module,readiness.service,probes}.ts`, `src/app.setup.ts`,
+`src/app.module.ts`, `src/main.ts`, `src/common/filters/problem-details.filter.ts`, `test/harness/{app,routes}.ts`,
+`test/platform/health.e2e-spec.ts` (new), `test/platform/probes.integration-spec.ts` (new)
 `GET /health/live` answers while the process runs; `GET /health/ready` checks PostgreSQL and Valkey (and
-the identity provider's configuration once `0.5.4` lands) — today it returns "ready" unconditionally
+the identity provider's configuration once `0.5.4` lands), each within one second, and answers a `503`
+`DEPENDENCY_UNAVAILABLE` problem when one does not — today it returns "ready" unconditionally
 (`health.controller.ts:20–27`). Neither reveals versions or configuration. These are the first routes outside
-the `/api` prefix, where an unknown path still gets Express's own HTML 404 today (0.3.1): this step makes
-every error a problem, wherever the path.
+the `/api` prefix (the old `/api/health` goes), where an unknown path still gets Express's own HTML 404 today
+(0.3.1): this step makes every error a problem, wherever the path.
 **Tests:** `readiness_fails_when_the_database_is_down` · `readiness_fails_when_valkey_is_down`
 **Verify:** `just test-e2e -- test/platform/health.e2e-spec.ts`
 **Done when:** readiness reports `503` with the database or Valkey stopped, and `200` when both return.
