@@ -77,6 +77,37 @@ Use `application/problem+json` following [RFC 9457](https://www.rfc-editor.org/r
 
 For unreadable resource identifiers, authorization precedes detailed existence, revision and business-state errors. Do not turn a cross-tenant ID into a 412 or a uniqueness message that confirms its existence. Authentication, CSRF and validation failures do not enter the mutation transaction.
 
+## Rate limits
+
+Every route counts its requests against one category, in Valkey, so that every API instance enforces the
+same limits (`0.3.8`, SR-API-008). A route declares its category with `@RateLimit('…')`; a route that
+declares none is `default`. A window opens with a client's first request in a category. Past the limit,
+the answer is `429 RATE_LIMITED` with `Retry-After`: the whole seconds until the window closes, never
+more than the window.
+
+| Category | Limit | Routes |
+|---|---|---|
+| `auth` | 20 per 15 minutes | sign-in start and callback, invitation acceptance |
+| `upload` | 60 per 10 minutes | starting an upload |
+| `export` | 10 per hour | requesting an export |
+| `message` | 60 per minute | sending a message |
+| `privileged` | 30 per 10 minutes | approvals, signature initiation, permission changes, support access |
+| `default` | 300 per minute | every other route |
+
+These are initial engineering defaults, reviewed against measured traffic. Each category is stricter
+than `default`.
+
+- **Who counts.** A signed-in member counts as themselves; anyone else as their address, an IPv6 client
+  as its /64. `auth` always counts by address. The sign-in callback and invitation acceptance also count
+  by account once they know it (`0.5.5`, `0.5.10`), and their refusal is the same whether or not the
+  account exists.
+- **The client's address** is whoever connected, unless `TRUSTED_PROXIES` names the proxy it came
+  through; then it is the address that proxy appended to `X-Forwarded-For`, and nothing a client writes in
+  the header chooses what it counts as. A deployment behind a load balancer names the balancer.
+- **Without Valkey**, a limited request is refused with `503 DEPENDENCY_UNAVAILABLE`, not served without
+  a limit, and readiness fails. Only the probes are not limited.
+- Public shares and certificate verification get limits of their own with those features (SR-API-009).
+
 ## Collections, filtering and search
 
 Default `limit=25`, maximum 100; larger values fail validation. Default ordering is `(createdAt DESC, id DESC)` with lexicographic keyset pagination. The cursor encodes a versioned last sort tuple and a fingerprint of tenant, filter, sort and projection scope; sign it or validate it against trusted request state, and reject incompatible reuse. The cursor never grants access. Every page reruns authorization and field projection.
