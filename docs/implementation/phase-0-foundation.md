@@ -487,12 +487,20 @@ the `/api` prefix (the old `/api/health` goes), where an unknown path still gets
 
 ### 0.3.8 — Rate limits by category, shared through Valkey
 **Repo:** backend · **Size:** M · **Depends on:** `0.2.3` · **Requirements:** SR-API-008, SR-AUTH-004
-**Files:** `src/common/rate-limit/**` (new), `src/app.module.ts`, `src/config/env.schema.ts`, `test/platform/rate-limits.e2e-spec.ts` (new)
-A global guard backed by Valkey (so limits hold across instances), with categories `auth` (sign-in
-start, callback, invitation acceptance — per IP and per account), `upload`, `export`, `message`,
-`privileged` and `default` ([`../reference/api.md`](../reference/api.md)), `Retry-After` on `429`, and a
-trusted-proxy setting so the client address is not spoofable. Credential brute-force protection itself
-lives at the identity provider (`0.5.1`).
+**Files:** `src/common/rate-limit/**` (new), `src/common/errors/domain-error.ts`, `src/common/filters/problem-details.filter.ts`,
+`src/app.module.ts`, `src/app.setup.ts`, `src/main.ts`, `src/config/env.schema.ts`, `src/health/health.controller.ts`,
+`.env.example`, `test/harness/app.ts`, `test/platform/rate-limits.e2e-spec.ts` (new)
+A global guard, after the session guard, that counts every request in Valkey so that limits hold across
+instances: a window opens with a client's first request in a category, and one transaction counts it and
+sets its expiry. The categories are `auth` (sign-in start, callback, invitation acceptance), `upload`,
+`export`, `message`, `privileged` and `default`, each stricter than `default`; their limits are in
+[`../reference/api.md`](../reference/api.md#rate-limits). A signed-in member counts as themselves; anyone
+else counts as their address, an IPv6 client as its /64. `auth` always counts by address, and `0.5.5` and
+`0.5.10` add the per-account count where the account is known. `429 RATE_LIMITED` carries `Retry-After`,
+never longer than the window. `TRUSTED_PROXIES` names the proxies whose `X-Forwarded-For` is believed,
+none by default, so the client address is not spoofable. Without Valkey, a limited request is refused
+with `503`: the limits fail closed, and only the probes go unlimited. Credential brute-force protection
+itself lives at the identity provider (`0.5.1`).
 **Tests:** `each_category_applies_its_own_limit` · `limits_hold_across_two_api_instances` · `a_spoofed_forwarded_for_header_is_ignored`
 **Verify:** `just test-e2e -- test/platform/rate-limits.e2e-spec.ts`
 **Done when:** the three tests pass with two API instances sharing one Valkey.
@@ -785,7 +793,9 @@ redirects to the provider with the tenant's locale. `GET /api/v1/auth/callback` 
 once, exchanges the code, verifies the ID token, and looks up the membership of **that identity in the
 host's tenant**: none, archived or inactive means a refusal page and no session (and a security event,
 `0.7.3`); otherwise this step creates the `UserSession` row, issues the `__Host-Http-sadara_session` cookie ([ADR-0023](../adr/0023-session-cookies-per-rfc-10017.md)) and returns
-the browser to `returnTo`. Authenticating later requests with it, expiry and CSRF are `0.5.6`.
+the browser to `returnTo`. Both routes are in the `auth` rate-limit category (`0.3.8`): the guard counts by
+address, and the callback also counts by account, through `RateLimiter.take('auth', 'account:<id>')`, once
+the ID token names the identity. Authenticating later requests with it, expiry and CSRF are `0.5.6`.
 **Tests:** `a_member_signs_in_end_to_end` · `a_non_member_gets_no_session` · `a_replayed_or_mismatched_state_is_refused` · `a_callback_from_another_browser_is_refused` · `return_to_cannot_leave_the_origin`
 **Verify:** `just test-e2e -- test/auth/sign-in.e2e-spec.ts`
 **Done when:** the five tests pass against the test issuer — including a login-CSRF attempt, in which a
@@ -863,7 +873,8 @@ provider account and an `Invitation` — email, role, seven-day expiry. Its sing
 in the email — so no outbox payload, log or table ever holds a usable link; a resend issues a new token;
 the inviter cannot grant a role above their own. The emailed link starts a sign-in that carries the
 invitation; the callback binds the membership only when **both** the token matches **and** the provider
-asserts that verified email — proof of mailbox and identity, never email alone. `DELETE` revokes; the
+asserts that verified email — proof of mailbox and identity, never email alone. Acceptance is in the `auth`
+rate-limit category (`0.3.8`), counted by address and, once the invitation names it, by account. `DELETE` revokes; the
 list shows pending, accepted, expired and revoked.
 **Tests:** `accepting_binds_the_invited_role_to_the_signed_in_identity` · `an_invitation_works_once` · `an_expired_invitation_is_refused` · `an_admin_cannot_invite_above_their_role` · `invitation_tokens_are_stored_hashed`
 **Verify:** `just test-e2e -- test/users/invitations.e2e-spec.ts`

@@ -95,7 +95,7 @@ The four source documents and their checksums: [`../requirements/README.md`](../
 | SR-AUTH-001 | SRD | 0.5.4, 4.2.1 | 0/2 |
 | SR-AUTH-002 | SRD | 0.5.8, 1.1.2, 1.1.3, 4.2.1, 4.2.2 | 0/5 |
 | SR-AUTH-003 | SRD | 0.5.6 | 0/1 |
-| SR-AUTH-004 | SRD | 0.3.8, 0.5.1 | 0/2 |
+| SR-AUTH-004 | SRD | 0.3.8, 0.5.1 | 1/2 |
 | SR-AUTH-005 | SRD | 0.1.6 | 1/1 |
 | SR-AUTH-006 | SRD | 0.1.6 | 1/1 |
 | SR-AUTH-007 | SRD | 0.5.7, 1.1.3, 4.2.1, 4.6.1 | 0/4 |
@@ -216,7 +216,7 @@ The four source documents and their checksums: [`../requirements/README.md`](../
 | SR-API-005 | SRD | 0.3.6, 1.4.3, 1.5.5 | 1/3 |
 | SR-API-006 | SRD | 1.9.1, 2.4.3, 2.9.1, 3.4.6, 3.6.2 | 0/5 |
 | SR-API-007 | SRD | 3.4.2, 3.4.6, 3.5.1, 4.4.1 | 0/4 |
-| SR-API-008 | SRD | 0.3.8, 2.6.5 | 0/2 |
+| SR-API-008 | SRD | 0.3.8, 2.6.5 | 1/2 |
 | SR-API-009 | SRD | 2.3.4, 3.3.2, 3.3.3, 3.7.1, 4.4.1, 4.4.2 | 0/6 |
 | SR-NFR-PERF-001 | SRD | 1.10.6, 2.10.1, 3.7.3, 4.1.7, 4.3.3, 4.7.2 | 0/6 |
 | SR-NFR-PERF-002 | SRD | 0.8.3, 1.3.2, 1.10.6, 2.8.1, 3.7.3, 4.1.7 | 0/6 |
