@@ -111,12 +111,12 @@ half the weighted total to the full total. Do **not** divide by an assumed AI sp
 
 | Phase | Microsteps | S · M · L | Hours before reserve | With 30% reserve, at 25 h/week |
 |---|---:|---|---:|---:|
-| 0 | 84 | 22 · 51 · 11 | 336–672 | 17–35 weeks |
+| 0 | 85 | 22 · 52 · 11 | 340–680 | 18–35 weeks |
 | 1 | 76 (+1 superseded) | 0 · 22 · 54 | 520–1040 | 27–54 weeks |
 | 2 | 44 | 0 · 13 · 31 | 300–600 | 16–31 weeks |
 | 3 | 22 | 0 · 5 · 17 | 156–312 | 8–16 weeks |
 | 4 | 25 | 0 · 3 · 22 | 188–376 | 10–20 weeks |
-| **All** | **251** (+1 superseded) | 22 · 94 · 135 | 1500–3000 | 78–156 weeks |
+| **All** | **252** (+1 superseded) | 22 · 95 · 135 | 1504–3008 | 78–156 weeks |
 | *[Demo milestone](demo-milestone.md)* | *125 (7 done)* | *20 · 54 · 44 left* | *608–1216 left* | *32–63 weeks by this model; about 19 at the measured pace* |
 
 Phase 0's sizes were set step by step against the code; the later phases were sized conservatively —

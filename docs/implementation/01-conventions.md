@@ -147,6 +147,7 @@ suite fails; "verified locally" is still in progress.
 | Functions, fields | camelCase | `withTenantTransaction`, `signedAt` |
 | Constants, enums, error codes | UPPER_SNAKE | `CONTRACT_NOT_APPROVABLE` |
 | Prisma models | singular PascalCase, mapped to plural snake_case tables | `model LegalTicket` → `legal_tickets` |
+| Database names | lower snake_case: a camelCase field is mapped (`@map`), an enum type too (`@@map`); a catalog test refuses any other name *(from 0.4.0)* | `tenantId` → `tenant_id` |
 | Permissions | `category.action` keys declared explicitly — never parsed | `contract.approve` |
 | Routes | plural kebab-case nouns; actions as sub-resources | `POST /api/v1/contracts/{id}/approvals` |
 | Migrations | name the invariant | `…_tenant_rls`, never `…_fix` |
