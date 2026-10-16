@@ -100,6 +100,7 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `the_runtime_role_owns_no_table` | 0.4.2 | backend + umbrella | todo |
 | `the_runtime_role_cannot_run_ddl` | 0.4.2 | backend + umbrella | todo |
 | `the_runtime_role_cannot_bypass_rls` | 0.4.2 | backend + umbrella | todo |
+| `the_runtime_role_has_bounded_work` | 0.4.2 | backend + umbrella | todo |
 | `queries_run_inside_the_tenant_transaction` | 0.4.3 | backend | todo |
 | `a_context_cannot_be_built_from_request_input` | 0.4.3 | backend | todo |
 | `the_setting_does_not_outlive_its_transaction` | 0.4.3 | backend | todo |
@@ -107,12 +108,14 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `a_treatment_cannot_cite_another_players_record` | 0.4.4 | backend | todo |
 | `attendance_cannot_mix_training_programs` | 0.4.4 | backend | todo |
 | `no_composite_foreign_key_uses_set_null` | 0.4.4 | backend | todo |
+| `no_foreign_key_cascades_a_key_change` | 0.4.4 | backend | todo |
 | `rls_missing_context_denies_reads_and_writes` | 0.4.5 | backend | todo |
 | `rls_pool_reuse_never_leaks_the_previous_tenant` | 0.4.5 | backend | todo |
 | `every_tenant_table_has_forced_rls_and_a_policy` | 0.4.5 | backend | todo |
 | `tenant_ids_cannot_be_updated` | 0.4.5 | backend | todo |
 | `the_tenant_directory_exposes_only_routing_columns` | 0.4.5 | backend | todo |
 | `every_index_on_a_tenant_table_leads_with_tenant_id` | 0.4.6 | backend | todo |
+| `every_foreign_key_is_served_by_an_index` | 0.4.6 | backend | todo |
 | `jod_amounts_keep_three_decimals` | 0.4.7 | backend | todo |
 | `excess_scale_is_refused_not_rounded` | 0.4.7 | backend | todo |
 | `money_never_passes_through_a_javascript_number` | 0.4.7 | backend | todo |
@@ -182,6 +185,7 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `an_unclassified_new_field_fails_the_suite` | 0.6.4 | backend | todo |
 | `own_record_access_requires_a_live_link` | 0.6.5 | backend | todo |
 | `an_expired_guardian_link_denies_access` | 0.6.5 | backend | todo |
+| `assigned_access_requires_a_live_staff_assignment` | 0.6.5 | backend | todo |
 | `the_session_lists_effective_permissions` | 0.6.6 | backend | todo |
 | `a_role_change_applies_on_the_next_request` | 0.6.6 | backend | todo |
 | `super_admin_reads_no_tenant_data` | 0.6.7 | backend | todo |
@@ -202,6 +206,7 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `role_changes_record_before_and_after` | 0.7.2 | backend | todo |
 | `a_refused_sign_in_is_recorded_without_a_tenant` | 0.7.3 | backend | todo |
 | `security_events_are_append_only` | 0.7.3 | backend | todo |
+| `provider_sign_in_failures_reach_security_events` | 0.7.3 | backend | todo |
 | `reading_a_medical_record_leaves_an_access_event` | 0.7.4 | backend | todo |
 | `a_failed_access_audit_withholds_the_data` | 0.7.4 | backend | todo |
 | `a_rolled_back_change_enqueues_nothing` | 0.7.5 | backend | todo |
