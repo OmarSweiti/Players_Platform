@@ -507,15 +507,25 @@ itself lives at the identity provider (`0.5.1`).
 
 ### 0.3.9 — The committed OpenAPI contract and the breaking-change check
 **Repo:** backend · **Size:** M · **Depends on:** `0.3.2`, `0.3.3`, `0.3.4`, `0.3.5` · **Requirements:** SR-CORE-002, TEST-004
-**Files:** `scripts/export-openapi.ts` (new), `openapi/openapi.json` (new, committed), `nest-cli.json`,
-`src/main.ts`, `.github/workflows/ci.yml`, `justfile`
+**Files:** `src/common/openapi/{contract,responses,zod-schema-converter}.ts` (new), `src/contract.ts` (new),
+`scripts/{export-openapi,contract-env}.ts` (new), `openapi/openapi.json` (new, committed),
+`scripts/{check-breaking-contract,install-oasdiff}.sh` (new), `scripts/test-policy.sh`, `src/app.setup.ts`,
+`src/config/swagger.ts`, `src/health/health.controller.ts`, `src/common/feature-flags/feature-gate.guard.ts`,
+`src/common/concurrency/if-match.decorator.ts`, `.github/workflows/ci.yml`, `justfile`, `CONTRIBUTING.md`,
+`test/platform/contract.e2e-spec.ts` (new)
 `@nestjs/swagger` 12 generates the document, OpenAPI 3.1, from the same Zod schemas through its
-`standardSchemaConverter` ([ADR-0024](../adr/0024-zod-schemas-and-vitest-on-nestjs-12.md)); the document registers the session-cookie scheme
-and the CSRF header (today two controllers reference an unregistered `bearer` scheme, `main.ts:59–69`)
-and is titled **Sadara API**. `npm run openapi` writes it without starting a server; CI fails if the
-committed file differs from the generated one and runs `oasdiff breaking` against `development`'s copy —
-a breaking change needs `v2` of that endpoint or a reviewed exception
-([ADR-0010](../adr/0010-api-contract.md)).
+`standardSchemaConverter`, as JSON Schema 2020-12 ([ADR-0024](../adr/0024-zod-schemas-and-vitest-on-nestjs-12.md)),
+in Nest's preview mode, so `npm run openapi` starts no server and reaches no database. It is titled
+**Sadara API** and registers the session cookie and the CSRF header; the unregistered `bearer` scheme is
+gone. Each route declares its success (`@Returns`, `@ReturnsPage`) and the problems it raises itself
+(`@Raises`); its security and the problems the HTTP pipeline can answer it with are derived from its route
+(public, `If-Match`, path, body, rate limit), and generation fails on a route that declares no success.
+Gated modules (`0.1.8`) stay out of the contract until they are rebuilt. CI fails if the committed file
+differs from the generated one and runs `oasdiff breaking` (pinned and digest-verified) against
+`development`'s copy — a breaking change needs `v2` of that endpoint or a reviewed exception: a line of
+`openapi/breaking-changes.allowed` as `development` holds it, so a change cannot excuse itself
+([ADR-0010](../adr/0010-api-contract.md)). `just contract` runs both locally, and the guards prove the
+check refuses.
 **Tests:** `the_committed_contract_matches_the_code` · `problem_details_are_declared_for_every_operation`
 **Verify:** `npm run openapi && git diff --exit-code openapi/openapi.json`
 **Done when:** CI regenerates and diffs the contract on every pull request, and every operation declares
