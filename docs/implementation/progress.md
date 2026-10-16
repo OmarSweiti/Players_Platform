@@ -48,6 +48,7 @@ edit only Status and Evidence.
 | 0.3.7 | Liveness and real readiness | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/63 |
 | 0.3.8 | Rate limits by category, shared through Valkey | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/66 |
 | 0.3.9 | The committed OpenAPI contract and the breaking-change check | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/67 |
+| 0.4.0 | One naming scheme in the database: lower snake_case | backend | todo |  |
 | 0.4.1 | Preflight: report every integrity violation before constraining anything | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/48 |
 | 0.4.2 | Database roles: owner, migrator, runtime | backend + umbrella | todo |  |
 | 0.4.3 | Explicit tenant context and the tenant transaction | backend | todo |  |

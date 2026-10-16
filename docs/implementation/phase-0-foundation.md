@@ -5,7 +5,7 @@
 > row-level security, authorization, atomic audit, durable work, a private file pipeline, the API
 > contract and the bilingual shell are in place, tested and green in CI.
 
-**Effort:** 84 microsteps — 22 S, 51 M, 11 L — **336–672 engineering hours** before the 30% reserve
+**Effort:** 85 microsteps — 22 S, 52 M, 11 L — **340–680 engineering hours** before the 30% reserve
 (the size weights are ceilings); [`00-master-plan.md`](00-master-plan.md#effort-model) turns that into a
 forecast and recalibrates it from measured hours after the first five steps. No new product
 features: the demonstrations are about what can no longer go wrong.
@@ -542,6 +542,24 @@ refuse what the code might forget ([ADR-0004](../adr/0004-tenancy-defense-in-dep
 grants are written in migration SQL and proven by catalog tests, because Prisma's drift check neither
 sees nor protects them ([ADR-0017](../adr/0017-sql-managed-database-objects.md)).*
 
+### 0.4.0 — One naming scheme in the database: lower snake_case
+**Repo:** backend · **Size:** M · **Depends on:** `0.4.1` · **Requirements:** —
+**Files:** `prisma/schema.prisma`, migration `…_snake_case_names`, `scripts/preflight.sql`,
+`test/db/naming.integration-spec.ts` (new)
+The tables are snake_case, but their 282 columns, the 26 enum types and the index and constraint names
+built from them are camelCase, so every SQL statement must quote them (`"tenantId"`) — DB-49, decided by
+the owner on 16 October 2026: rename, before this group writes most of the project's SQL. Every camelCase
+field gets `@map("snake_case")` and every enum `@@map`; the Prisma client keeps its field names, so no
+application code changes. One forward-only migration renames in place — `RENAME COLUMN`, `ALTER TYPE …
+RENAME TO`, `ALTER INDEX … RENAME TO`, `RENAME CONSTRAINT` — never a drop and an add, so no row moves; the
+preflight's SQL follows. A catalog test refuses any table, column, type, index or constraint name that is
+not lower snake_case, so a field added later without its `@map` fails CI. The step's record moves the
+plan's SQL examples and constraint names to the new names.
+**Tests:** `every_database_name_is_lower_snake_case`
+**Verify:** `just migrations && just preflight && just test-int -- naming && just test-e2e`
+**Done when:** the catalog test passes, `just migrations` reports no drift, and every existing suite
+passes unchanged.
+
 ### 0.4.1 — Preflight: report every integrity violation before constraining anything
 **Repo:** backend · **Size:** M · **Depends on:** `0.2.2` · **Requirements:** SR-DB-003
 **Files:** `scripts/preflight.sql` (new), `scripts/preflight.ts` (new), `justfile` (`preflight`, and `scripts/` joins the
@@ -561,7 +579,7 @@ migrations still move forward only, and a database with any real account follows
 clean one.
 
 ### 0.4.2 — Database roles: owner, migrator, runtime
-**Repo:** backend + umbrella · **Size:** M · **Depends on:** `0.2.1`, `0.2.2` · **Requirements:** SR-NFR-SEC-002
+**Repo:** backend + umbrella · **Size:** M · **Depends on:** `0.4.0`, `0.2.1`, `0.2.2` · **Requirements:** SR-NFR-SEC-002
 **Files:** umbrella `infra/postgres/init/10-roles.sql`, `infra/compose.yaml`; backend `prisma.config.ts`, `src/config/env.schema.ts`,
 `.github/workflows/ci.yml`, `justfile`, `test/db/roles.integration-spec.ts` (new)
 `sadara_owner` (NOLOGIN) owns the schema; `sadara_migrator` assumes it only to run migrations
@@ -601,7 +619,7 @@ export function withTenantTransaction<T>(ctx: AuthorizedTenantContext, fn: (tx: 
 **Done when:** the three tests pass and the lint rule rejects a module that imports the root client.
 
 ### 0.4.4 — Composite and same-parent foreign keys
-**Repo:** backend · **Size:** M · **Depends on:** `0.4.1` · **Requirements:** SYS-TEN-004
+**Repo:** backend · **Size:** M · **Depends on:** `0.4.0` · **Requirements:** SYS-TEN-004
 **Files:** `prisma/schema.prisma`, migration `…_tenant_integrity`, `test/db/foreign-keys.integration-spec.ts` (new)
 Make `Contract.season` (`schema.prisma:638`), `Training.season` (`:834`), `PerformanceRecord.season`
 (`:756`), `LegalTicket.assignedTo` (`:975`), `Message.sender` (`:1287`) and `AuditLog.user` (`:1358`)
@@ -651,7 +669,7 @@ of another: six foreign keys gain an index, and 25 redundant indexes go (DB-54).
 **Done when:** the catalog test passes with a short, reviewed allowlist of tenant-safe exceptions.
 
 ### 0.4.7 — Money: NUMERIC(19,4) with currency rules
-**Repo:** backend · **Size:** M · **Depends on:** `0.4.1` · **Requirements:** —
+**Repo:** backend · **Size:** M · **Depends on:** `0.4.0` · **Requirements:** —
 **Files:** `src/common/money/money.ts` (new), `prisma/schema.prisma`, migration `…_money`, contract and training DTOs
 Money columns become `Decimal @db.Decimal(19, 4)` (today `Decimal(…, 2)` — JOD has three decimals;
 `schema.prisma:616, 621, 825, 898`); a global `CurrencyDefinition(code, minorUnitExponent, enabled)` is
@@ -670,7 +688,7 @@ export class Money { static parse(amount: string, currency: CurrencyCode): Money
 is refused, and no money column keeps scale 2.
 
 ### 0.4.8 — Calendar dates, instants and tenant time zones
-**Repo:** backend · **Size:** M · **Depends on:** `0.4.1` · **Requirements:** SR-CORE-006, UX-007
+**Repo:** backend · **Size:** M · **Depends on:** `0.4.0` · **Requirements:** SR-CORE-006, UX-007
 **Files:** `prisma/schema.prisma`, migration `…_dates_instants_zones`, `src/common/time/**` (new), `test/db/time.integration-spec.ts` (new)
 Civil values — birth dates, passport expiry, contract and season boundaries — become `DATE`; every
 instant becomes `timestamptz(3)`, converted `AT TIME ZONE 'UTC'` only where the preflight shows the
@@ -683,7 +701,7 @@ leave the untyped `settings` JSON. Rules take an injected clock ([ADR-0007](../a
 no longer holds the three typed values.
 
 ### 0.4.9 — Normalised emails; lifetime uniqueness with audited reactivation
-**Repo:** backend · **Size:** S · **Depends on:** `0.4.1` · **Requirements:** SR-ACL-002
+**Repo:** backend · **Size:** S · **Depends on:** `0.4.0` · **Requirements:** SR-ACL-002
 **Files:** `prisma/schema.prisma`, migration `…_normalized_email`, `src/modules/users/**`
 `normalizedEmail` (trimmed, lowercased, Unicode-normalised) is unique per tenant **for the life of the
 membership**: an archived member keeps the address reserved, and bringing them back is an audited
@@ -710,7 +728,7 @@ length CHECK equal to its API bound (DB-56).
 constraint by name.
 
 ### 0.4.11 — UUIDv7 for high-ingest tables
-**Repo:** backend · **Size:** S · **Depends on:** `0.4.1` · **Requirements:** SR-DB-002
+**Repo:** backend · **Size:** S · **Depends on:** `0.4.0` · **Requirements:** SR-DB-002
 **Files:** `prisma/schema.prisma`, `src/infrastructure/prisma/model-classification.ts`
 UUID keys stay (v4 by default); append-heavy tables whose index locality matters — audit logs, security
 events, outbox and inbox, sessions, messages, notifications — use `@default(uuid(7))`, declared when each
