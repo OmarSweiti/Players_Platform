@@ -40,7 +40,7 @@ Group arrows summarize; each step's dependencies below are authoritative. A late
 ### 2.1.2 — Enforce purpose and immutable clinical amendments
 **Repo:** backend · **Size:** L · **Depends on:** `2.1.1` · **Requirements:** SR-MED-001/004, BR-RULE-07, SR-AUD-002/004
 **Files:** `backend/src/modules/medical/application/records.service.ts` · `backend/src/modules/medical/domain/medical.policy.ts` · `backend/test/medical/records.e2e-spec.ts`
-**Build:** Implement readRecord(ctx,id,purpose) and amendRecord(ctx,id,revision,change,reason). Require active patient relationship or approved explicit recipient grant, confidential permission and permitted purpose. Audit reads before releasing content; amendments preserve prior values in restricted evidence. Apply approved versioned encryption/decrypt boundary; test tamper refusal and key recovery. Attachments use MedicalRecordDocument→FileObject and never broaden visibility.
+**Build:** Implement readRecord(ctx,id,purpose) and amendRecord(ctx,id,revision,change,reason). Require an active patient relationship — a MEDICAL staff assignment (0.6.5, DB-60) — or approved explicit recipient grant, confidential permission and permitted purpose. Audit reads before releasing content; amendments preserve prior values in restricted evidence. Apply approved versioned encryption/decrypt boundary; test tamper refusal and key recovery. Attachments use MedicalRecordDocument→FileObject and never broaden visibility.
 **Tests:** `medical_unassigned_user_and_unapproved_purpose_are_denied` · `medical_amendments_preserve_prior_clinical_evidence` · `medical_ciphertext_tamper_and_key_restore_are_checked`
 **Verify:** `(cd backend && just test-e2e -- test/medical/records.e2e-spec.ts)`
 **Done when:** A permitted clinician can append an audited amendment while an unrelated clinician cannot retrieve the record.
@@ -56,7 +56,7 @@ Group arrows summarize; each step's dependencies below are authoritative. A late
 ### 2.1.4 — Record human return-to-play decisions
 **Repo:** backend · **Size:** M · **Depends on:** `2.1.3` · **Requirements:** SR-MED-008
 **Files:** `backend/src/modules/medical/application/return-to-play.service.ts` · `backend/test/medical/return-to-play.e2e-spec.ts`
-**Build:** recordReturnToPlay(ctx,recordId,revision,{effectiveDate,decision,rationale}) records author, policy version and immutable assessment evidence. Validate clinician authority; predicted recovery dates never generate clearance. Correcting a decision produces a new version and safe availability event, not replacement of earlier evidence.
+**Build:** recordReturnToPlay(ctx,recordId,revision,{effectiveDate,decision,rationale}) records author, policy version and immutable assessment evidence. Validate clinician authority; predicted recovery dates never generate clearance. Correcting a decision produces a new version and safe availability event, not replacement of earlier evidence. MedicalRecord.returnToPlayDate is retired in favour of these decisions (DB-71).
 **Tests:** `return_to_play_requires_human_authority` · `recovery_date_never_implies_medical_clearance`
 **Verify:** `(cd backend && just test-e2e -- test/medical/return-to-play.e2e-spec.ts)`
 **Done when:** Return-to-play status changes only through an attributable authorized human assessment.
@@ -98,7 +98,7 @@ Group arrows summarize; each step's dependencies below are authoritative. A late
 ### 2.2.1 — Model training programs and governed pricing
 **Repo:** backend · **Size:** L · **Depends on:** `1.10.9` · **Requirements:** SR-TR-001, PRD-TR-001, BR-OBJ-03
 **Files:** `backend/src/modules/training/domain/program.ts` · `backend/prisma/schema.prisma` · `backend/test/training/programs.e2e-spec.ts`
-**Build:** Create program/camp with lifecycle, title, description, civil date range, IANA zone, location, capacity, Money and versioned recurrence metadata. Validate end≥start, capacity≥0 and payable exponent. Publish/archive commands require current revision; all new owned tables ship tenant constraints, RLS/grants and catalog tests.
+**Build:** Create program/camp with lifecycle, title, description, civil date range, IANA zone, location, capacity, Money and versioned recurrence metadata. Validate end≥start, capacity≥0 and payable exponent. Publish/archive commands require current revision; all new owned tables ship tenant constraints, RLS/grants and catalog tests. Program staff are assignments like 0.6.5's, so a coach's "assigned programs" have a record (DB-60).
 **Tests:** `training_program_validates_dates_capacity_and_money`
 **Verify:** `(cd backend && just test-e2e -- test/training/programs.e2e-spec.ts)`
 **Done when:** A valid program persists with exact currency-aware pricing and rejects invalid dates or capacity.
@@ -106,7 +106,7 @@ Group arrows summarize; each step's dependencies below are authoritative. A late
 ### 2.2.2 — Generate recurrence instances and explicit exceptions
 **Repo:** backend · **Size:** L · **Depends on:** `2.2.1` · **Requirements:** SR-TR-002, SYS-ASY-002
 **Files:** `backend/src/modules/training/application/schedule.service.ts` · `backend/test/training/schedule.e2e-spec.ts`
-**Build:** expandSchedule(programId,horizon,ruleVersion) uses a bounded recurrence rule and unique(programId,occurrenceKey). Each session stores beginsAt/endsAt and zone. Define DST gap/fold choice, cancellation and reschedule exceptions. Editing a rule preserves completed sessions/attendance and reconciles future instances; notifications follow committed schedule state.
+**Build:** expandSchedule(programId,horizon,ruleVersion) uses a bounded recurrence rule and unique(programId,occurrenceKey). Each session stores startsAt/endsAt (0.4.8) and zone. Define DST gap/fold choice, cancellation and reschedule exceptions. Editing a rule preserves completed sessions/attendance and reconciles future instances; notifications follow committed schedule state.
 **Tests:** `training_recurrence_preserves_completed_sessions` · `training_dst_exception_has_one_occurrence`
 **Verify:** `(cd backend && just test-e2e -- test/training/schedule.e2e-spec.ts)`
 **Done when:** Retrying recurrence expansion produces no duplicate occurrence and preserves completed sessions.
@@ -122,7 +122,7 @@ Group arrows summarize; each step's dependencies below are authoritative. A late
 ### 2.2.4 — Record operational payment observations honestly
 **Repo:** backend · **Size:** M · **Depends on:** `2.2.3` · **Requirements:** SR-TR-006
 **Files:** `backend/src/modules/training/application/payment-observation.service.ts` · `backend/test/training/payment-observation.e2e-spec.ts`
-**Build:** Record Unpaid/Partial/Paid/Refunded/Waived observations with actor, source, date and reason under separate permission. Mark them unverified operational status until finance allocations arrive in 3.4.3; never manufacture receipts or settlement entries. Future reconciliation preserves observations as provenance.
+**Build:** Record Unpaid/Partial/Paid/Refunded/Waived observations with actor, source, date and reason under separate permission. Mark them unverified operational status until finance allocations arrive in 3.4.3; never manufacture receipts or settlement entries. Future reconciliation preserves observations as provenance. Observations are append-only rows (DB-70).
 **Tests:** `training_payment_status_is_not_settlement_evidence`
 **Verify:** `(cd backend && just test-e2e -- test/training/payment-observation.e2e-spec.ts)`
 **Done when:** An authorized observation changes displayed status without creating a settled-money fact.
@@ -140,7 +140,7 @@ Group arrows summarize; each step's dependencies below are authoritative. A late
 ### 2.3.1 — Record attendance against the correct enrollment and session
 **Repo:** backend + frontend · **Size:** L · **Depends on:** `2.2.5` · **Requirements:** SR-TR-007/008, BR-RULE-08
 **Files:** `backend/src/modules/training/application/attendance.service.ts` · `frontend/src/features/training/attendance/` · `backend/test/training/attendance.e2e-spec.ts`
-**Build:** upsertAttendance(ctx,enrollmentId,sessionId,revision,state) permits Present/Absent/Late/Excused under roster policy. Composite FKs prove same training and tenant; unique(enrollmentId,sessionId) prevents duplication. Corrections preserve recorder/reason/audit; no silent offline overwrite. Provide roster batch action with per-row authorized outcome.
+**Build:** upsertAttendance(ctx,enrollmentId,sessionId,revision,state) permits Present/Absent/Late/Excused under roster policy. Composite FKs prove same training and tenant; unique(enrollmentId,sessionId) prevents duplication. Corrections preserve recorder/reason/audit; no silent offline overwrite. Provide roster batch action with per-row authorized outcome. Attendance reads its session's date; the copied `date` column is dropped (DB-58).
 **Tests:** `attendance_rejects_wrong_training_and_duplicate_pair` · `attendance_correction_requires_revision_and_reason`
 **Verify:** `(cd backend && just test-e2e -- test/training/attendance.e2e-spec.ts)`
 **Done when:** Each attendance pair identifies one enrollment and same-program session with attributable corrections.
@@ -156,7 +156,7 @@ Group arrows summarize; each step's dependencies below are authoritative. A late
 ### 2.3.3 — Issue immutable bilingual certificates
 **Repo:** backend · **Size:** L · **Depends on:** `2.3.2` · **Requirements:** SR-TR-010, PRD-TR-002, SYS-ASY-001
 **Files:** `backend/src/modules/training/application/certificates.service.ts` · `backend/src/workers/certificates/` · `backend/test/training/certificates.e2e-spec.ts`
-**Build:** Issue Certificate with eligibility snapshot, template/font version, immutable FileObject/hash and random verification-token digest. Outbox rendering is idempotent; Arabic PDF uses embedded approved font. Amendments/reissues get new issuance identity; revoke preserves original evidence. No duplicate certificate on worker retry.
+**Build:** Issue Certificate with eligibility snapshot, template/font version, immutable FileObject/hash and random verification-token digest, unique (SR-TR-010). Outbox rendering is idempotent; Arabic PDF uses embedded approved font. Amendments/reissues get new issuance identity; revoke preserves original evidence. No duplicate certificate on worker retry.
 **Tests:** `certificate_retry_preserves_one_issuance` · `certificate_arabic_render_preserves_template_provenance`
 **Verify:** `(cd backend && just test-e2e -- test/training/certificates.e2e-spec.ts)`
 **Done when:** An eligible participant receives one immutable certificate linked to its completion and template evidence.
@@ -216,7 +216,7 @@ Group arrows summarize; each step's dependencies below are authoritative. A late
 ### 2.5.1 — Version rating schemes and deterministic totals
 **Repo:** backend · **Size:** L · **Depends on:** `2.4.1` · **Requirements:** SR-RT-001/002/003/004, PRD-RT-001, BR-RULE-09
 **Files:** `backend/src/modules/ratings/domain/` · `backend/prisma/schema.prisma` · `backend/test/ratings/schemes.e2e-spec.ts`
-**Build:** RatingSchemeVersion owns immutable technical/physical/mental and extensible dimensions, scale, weights and rounding. Calculate decimal totals server-side; validate approved weight total and evaluator policy. Capture dimension observations and scheme version; imported legacy scores retain legacy-unverified provenance rather than invented historic weights.
+**Build:** RatingSchemeVersion owns immutable technical/physical/mental and extensible dimensions, scale, weights and rounding. Calculate decimal totals server-side; validate approved weight total and evaluator policy. Capture dimension observations and scheme version; imported legacy scores retain legacy-unverified provenance rather than invented historic weights. Each rating records the period it covers, in civil dates (PRD-RT-001, DB-70).
 **Tests:** `rating_total_is_computed_from_immutable_scheme` · `rating_scheme_change_preserves_previous_scores`
 **Verify:** `(cd backend && just test-e2e -- test/ratings/schemes.e2e-spec.ts)`
 **Done when:** A new scheme cannot alter prior scores and clients cannot write their own calculated total.
@@ -266,7 +266,7 @@ Group arrows summarize; each step's dependencies below are authoritative. A late
 ### 2.6.4 — Use monotonic read cursors and reconnect synchronization
 **Repo:** backend · **Size:** M · **Depends on:** `2.6.1` · **Requirements:** SR-CH-007, SR-CH-004
 **Files:** `backend/src/modules/chat/application/read-state.service.ts` · `backend/test/chat/reconnect.e2e-spec.ts`
-**Build:** Store lastReadSequence per member and advance monotonically to an existing authorized message. Reconnect fetches persisted sequence gaps through bounded REST pagination; last-read timestamps alone are not reliable ordering. Replayed broadcasts reconcile by message ID/sequence, and removed members cannot sync old attachments or counts.
+**Build:** Store lastReadSequence per member and advance monotonically to an existing authorized message. Reconnect fetches persisted sequence gaps through bounded REST pagination; last-read timestamps alone are not reliable ordering. Replayed broadcasts reconcile by message ID/sequence, and removed members cannot sync old attachments or counts. Conversation.lastMessageAt changes only in the transaction that stores the message (DB-58).
 **Tests:** `chat_read_cursor_never_moves_backwards` · `chat_reconnect_recovers_committed_messages_once`
 **Verify:** `(cd backend && just test-e2e -- test/chat/reconnect.e2e-spec.ts)`
 **Done when:** A reconnect recovers committed gaps without duplicates or a regressing read cursor.

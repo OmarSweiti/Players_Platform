@@ -120,7 +120,7 @@ GET /api/v1/players?limit=25&status=ACTIVE&sort=createdAt:desc&cursor=opaque
 { "data": [], "page": { "nextCursor": null, "hasMore": false } }
 ```
 
-Fetch at most `limit+1` authorized rows; set `hasMore` and generate a cursor from the final returned row. Alternate allowed sorts must include a unique tiebreaker and explicit null/collation behavior. Sorting by a mutable field has documented live-list semantics; exports use their own stable snapshot policy. Do not claim that any cursor creates a consistent database snapshot across requests.
+Fetch at most `limit+1` authorized rows; set `hasMore` and generate a cursor from the final returned row. Alternate allowed sorts must include a unique tiebreaker and explicit null/collation behavior. Text a person reads sorts with the collation of the request's locale (`ar-x-icu` or `en-x-icu`), on an index built with the same collation; codes and identifiers sort bytewise ([database](database.md), DB-51). Sorting by a mutable field has documented live-list semantics; exports use their own stable snapshot policy. Do not claim that any cursor creates a consistent database snapshot across requests.
 
 Filters/operators are endpoint allowlists, including bounded date ranges, arrays and search length. No raw Prisma where/order JSON. Search operates on authorized projections and Arabic/Latin names/aliases; counts exclude hidden matches. Totals are omitted unless an endpoint explicitly authorizes and budgets them. Review bounded query counts and representative EXPLAIN plans; “every filter gets an index” and “every page requires exactly one SQL query” are not engineering laws.
 

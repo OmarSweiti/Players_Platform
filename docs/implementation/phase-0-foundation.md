@@ -552,15 +552,20 @@ clean one.
 
 ### 0.4.2 — Database roles: owner, migrator, runtime
 **Repo:** backend + umbrella · **Size:** M · **Depends on:** `0.2.1`, `0.2.2` · **Requirements:** SR-NFR-SEC-002
-**Files:** umbrella `infra/postgres/init/10-roles.sql`; backend `prisma.config.ts`, `src/config/env.schema.ts`,
+**Files:** umbrella `infra/postgres/init/10-roles.sql`, `infra/compose.yaml`; backend `prisma.config.ts`, `src/config/env.schema.ts`,
 `.github/workflows/ci.yml`, `justfile`, `test/db/roles.integration-spec.ts` (new)
 `sadara_owner` (NOLOGIN) owns the schema; `sadara_migrator` assumes it only to run migrations
 (`MIGRATION_DATABASE_URL`, used by a new `just migrate`); `sadara_app`, the runtime role, is **not an owner and has NOBYPASSRLS**, with
 default privileges granting it only DML. The application never connects as the owner or migrator, in
 any environment, and CI and the test harness use the same split.
-**Tests:** `the_runtime_role_owns_no_table` · `the_runtime_role_cannot_run_ddl` · `the_runtime_role_cannot_bypass_rls`
+The runtime role's defaults bound its work (DB-52): `statement_timeout` 15 s, `lock_timeout` 5 s,
+`idle_in_transaction_session_timeout` 60 s and `TimeZone` UTC; a job that needs longer says so with `SET LOCAL`
+inside its transaction. Databases are created with PostgreSQL's builtin `C.UTF-8` collation provider — the
+local stack, CI and the replay alike — so no operating-system upgrade can reorder an index (DB-51); the
+local volume is recreated once (`just reset`).
+**Tests:** `the_runtime_role_owns_no_table` · `the_runtime_role_cannot_run_ddl` · `the_runtime_role_cannot_bypass_rls` · `the_runtime_role_has_bounded_work`
 **Verify:** `just migrations && just test-int -- roles`
-**Done when:** the three tests pass as the runtime role in CI.
+**Done when:** the four tests pass as the runtime role in CI.
 
 ### 0.4.3 — Explicit tenant context and the tenant transaction
 **Repo:** backend · **Size:** L · **Depends on:** `0.4.2`, `0.2.3` · **Requirements:** SYS-TEN-001, SYS-TEN-002, SR-DB-004
@@ -589,14 +594,17 @@ export function withTenantTransaction<T>(ctx: AuthorizedTenantContext, fn: (tx: 
 **Repo:** backend · **Size:** M · **Depends on:** `0.4.1` · **Requirements:** SYS-TEN-004
 **Files:** `prisma/schema.prisma`, migration `…_tenant_integrity`, `test/db/foreign-keys.integration-spec.ts` (new)
 Make `Contract.season` (`schema.prisma:638`), `Training.season` (`:834`), `PerformanceRecord.season`
-(`:756`), `LegalTicket.assignedTo` (`:975`), `Message.sender` (`:1287`), `AuditLog.user` (`:1358`) and
-`Document.uploadedBy` composite `(…Id, tenantId)` with `RESTRICT`; change the two composite `SET NULL`
+(`:756`), `LegalTicket.assignedTo` (`:975`), `Message.sender` (`:1287`) and `AuditLog.user` (`:1358`)
+composite `(…Id, tenantId)` with `RESTRICT`, and give `Document.uploadedById` the composite relation it
+lacks; change the two composite `SET NULL`
 keys (`scouting_reports_playerId_tenantId_fkey`, `treatment_sessions_medicalRecordId_tenantId_fkey`) to
 `RESTRICT`, because `SET NULL` would null `tenantId` too. Add the **same-parent** keys: a treatment
 session references `(medicalRecordId, playerId, tenantId)`, so it cannot cite another player's record;
 attendance carries `trainingId`, so its enrollment and session must belong to one program. Constraints
 are added `NOT VALID`, validated in a separate statement, and only then is the weaker key dropped.
-**Tests:** `foreign_keys_refuse_cross_tenant_edges` · `a_treatment_cannot_cite_another_players_record` · `attendance_cannot_mix_training_programs` · `no_composite_foreign_key_uses_set_null`
+Every relation also declares `onUpdate: Restrict`: today all 67 keys are `ON UPDATE CASCADE`, so a
+changed parent key would rewrite its children, `tenantId` included (DB-53).
+**Tests:** `foreign_keys_refuse_cross_tenant_edges` · `a_treatment_cannot_cite_another_players_record` · `attendance_cannot_mix_training_programs` · `no_composite_foreign_key_uses_set_null` · `no_foreign_key_cascades_a_key_change`
 **Verify:** `just preflight && just migrations && just test-int -- foreign-keys`
 **Done when:** raw inserts violating each rule fail in PostgreSQL and `just migrations` reports no drift.
 
@@ -626,7 +634,9 @@ with no context, including across interleaved transactions on one small pool.
 Prefix the unprefixed filter indexes ([`../reference/database.md`](../reference/database.md)) with
 `tenantId` and drop the redundant `tenants.slug` index that duplicates its unique constraint
 (`schema.prisma:278`, `:318`).
-**Tests:** `every_index_on_a_tenant_table_leads_with_tenant_id`
+The same catalog test asserts that an index serves every foreign key and that no index is a left prefix
+of another: six foreign keys gain an index, and 25 redundant indexes go (DB-54).
+**Tests:** `every_index_on_a_tenant_table_leads_with_tenant_id` · `every_foreign_key_is_served_by_an_index`
 **Verify:** `just migrations && just test-int -- indexes`
 **Done when:** the catalog test passes with a short, reviewed allowlist of tenant-safe exceptions.
 
@@ -681,6 +691,9 @@ end dates not before start dates; finite numerics); a partial unique index for *
 tenant** and **one featured image per player**; legal notes **internal by default** (today
 `isInternal` defaults to `false`, `schema.prisma:1001`); size and shape bounds on the JSON columns so
 metadata cannot become a hidden relational store.
+Tenant slugs and domains are lower case by CHECK — a DNS label; the domain in ASCII, punycode for an
+Arabic name — and live seasons are unique by name within their tenant (DB-55); every text column gets a
+length CHECK equal to its API bound (DB-56).
 **Tests:** `impossible_values_are_refused_by_the_database` · `a_tenant_has_at_most_one_current_season` · `legal_notes_are_internal_by_default`
 **Verify:** `just migrations && just test-int -- constraints`
 **Done when:** each rule refuses its counter-example in raw SQL, and a catalog test lists every
@@ -694,7 +707,8 @@ events, outbox and inbox, sessions, messages, notifications — use `@default(uu
 table is created. The classification records which, so a reviewer sees the choice.
 **Tests:** `high_ingest_ids_are_time_ordered`
 **Verify:** `just test-int -- ids`
-**Done when:** the test passes for `audit_logs`, the one high-ingest table that exists today.
+**Done when:** the test passes for `audit_logs`, the one high-ingest table this step migrates; messages and
+notifications switch in the migrations of the steps that rebuild them.
 
 ### 0.4.12 — The existing modules on the tenant transaction
 **Repo:** backend · **Size:** M · **Depends on:** `0.4.5`, `0.1.8` · **Requirements:** SYS-TEN-003
@@ -702,6 +716,7 @@ table is created. The classification records which, so a reviewer sees the choic
 Every repository in users, medical and scouting moves onto the transaction client and the verified
 context: a tenant id passed in by a caller becomes `ctx.tenantId`, still written explicitly into each
 predicate. The quarantined modules are exercised with their flags on.
+Their ordinary reads exclude archived rows: the archive rule of `database.md` (DB-57).
 **Tests:** `medical_reads_see_only_the_context_tenant` · `scouting_writes_are_stamped_with_the_context_tenant`
 **Verify:** `FEATURE_MEDICAL=on FEATURE_SCOUTING=on just test-e2e -- test/legacy-modules`
 **Done when:** no module repository accepts a caller-supplied tenant id, every query runs on the tenant
@@ -728,6 +743,8 @@ flow mapping **MFA (OTP or WebAuthn) to level of assurance 2**; WebAuthn and pas
 being required, so they can be adopted without changing any business API. Locales Arabic and English;
 mail to Mailpit. Capabilities the pinned release does not provide (for example an `amr` claim) are
 recorded, not assumed.
+The realm stores its login and admin events — failed sign-ins, lockouts, MFA changes — for a stated
+retention, so that `0.7.3` can import them (DB-61).
 **Tests:** `the_api_client_requires_pkce` · `brute_force_detection_is_enabled` · `mfa_maps_to_assurance_level_2`
 **Verify:** `just up && bash infra/keycloak/test-realm.sh`
 **Done when:** the realm imports on a fresh stack and the script proves each setting from the running
@@ -751,8 +768,9 @@ sign-in transaction and the membership lookup; after sign-in the session is the 
 **Files:** `prisma/schema.prisma`, migration `…_identity_sessions`, `test/db/identity.integration-spec.ts` (new)
 `Identity(id, issuer, subject, createdAt)` is global and unique on `(issuer, subject)`; the tenant `User`
 is the **membership**, with `identityId` unique per tenant, and keeps its id so every business foreign
-key survives. `UserSession` (tenant-owned, UUIDv7, under RLS) stores only hashes of the session and CSRF
-tokens, the identity provider's `sid`, the `acr`, `amr` and `auth_time` it asserted, idle and absolute
+key survives. `UserSession` (tenant-owned, UUIDv7, under RLS) stores only the hash of the session
+token — the CSRF token is derived from it and never stored (`0.5.6`) — the identity provider's `sid`,
+the `acr`, `amr` and `auth_time` it asserted, idle and absolute
 expiry, and revocation. An identity is never linked by email alone.
 **Tests:** `an_identity_links_to_at_most_one_membership_per_tenant` · `sessions_store_only_token_hashes`
 **Verify:** `just migrations && just test-int -- identity`
@@ -860,6 +878,7 @@ per slug.
 ```
 npm run tenant:provision -- --slug sadara --name "Sadara Sports Agency" --domain sadara.example --owner-email owner@sadara.test
 ```
+The slug and domain are stored in lower case (DB-55).
 **Tests:** `provisioning_creates_a_tenant_and_an_invited_owner` · `provisioning_is_idempotent_per_slug` · `provisioning_never_accepts_a_password`
 **Verify:** `just test-e2e -- test/cli/provision-tenant.e2e-spec.ts`
 **Done when:** the three tests pass against the compose Keycloak.
@@ -876,6 +895,8 @@ invitation; the callback binds the membership only when **both** the token match
 asserts that verified email — proof of mailbox and identity, never email alone. Acceptance is in the `auth`
 rate-limit category (`0.3.8`), counted by address and, once the invitation names it, by account. `DELETE` revokes; the
 list shows pending, accepted, expired and revoked.
+The invitation records the locale its email is written in: the inviter's choice, else the tenant's
+default (DB-68).
 **Tests:** `accepting_binds_the_invited_role_to_the_signed_in_identity` · `an_invitation_works_once` · `an_expired_invitation_is_refused` · `an_admin_cannot_invite_above_their_role` · `invitation_tokens_are_stored_hashed`
 **Verify:** `just test-e2e -- test/users/invitations.e2e-spec.ts`
 **Done when:** the five tests pass.
@@ -916,6 +937,8 @@ The seeding splits each name into enums that have no `REJECT`, `SUBMIT`, `VIEW`,
 — nothing is parsed from a name — and all of today's permissions exist, deduplicated. The catalog and
 the default matrix sync in one transaction, idempotently; the API refuses to boot if the database
 disagrees with the code. `SUPER_ADMIN: Object.values(PERMISSIONS)` (`permission.service.ts:93`) is gone.
+`role_permissions` stops deleting with its permission (`RESTRICT`), and nothing sorts or compares roles
+by enum order, which differs between the database and the schema (DB-53, DB-58).
 **Tests:** `every_catalog_entry_can_be_stored` · `the_database_matrix_equals_the_code_matrix` · `the_permission_sync_is_idempotent`
 **Verify:** `just test-int -- catalog && just seed && just seed`
 **Done when:** the three tests pass and two consecutive seeds succeed on a fresh database.
@@ -968,9 +991,12 @@ fail.
 minor) — tenant-owned, composite keys, validity windows, provenance and verification. **No live link
 means deny**; nothing is inferred from a surname or an email. The administration workflow arrives in
 `1.2.3`; guardian authority rules are OPEN (child protection).
-**Tests:** `own_record_access_requires_a_live_link` · `an_expired_guardian_link_denies_access`
+`PlayerStaffAssignment(playerId, userId, function, startsOn, endsOn?, assignedById)` records who is
+assigned to which player — the agent who looks after them, their coach, medical and legal staff — with
+history kept: the role matrix's "assigned" cells read it, and no live assignment means deny (DB-60).
+**Tests:** `own_record_access_requires_a_live_link` · `an_expired_guardian_link_denies_access` · `assigned_access_requires_a_live_staff_assignment`
 **Verify:** `just test-int -- relationships`
-**Done when:** both tests pass under RLS.
+**Done when:** the three tests pass under RLS.
 
 ### 0.6.6 — Effective permissions for the web app
 **Repo:** backend · **Size:** S · **Depends on:** `0.6.2` · **Requirements:** —
@@ -1044,6 +1070,8 @@ trigger), for every role, until an approved retention path exists. The table gai
 structural deltas — who, what, when, tenant, request, before and after — with confidential values
 replaced by references; never a request body. If the audit insert fails, the business change rolls back.
 Permission and role changes record the previous and the new state.
+The client address is stored as `inet` and an over-long user agent is truncated before the insert, so
+request metadata can never abort a business change (DB-56).
 **Tests:** `a_rolled_back_change_leaves_no_audit_row` · `a_failed_audit_insert_aborts_the_change` · `audit_payloads_carry_no_confidential_values` · `role_changes_record_before_and_after`
 **Verify:** `just test-int -- audit`
 **Done when:** the four tests pass, the failure case by injected fault.
@@ -1057,9 +1085,12 @@ success and refusal, step-up, logout, back-channel events and session revocation
 it is known and hashed network data; this step wires those events into the sign-in callback (`0.5.5`),
 step-up (`0.5.8`) and session revocation (`0.5.7`). Reading it is restricted (the tenant's own view
 arrives in `1.7.1`).
-**Tests:** `a_refused_sign_in_is_recorded_without_a_tenant` · `security_events_are_append_only`
+It also imports the identity provider's own login and admin events — failed sign-ins, lockouts, MFA
+changes, none of which reach Sadara — through the provider adapter (`0.5.4`) and its authenticated admin
+API, deduplicated by the provider's event id (DB-61).
+**Tests:** `a_refused_sign_in_is_recorded_without_a_tenant` · `security_events_are_append_only` · `provider_sign_in_failures_reach_security_events`
 **Verify:** `just test-int -- security-events`
-**Done when:** both tests pass.
+**Done when:** the three tests pass.
 
 ### 0.7.4 — Access audit for confidential reads
 **Repo:** backend · **Size:** S · **Depends on:** `0.7.2`, `0.6.4` · **Requirements:** —
@@ -1163,6 +1194,9 @@ records the declared size and type, the owner it is for and its expiry. The poly
 table (`entityType` + `entityId`, no referential integrity) is **contained** here — no new writes, rows kept
 — and migrated and retired by `1.3.1`; each domain adds a typed binding when it is built — player documents `1.3.1`, player media `1.3.3`, contract versions `1.4.8`,
 legal attachments `1.5.3`, message attachments `2.6.5`.
+`FileObject` also keeps the quarantined object's version (`quarantineVersionId`) beside the final one; the
+upload session's owner is a declared intent, `(ownerKind, ownerId)`, checked by the owner's policy at upload
+and at binding and never joined — the typed binding is the only reference (DB-69).
 **Tests:** `a_file_object_never_stores_a_url` · `sizes_beyond_two_gibibytes_are_representable`
 **Verify:** `just migrations && just test-int -- files`
 **Done when:** both tests pass and no table references files by URL except the legacy columns their
