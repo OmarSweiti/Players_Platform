@@ -92,8 +92,8 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `each_category_applies_its_own_limit` | 0.3.8 | backend | done |
 | `limits_hold_across_two_api_instances` | 0.3.8 | backend | done |
 | `a_spoofed_forwarded_for_header_is_ignored` | 0.3.8 | backend | done |
-| `the_committed_contract_matches_the_code` | 0.3.9 | backend | todo |
-| `problem_details_are_declared_for_every_operation` | 0.3.9 | backend | todo |
+| `the_committed_contract_matches_the_code` | 0.3.9 | backend | done |
+| `problem_details_are_declared_for_every_operation` | 0.3.9 | backend | done |
 | `preflight_reports_cross_tenant_edges` | 0.4.1 | backend | done |
 | `preflight_reports_same_parent_violations` | 0.4.1 | backend | done |
 | `preflight_output_contains_no_personal_data` | 0.4.1 | backend | done |
