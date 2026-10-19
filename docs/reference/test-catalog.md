@@ -246,9 +246,9 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `no_user_facing_literal_remains` | 0.9.2 | frontend | done |
 | `the_lint_refuses_a_physical_margin` | 0.9.3 | frontend | done |
 | `a_mixed_identifier_does_not_reorder_in_arabic` | 0.9.3 | frontend | done |
-| `a_contract_change_breaks_the_typecheck` | 0.9.4 | frontend | todo |
-| `problem_details_expose_code_and_field_errors` | 0.9.4 | frontend | todo |
-| `no_request_carries_a_tenant_header` | 0.9.4 | frontend | todo |
+| `a_contract_change_breaks_the_typecheck` | 0.9.4 | frontend | done |
+| `problem_details_expose_code_and_field_errors` | 0.9.4 | frontend | done |
+| `no_request_carries_a_tenant_header` | 0.9.4 | frontend | done |
 | `no_session_secret_is_readable_by_javascript` | 0.9.5 | frontend | todo |
 | `an_expired_session_returns_to_sign_in_with_the_return_path` | 0.9.5 | frontend | todo |
 | `logout_clears_every_cached_query` | 0.9.5 | frontend | todo |

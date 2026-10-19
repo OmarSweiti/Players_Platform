@@ -97,7 +97,7 @@ edit only Status and Evidence.
 | 0.9.1 | The route map | frontend | done | https://github.com/OmarSweiti/Players_Platform_Frontend/pull/41 |
 | 0.9.2 | Arabic and English, RTL and LTR | frontend | done | https://github.com/OmarSweiti/Players_Platform_Frontend/pull/42 |
 | 0.9.3 | Logical CSS and bidirectional isolation | frontend | done | https://github.com/OmarSweiti/Players_Platform_Frontend/pull/43 |
-| 0.9.4 | A typed client generated from the contract, on the same origin | frontend | todo |  |
+| 0.9.4 | A typed client generated from the contract, on the same origin | frontend | done | https://github.com/OmarSweiti/Players_Platform_Frontend/pull/50 |
 | 0.9.5 | Sessions in the browser | frontend | todo |  |
 | 0.9.6 | The application shell | frontend | todo |  |
 | 0.10.1 | Structured logs with request correlation | backend | todo |  |

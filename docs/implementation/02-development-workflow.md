@@ -26,7 +26,7 @@ Then two terminals, each starting at the umbrella root:
 cd backend && cp .env.example .env
 just migrate && just seed && npm run start:dev
 # terminal 2 — the web app (on :3001, served at https://<tenant>.localhost/ by the proxy)
-cd frontend && npm run dev
+cd frontend && cp .env.example .env.local && npm run dev
 ```
 
 The API validates its environment at boot and refuses to start, naming the variable, when one is
@@ -77,7 +77,8 @@ repository's `AGENTS.md`.
 | frontend | `just check` | type-check, lint and formatting, production build, unit tests, the browser journeys |
 | frontend | `just test` · `just test-e2e` | unit and component tests (Vitest, jsdom, MSW) · the browser journeys in Arabic and English, with axe, against a fresh build |
 | frontend | `just format` | rewrite the application code in Prettier's format |
-| frontend | `npm run api:generate` | regenerate the typed client from the backend contract *(from 0.9.4)* |
+| frontend | `npm run api:sync -- <backend commit>` · `npm run api:generate` | copy the backend's contract at a commit · regenerate the typed client from it *(from 0.9.4)* |
+| frontend | `just contract` | the copy is the backend's at its recorded commit, and the types are the generator's *(from 0.9.4)* |
 
 ## The microstep lifecycle
 
