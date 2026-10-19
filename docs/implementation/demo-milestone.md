@@ -116,9 +116,9 @@ run early.
 stale.*
 
 <!-- plan:milestone:begin -->
-**Demo milestone** — 30 of 126 microsteps done; 532–1064 engineering hours left before the reserve.
+**Demo milestone** — 31 of 126 microsteps done; 528–1056 engineering hours left before the reserve.
 
-Next in build order (every dependency done): `0.9.4`, `0.10.1`, `0.4.0`, `0.5.1`, `0.2.6`, `0.8.1`.
+Next in build order (every dependency done): `0.10.1`, `0.4.0`, `0.5.1`, `0.2.6`, `0.8.1`.
 
 | Stage | Step | Title | Repo | Size | Status |
 |---|---|---|---|---|---|
@@ -152,7 +152,7 @@ Next in build order (every dependency done): `0.9.4`, `0.10.1`, `0.4.0`, `0.5.1`
 | C | 0.3.7 | Liveness and real readiness | backend | S | done |
 | C | 0.3.8 | Rate limits by category, shared through Valkey | backend | M | done |
 | C | 0.3.9 | The committed OpenAPI contract and the breaking-change check | backend | M | done |
-| C | 0.9.4 | A typed client generated from the contract, on the same origin | frontend | M | todo |
+| C | 0.9.4 | A typed client generated from the contract, on the same origin | frontend | M | done |
 | C | 0.10.1 | Structured logs with request correlation | backend | M | todo |
 | D | 0.4.0 | One naming scheme in the database: lower snake_case | backend | M | todo |
 | D | 0.4.2 | Database roles: owner, migrator, runtime | backend + umbrella | M | todo |

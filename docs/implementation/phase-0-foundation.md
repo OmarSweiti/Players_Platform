@@ -1328,16 +1328,26 @@ directional icons mirror, media controls do not.
 ### 0.9.4 — A typed client generated from the contract, on the same origin
 **Repo:** frontend · **Size:** M · **Depends on:** backend `0.3.9`, `0.9.1`, umbrella `0.2.1` · **Requirements:** —
 **Files:** `src/shared/api/{client,problem}.ts` (new), `src/shared/api/schema.d.ts` (generated),
-`src/server/api/**` (new), `src/shared/lib/api-client.ts` (delete), `package.json`
-`openapi-typescript` generates types from the backend's committed contract at the pinned backend
-version, and `openapi-fetch` calls **`/api/v1` on the web app's own origin** — the local HTTPS proxy
-(`0.2.1`) in development, the same path routing in every hosted environment — so the session cookie is
-never cross-site. Reads go through a server-only layer, `src/server/api/` (`import 'server-only'`), which
-calls the API's internal address with the session cookie and `cache: 'no-store'`; the browser uses the
-same generated client against `/api/v1` for writes and interactive reads, and no Server Action carries a
-business write ([ADR-0025](../adr/0025-the-web-app-data-path.md)).
-Problem details become a typed `ApiProblem`. The client never sends a tenant header — today it sends
-`X-Tenant-ID` from `localStorage` (`api-client.ts:58–61`) — and `axios` goes.
+`src/server/api/{client,internal-url}.ts` (new), `openapi/{openapi,source}.json` (new), `scripts/contract.mjs`
+(new), `scripts/test-policy.sh`, `.env.example` (new), `.prettierignore` (new), `src/shared/lib/api-client.ts`
+and the modules that used it (delete), `src/features/auth/hooks/use-auth.ts`, `src/components/layout/sidebar.tsx`,
+`package.json`, `justfile`, `.github/workflows/ci.yml`, `CONTRIBUTING.md`
+`openapi/openapi.json` is the backend's committed contract, byte for byte, at the backend commit
+`openapi/source.json` records (`npm run api:sync -- <commit>`, a full SHA); `openapi-typescript` generates
+the types from it, and `openapi-fetch` calls **`/api/v1` on the web app's own origin** — the local HTTPS
+proxy (`0.2.1`) in development, the same path routing in every hosted environment — so the session cookie is
+never cross-site. A step that needs a newer contract syncs it; the backend's breaking-change check keeps an
+older copy valid meanwhile. Reads go through a server-only layer, `src/server/api/` (`import 'server-only'`),
+which calls the API's internal address (`API_INTERNAL_URL`) with the session cookie, nothing else of the
+request, and `cache: 'no-store'`; the browser uses the same generated client against `/api/v1` for writes
+and interactive reads, and no Server Action carries a business write
+([ADR-0025](../adr/0025-the-web-app-data-path.md)). Every call asks for the page's language
+(`Accept-Language`), so the API's messages match the page. Problem details become a typed `ApiProblem`; a
+failure that is not one becomes `INTERNAL_ERROR` with its status. The client never sends a tenant header —
+it refuses one — and `axios` goes, with the medical and scouting wrappers that called routes outside the
+contract; the sign-out request, to a route `0.1.6` retired, gives way to clearing the cache until `0.9.5`.
+CI and `just contract` verify the copy against the backend at the recorded commit and refuse types that
+differ from the generator's.
 **Tests:** `a_contract_change_breaks_the_typecheck` · `problem_details_expose_code_and_field_errors` · `no_request_carries_a_tenant_header`
 **Verify:** `npm run api:generate && npx tsc --noEmit && npx vitest run src/shared/api`
 **Done when:** every API call goes through the generated client and the three tests pass.
@@ -1350,7 +1360,9 @@ token come from `GET /api/v1/auth/session` — never from reading cookies, which
 `401` returns to sign-in with the return path; writes carry the CSRF token; TanStack Query keys include
 the tenant and the projection, and logout or a tenant change clears every cached query before navigating
 to the provider's sign-out. The authenticated layout checks the session on the server through
-`src/server/api/` and renders nothing protected without it; TanStack Query serves interactive screens
+`src/server/api/` and renders nothing protected without it; a server read also tells the API the public
+host it serves, which the API believes only because it lists the web app among its trusted proxies
+(`0.3.8`, `0.5.2`); TanStack Query serves interactive screens
 only, prefetched on the server and hydrated; nothing tenant-scoped is cached by Next
 ([ADR-0025](../adr/0025-the-web-app-data-path.md)). `proxy.ts` looks at cookie presence only to route,
 never to decide.
