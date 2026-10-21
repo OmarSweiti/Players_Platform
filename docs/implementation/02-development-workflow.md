@@ -190,8 +190,9 @@ SELECT count(*) FROM players;          -- outside a tenant transaction: 0, by de
 From a symptom to a minimal reproduction:
 
 1. **Read the exact error** — the problem-details `code` and `requestId`, then the API log line with the
-   same `requestId`, in the terminal running the API (`just logs <service>` for the stack). Guessing costs
-   more than reading.
+   same `requestId`, in the terminal running the API (`just logs <service>` for the stack). Every line is
+   JSON: searching for the id finds the request's access line, what was logged while it ran, and the lines
+   of the jobs it enqueued. Guessing costs more than reading.
 2. **Check the stack:** `just up` reports every service healthy? ClamAV's first signature download takes
    minutes; Keycloak takes about a minute to import the realm.
 3. **Empty results where data exists** → the query ran outside `withTenantTransaction`, so row-level
