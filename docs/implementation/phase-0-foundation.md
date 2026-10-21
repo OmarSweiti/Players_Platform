@@ -1150,7 +1150,8 @@ migration `…_registry_role`; umbrella `infra/compose.yaml` (a `worker` service
 A second entry point runs BullMQ on Valkey. It finds work without a privileged client: a registry role
 may read only the `tenant_directory` view (`0.4.5`); for each active tenant the relay opens a tenant
 transaction and claims due events `FOR UPDATE SKIP LOCKED`, then publishes them. Every job carries its tenant and a
-business reference; its handler restores that tenant's context and runs in its own tenant transaction.
+business reference; its handler restores that tenant's context and runs in its own tenant transaction, inside
+the correlation the job carries (`runCorrelatedJob`, `0.10.1`).
 Retries back off exponentially to a bound, then mark `DEAD` with the last error; shutdown drains
 in-flight jobs.
 Valkey runs with append-only persistence and `maxmemory-policy noeviction`, as BullMQ requires — in the
@@ -1389,13 +1390,24 @@ operating system. Landmarks, headings, visible focus and keyboard operation from
 
 ### 0.10.1 — Structured logs with request correlation
 **Repo:** backend · **Size:** M · **Depends on:** `0.3.1` · **Requirements:** SR-CORE-008, SYS-TEN-007
-**Files:** `src/infrastructure/logging/**` (new), `src/main.ts`, `src/common/interceptors/logging.interceptor.ts` (delete),
-`src/common/logging/request-id.ts`, `test/platform/logging.integration-spec.ts` (new)
-`nestjs-pino` JSON logs carrying `requestId`, opaque tenant and member ids, the **route template**,
-status and duration. A well-formed incoming `X-Request-Id` is kept, otherwise a UUIDv7 is generated;
-it is returned on the response and travels into jobs, so one id follows a request through the worker.
-The hand-rolled interceptor goes, and the request-id middleware of `0.3.1` (a UUIDv4 for every request,
-which problems and the access log already carry) hands its id over to the logger's.
+**Files:** `src/infrastructure/logging/{logging.module,logger-options,correlation}.ts` (new), `src/main.ts`,
+`src/app.setup.ts`, `src/app.module.ts`, `src/common/interceptors/logging.interceptor.ts` (delete),
+`src/common/logging/{request-id,route-template}.ts`, `src/common/filters/problem-details.filter.ts`,
+`src/infrastructure/events/event.service.ts`, `test/harness/{app,log-capture}.ts`,
+`test/platform/logging.integration-spec.ts` (new)
+`nestjs-pino` writes one JSON object per line with the [safe event contract](../reference/observability.md#safe-event-contract)'s
+fields — an ISO `timestamp`, the `level` by name, `service`, `environment` — Nest's own lines included; the
+level is `debug` in development, `info` where deployed, errors only in tests. pino-http writes the access
+log in place of the hand-rolled interceptor: `requestId`, `method`, the **route template** (`route`; a path
+no route serves, Nest's `*path` catch-all included, is `(unmatched route)`), `status`, `durationMs`, and the
+opaque `tenantId` and `actorId` of a verified session — never the URL, a header, a body or an address; a
+refusal at `warn`, a failure at `error`. The request id is a UUIDv7, or the canonical UUID a trusted proxy
+sent in `X-Request-Id` — believed only from a peer `TRUSTED_PROXIES` names, as `X-Forwarded-For` is
+(`0.3.8`) — returned as before and handed over to the logger. The rest of the request runs inside it
+(AsyncLocalStorage, log correlation only): `jobCorrelation()` stamps it on a job, `runCorrelatedJob()` runs
+a handler inside it with `jobId` and `attempt`, and the jobs it enqueues carry it on, so one id follows a
+request through the worker; `EventService` stamps its jobs. Tests read the log with `bootApp({ logs })`;
+nestjs-pino keeps one logger per process, built by the first app.
 **Tests:** `a_request_id_reaches_the_worker_log` · `logs_carry_route_templates_not_urls`
 **Verify:** `just test-int -- logging`
 **Done when:** both tests pass.
