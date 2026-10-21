@@ -16,6 +16,7 @@ run bash scripts/pr-type-label.sh --self-test
 run bash scripts/check-submodules.sh --self-test
 run python3 scripts/check-plan.py --self-test
 run python3 scripts/check-stack.py --self-test
+run bash scripts/check-validation.sh --self-test
 run bash .githooks/test-hooks.sh
 if [ "$status" -eq 0 ]; then echo; echo "guards: every guard still refuses"; else echo; echo "guards: FAILED"; fi
 exit "$status"

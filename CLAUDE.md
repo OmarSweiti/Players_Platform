@@ -21,7 +21,7 @@ Players_Platform/     ← the umbrella: the plan (docs/), the local stack (infra
 | [`docs/implementation/demo-milestone.md`](docs/implementation/demo-milestone.md) | **the build order**: Sadara is built to show and to sell; the first milestone is a sales demo built as the real product ([ADR-0021](docs/adr/0021-a-product-built-to-sell.md)) |
 | [`docs/implementation/handoff.md`](docs/implementation/handoff.md) | whether someone stopped mid-step |
 | [`docs/implementation/01-conventions.md`](docs/implementation/01-conventions.md) | the engineering law: fifteen invariants — keep it open |
-| [`docs/implementation/02-development-workflow.md`](docs/implementation/02-development-workflow.md) | every command, the nine-station microstep lifecycle, the rules for agents |
+| [`docs/implementation/02-development-workflow.md`](docs/implementation/02-development-workflow.md) | every command, the ten-station microstep lifecycle, the rules for agents |
 | [`docs/implementation/03-github-workflow.md`](docs/implementation/03-github-workflow.md) | branches, titles, PRs, pins and progress |
 | [`docs/requirements/`](docs/requirements/README.md) | the frozen BRD, PRD, SysRD and SRS — departures are in the master plan's errata |
 
@@ -29,9 +29,16 @@ Players_Platform/     ← the umbrella: the plan (docs/), the local stack (infra
 
 - One microstep per PR, in the repository the step names; `just branch feat/<slug>` from a fresh `development`.
 - Titles: `type(scope): summary  [N.N.N]`. The PR title becomes the squash commit.
-- `just pr '<title>' <body>` → `just merge <the URL it printed>`. **Never guess a PR number.**
-- **Never** add coding-assistant attribution — no `Co-Authored-By:` a tool, no "Generated with" — in any
-  commit, title or PR body. Hooks and CI refuse it.
+- `just pr '<title>' <body>` → `just evidence <the URL it printed> <report> <screenshots>` → the
+  maintainer approves → `just merge <the URL>`. **Never guess a PR number.**
+- **Validate every PR, and show it**: run the stack and both apps, exercise the change (a screen in Arabic
+  and English), capture screenshots; `just evidence` posts them for the head commit, and the
+  `validation` check refuses a PR without it.
+- **The maintainer approves every PR**, Dependabot's too. `just pr` opens it as the engineering app
+  (GitHub refuses an approval from a PR's author), assigned to them with their review requested; never
+  merge before they approve, never bypass a rule.
+- **Never** add coding-assistant attribution — no `Co-Authored-By:` a tool, no "Generated with", no
+  assistant name — in any commit, branch, title, PR body or comment. Hooks and CI refuse it.
 - Status changes only in `docs/implementation/progress.md`, in the umbrella PR that moves the pins; then `just plan`.
 
 ## The invariants (reminders — the law is `01-conventions.md`)
@@ -64,13 +71,14 @@ just pre-push       # the complete local gate (just pr runs it for you)
 
 ## Safety layers, honestly
 
-Server rulesets refuse direct pushes, force pushes and unreviewed merges on `development`, `staging` and
-`main`, with five required checks. Local hooks refuse bad titles, attribution, secrets, sensitive files
-and edits to committed migrations — `--no-verify` bypasses them, which is why CI and the rulesets repeat
+Server rulesets refuse direct pushes, force pushes and any merge the maintainer has not approved on
+`development`, `staging` and `main`, with the required checks — `validation` among them on
+`development`. Local hooks refuse bad titles, attribution, secrets, sensitive files and edits to
+committed migrations — `--no-verify` bypasses them, which is why CI and the rulesets repeat
 every rule that matters. The admin can bypass a ruleset only through a pull request, and GitHub logs it.
 
 ## Scoped rules
 
 `.claude/rules/` loads by path: `backend.md` (backend source and tests), `migrations.md` (the Prisma
-schema and migrations), `frontend.md` (the web app), and `security.md` (always). Each application's own
-`AGENTS.md` routes back here.
+schema and migrations), `frontend.md` (the web app), and `security.md` and `delivery.md` (always). Each
+application's own `AGENTS.md` routes back here.
