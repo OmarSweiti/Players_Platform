@@ -52,13 +52,15 @@ docs(plan): record the phase-0 exit criteria  [—]
 ```bash
 just branch feat/player-directory            # validates the name, fresh development, new branch
 git commit -m "feat(players): add the player directory  [1.2.4]"
-just pr 'feat(players): add the player directory  [1.2.4]' notes/pr.md   # gate → push → PR → waits for checks
-just merge <the PR URL that just pr printed>  # route, title, attribution, checks, clean merge state
+just pr 'feat(players): add the player directory  [1.2.4]' notes/pr.md   # gate → push → PR (the engineering app) → waits for checks
+just evidence <the PR URL> report.md shots/  # in the umbrella: the validation evidence, for the head commit
+# … the maintainer reviews and approves on GitHub …
+just merge <the PR URL that just pr printed>  # approval, route, title, attribution, checks, clean merge state
 ```
 
-- Every pull request is assigned to the maintainer: `just pr` and the promotion recipes assign the
-  author, Dependabot assigns through `dependabot.yml`, and the labeler workflow assigns any other PR
-  when it opens. CODEOWNERS requests the maintainer's review.
+- Every pull request is assigned to the maintainer and requests their review: `just pr` and the
+  promotion recipes name them, Dependabot assigns through `dependabot.yml`, the labeler workflow assigns
+  any other PR when it opens, and CODEOWNERS requests the review on every one.
 - `just pr` runs `just pre-push` (the complete local gate) first. Use the **URL it prints** for
   `just merge`; never guess a PR number — another PR (often Dependabot's) may have taken it.
 - `just merge` refuses unless every required check passed **and** GitHub reports the PR as cleanly
@@ -66,14 +68,53 @@ just merge <the PR URL that just pr printed>  # route, title, attribution, check
   the admin's pull-request bypass is applied silently by the API, so a recipe that only asked GitHub
   to refuse would merge a behind PR as a logged bypass (it happened once, on Players_Platform#3).
 
+## Review and approval
+
+**The maintainer approves every pull request** — the engineering app's, Dependabot's, every promotion —
+and GitHub enforces it: each flow branch's ruleset requires one approving review from the code owner
+(`CODEOWNERS` names the maintainer on every path), a new push dismisses an earlier approval, and every
+review conversation is resolved before the merge.
+
+**The engineering app opens the PRs prepared for the maintainer.** GitHub refuses an approval from a
+pull request's own author, so a PR the maintainer's account opened could never be approved. The app —
+*Sadara Engineering*, a private GitHub App the maintainer owns (`just engineering-app` creates it once)
+— only opens PRs, assigns them, requests the review and comments: it reads code, writes pull requests,
+issues and workflow re-runs, and can neither push code nor change a setting or a ruleset. Commits and
+branches stay the maintainer's. Its private key lives outside every repository
+(`~/.config/sadara/engineering-app`, mode 600), and each command takes a token for one repository that
+expires within the hour (`scripts/engineering-token.sh`).
+
+**Validation evidence comes first.** Before the review is asked for, the PR carries a validation comment
+for its head commit: the change running, each scenario with what was expected and seen, and the
+screenshots ([the Validate station](02-development-workflow.md#the-microstep-lifecycle)). `just evidence`
+posts it; the screenshots are stored in
+[`Players_Platform_Evidence`](https://github.com/OmarSweiti/Players_Platform_Evidence) and linked at their
+commit, so they cannot change; the `validation` check refuses a PR without evidence for its exact head.
+
+**What the reviewer checks**, in order:
+
+1. Every check is green, `validation` included.
+2. The evidence shows the change working at the head commit: a screenshot for each scenario (Arabic and
+   English for a screen), the requests and answers for an endpoint, expected against seen — and nothing
+   real or secret in any of it.
+3. The diff is the title and the microstep — no more; "Not in this PR" names what was deferred.
+4. "Risk" is true, and anything touching identity, tenancy, money, migrations or the gates themselves is
+   read closely.
+5. The decisions the PR took are stated, and none is one to overrule.
+
+Then **Approve**, or **Request changes** with one comment per issue — the author fixes, validates again
+and asks again. After the approval, `just merge` merges only what GitHub itself calls clean. The
+maintainer's admin bypass remains, through a PR and logged by GitHub, for emergencies only; no recipe uses
+it.
+
 ## What is enforced, and by what
 
 | Layer | Enforces | Bypassable by |
 |---|---|---|
-| **Rulesets** (server) | PR required on all three flow branches; no force-push or deletion; squash or merge into `development`, merge only into `staging`/`main`; five required checks; `v*` tags append-only | the admin, **through a PR only**, logged — and never for tags |
-| **Required checks** (CI) | `test`, `guards`, `supply-chain` (secrets, attribution, npm advisories), `protected-paths` (committed migrations are immutable), `topology` (legal route, title grammar) | the logged admin bypass |
+| **Rulesets** (server) | PR required on all three flow branches; **the code owner's approval** (one review, dismissed by a new push, every conversation resolved); no force-push or deletion; squash or merge into `development`, merge only into `staging`/`main`; required checks; `v*` tags append-only | the admin, **through a PR only**, logged — and never for tags |
+| **Required checks** (CI) | `test`, `guards`, `supply-chain` (secrets, attribution, npm advisories), `protected-paths` (committed migrations are immutable), `topology` (legal route, title grammar), and on `development` `validation` (evidence for the head commit) | the logged admin bypass |
 | **Hooks** (local) | commit subject grammar, attribution, secrets, sensitive files, immutable paths, direct pushes to flow branches, tag rules | `--no-verify`, or a clone that never ran `just setup` |
-| **Recipes** | `just merge` / `just promote-merge` refuse illegal routes, bad titles, red checks and unclean merge states | calling `gh pr merge` directly |
+| **Recipes** | `just pr` opens PRs as the engineering app; `just merge` / `just promote-merge` refuse an unapproved PR, illegal routes, bad titles, red checks and unclean merge states | calling `gh pr merge` directly |
 
 Run `./scripts/gh-audit.sh` in any repository to diff the live settings and rulesets against the
 files — it must report `no drift`.
@@ -117,5 +158,7 @@ just pr 'chore(repo): pin the applications and record 1.2.1–1.2.3  [1.2.1–1.
 
 Monthly grouped version updates (patch and minor separately; majors one by one, for deliberate
 review) and immediate security updates, all against `development`, all titled `chore(repo): …  [—]`,
-all assigned to the maintainer.
-Read every one before merging it; a major needs its migration notes read and the app exercised.
+all assigned to the maintainer, whose review CODEOWNERS requests. Each needs the maintainer's approval:
+read it (the release notes it links, the lockfile change) and approve it once CI is green; a major needs
+its migration notes read and the app exercised. Dependabot's PRs carry no validation comment — CI is
+their evidence — and a red one is fixed before it is approved.

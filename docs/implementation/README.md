@@ -32,7 +32,7 @@ the owner is in the [long-lead register](00-master-plan.md#long-lead-register): 
    the phases, the effort model, the risks, the OPEN register and the errata.
 3. [`01-conventions.md`](01-conventions.md) — the engineering law: fifteen invariants, architecture,
    naming, testing, the microstep definition of done, budgets, migrations.
-4. [`02-development-workflow.md`](02-development-workflow.md) — bring-up, every command, the nine-station
+4. [`02-development-workflow.md`](02-development-workflow.md) — bring-up, every command, the ten-station
    microstep lifecycle, rules for AI agents, manual testing, debugging.
 5. [`03-github-workflow.md`](03-github-workflow.md) — branches, titles, the daily loop, pins and
    progress, releases.

@@ -77,12 +77,15 @@ repository's `AGENTS.md`.
 | frontend | `just check` | type-check, lint and formatting, production build, unit tests, the browser journeys |
 | frontend | `just test` · `just test-e2e` | unit and component tests (Vitest, jsdom, MSW) · the browser journeys in Arabic and English, with axe, against a fresh build |
 | frontend | `just format` | rewrite the application code in Prettier's format |
+| umbrella | `just engineering-app` · `just engineering-app status` | create the app that opens every PR for the maintainer's approval (once) · where it is installed |
+| umbrella | `just evidence <PR URL> <report.md> [<screenshots>]` | post validation evidence on a PR, for its head commit, and rerun the `validation` check |
+| frontend | `npm run evidence -- --out <dir> [--viewport mobile] <name>=<url>…` | screenshots of named pages, as a person sees them, for validation evidence |
 | frontend | `npm run api:sync -- <backend commit>` · `npm run api:generate` | copy the backend's contract at a commit · regenerate the typed client from it *(from 0.9.4)* |
 | frontend | `just contract` | the copy is the backend's at its recorded commit, and the types are the generator's *(from 0.9.4)* |
 
 ## The microstep lifecycle
 
-Every change follows nine stations. An agent follows them literally.
+Every change follows ten stations. An agent follows them literally.
 
 1. **Pick.** Read the frontier at the top of [`README.md`](README.md). Take the first *ready* step —
    every dependency done — in the [demo milestone](demo-milestone.md)'s build order; go to the next ready
@@ -97,17 +100,42 @@ Every change follows nine stations. An agent follows them literally.
    "Not in this PR" or a new microstep, not a silent expansion.
 6. **Verify.** Run the step's **Verify** command; confirm its **Done when** sentence is true; then
    `just check`.
-7. **Ship.** Commit `type(scope): summary  [N.N.N]`; `just pr` with the template filled — the Verify
-   output, what was tried by hand, the hours spent; `just merge <URL>` once green. No assistant
-   attribution anywhere.
-8. **Record.** When the umbrella next moves its pins, set the step to `done` in
-   [`progress.md`](progress.md) with its PR URL, run `just plan`, and ship that with the pin bump.
-9. **Hand off.** Stopping with work in flight? Overwrite [`handoff.md`](handoff.md): the step, its state,
+7. **Validate** — run it as a person would, and keep the proof. Start the stack (`just up`) and both
+   applications from this branch, and reach them through `https://sadara.localhost`, as the browser
+   reaches production. Exercise every scenario the change touches, one that must fail included: a screen
+   in Arabic **and** English (and at mobile width when its layout changes), an endpoint through real HTTP
+   requests. Capture screenshots (`cd frontend && npm run evidence -- --out <dir> <name>=<url>…`) and the
+   requests with their answers. Write the report: the environment (commits, services), then each
+   scenario — steps, expected, seen, result. Synthetic data only; never a secret, token, cookie or
+   personal value in a screenshot or a transcript. A change that runs nothing (plan text) says so and
+   shows the rendered page. If something does not work, fix it first: a failure is never posted as
+   validation.
+8. **Ship.** Commit `type(scope): summary  [N.N.N]`; `just pr` with the template filled — the Verify
+   output, the hours spent. The **engineering app** opens the PR, assigned to the maintainer with their
+   review requested ([review and approval](03-github-workflow.md#review-and-approval)). Then
+   `just evidence <PR URL> <report.md> <screenshots>` posts the evidence on it, for its head commit, and
+   the `validation` check passes. Report the PR to the maintainer and stop: **the maintainer approves
+   every PR**, and GitHub refuses the merge until they do. A push after the approval dismisses it —
+   validate again, ask again. Once it is approved and green, `just merge <URL>`.
+9. **Record.** When the umbrella next moves its pins, set the step to `done` in
+   [`progress.md`](progress.md) with its PR URL, run `just plan`, and ship that with the pin bump — the
+   same route: evidence (the plan check's output, the rendered record), the maintainer's approval, then
+   the merge.
+10. **Hand off.** Stopping with work in flight? Overwrite [`handoff.md`](handoff.md): the step, its state,
    the next action, anything surprising. One page; history is git's job.
 
 ## Rules for AI agents
 
 - Start at `AGENTS.md` (Codex and others) or `CLAUDE.md` (Claude), then this file, then the frontier.
+- **Validate every PR, and show it** (station 7): the change running, every scenario exercised, the
+  evidence posted with `just evidence` before the maintainer is asked to approve. A PR without evidence
+  for its head commit cannot merge.
+- **The maintainer approves every PR** — the engineering app's, Dependabot's, every promotion. Never
+  merge before the approval; never bypass a rule or ask GitHub to (`gh pr merge --admin` is the
+  maintainer's emergency path, never a recipe's).
+- **Nothing on GitHub names an assistant.** Commits and branches are the maintainer's; PRs and comments
+  come from the engineering app; no co-author trailer, no "Generated with", no assistant name — in a
+  commit, branch, title, PR body, comment, screenshot or report.
 - **One microstep per PR.** Do not bundle steps; do not start the next one on the same branch.
 - **Never weaken a gate to get green:** no skipped or deleted tests, no `--no-verify`, no disabled lint
   rule, no edited migration, no loosened ruleset, no `passWithNoTests`. If a gate is wrong, stop and say so.
@@ -185,7 +213,7 @@ find the cause.
 | When | Do |
 |---|---|
 | each session | `git switch development && git pull --ff-only` in the repository you work in; `just setup` if the post-merge hook says so; read [`handoff.md`](handoff.md) |
-| each microstep | the nine stations |
+| each microstep | the ten stations |
 | weekly | read open Dependabot PRs; re-read the risk register's triggers; update the effort forecast from measured hours; `gh run list --event schedule` to confirm scheduled workflows still run |
 | each phase entry | **refine the phase file**: bring every microstep of the phase to full Files, Build, Tests, Verify and Done-when against the code as it stands; restate or settle each OPEN item it depends on; record the date |
 | each phase gate | run the exit gate and record it (`0.11.1` and its successors); review the risk and long-lead registers; re-forecast; `just gh-audit` in all three repositories |
