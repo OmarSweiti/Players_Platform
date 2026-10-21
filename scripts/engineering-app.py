@@ -24,6 +24,7 @@ installed by anyone else. Standard library only.
 import http.server
 import json
 import os
+import re
 import secrets
 import subprocess
 import sys
@@ -36,6 +37,8 @@ OWNER = "OmarSweiti"
 REPOSITORIES = ["Players_Platform", "Players_Platform_Backend", "Players_Platform_Frontend"]
 HOME = os.environ.get("SADARA_ENGINEERING_APP_DIR") or os.path.join(
     os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser("~/.config"), "sadara", "engineering-app")
+# The one-time code GitHub hands back after the app is registered.
+CODE = re.compile(r"[A-Za-z0-9_-]{8,128}")
 TOKEN_SCRIPT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "engineering-token.sh")
 
 PERMISSIONS = {
@@ -121,11 +124,14 @@ def create():
                     % (action, definition.replace("&", "&amp;").replace("'", "&#39;"))))
             elif url.path == "/created":
                 query = urllib.parse.parse_qs(url.query)
-                if query.get("state", [""])[0] != state or "code" not in query:
+                code = query.get("code", [""])[0]
+                # Only the answer to this request, and only a code of GitHub's shape:
+                # it becomes one path segment of a fixed api.github.com URL, nothing else.
+                if query.get("state", [""])[0] != state or not CODE.fullmatch(code):
                     self.reply(page("Refused", "<p>This answer did not come from the request made here.</p>"))
                     return
                 request = urllib.request.Request(
-                    "https://api.github.com/app-manifests/%s/conversions" % urllib.parse.quote(query["code"][0]),
+                    "https://api.github.com/app-manifests/%s/conversions" % urllib.parse.quote(code, safe=""),
                     method="POST", headers={"Accept": "application/vnd.github+json"})
                 with urllib.request.urlopen(request, timeout=30) as response:
                     created.update(save(json.load(response)))
