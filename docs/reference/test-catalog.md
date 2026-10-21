@@ -255,8 +255,8 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `navigation_hides_what_the_member_cannot_open` | 0.9.6 | frontend | todo |
 | `empty_states_name_the_next_action` | 0.9.6 | frontend | todo |
 | `a_failed_request_offers_retry` | 0.9.6 | frontend | todo |
-| `a_request_id_reaches_the_worker_log` | 0.10.1 | backend | todo |
-| `logs_carry_route_templates_not_urls` | 0.10.1 | backend | todo |
+| `a_request_id_reaches_the_worker_log` | 0.10.1 | backend | done |
+| `logs_carry_route_templates_not_urls` | 0.10.1 | backend | done |
 | `telemetry_canaries_never_escape` | 0.10.2 | backend | todo |
 | `a_restored_stack_passes_the_catalog_tests` | 0.10.3 | umbrella + backend | todo |
 | `restored_files_match_their_recorded_hashes` | 0.10.3 | umbrella + backend | todo |

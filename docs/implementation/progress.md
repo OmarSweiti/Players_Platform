@@ -100,7 +100,7 @@ edit only Status and Evidence.
 | 0.9.4 | A typed client generated from the contract, on the same origin | frontend | done | https://github.com/OmarSweiti/Players_Platform_Frontend/pull/50 |
 | 0.9.5 | Sessions in the browser | frontend | todo |  |
 | 0.9.6 | The application shell | frontend | todo |  |
-| 0.10.1 | Structured logs with request correlation | backend | todo |  |
+| 0.10.1 | Structured logs with request correlation | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/70 |
 | 0.10.2 | Redaction by allowlist, proven by canaries | backend | todo |  |
 | 0.10.3 | Local backup and restore, drilled | umbrella + backend | todo |  |
 | 0.10.4 | Failure drills: worker crash, database loss, storage loss | backend | todo |  |
