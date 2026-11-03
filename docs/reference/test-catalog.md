@@ -102,14 +102,14 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `the_runtime_role_cannot_run_ddl` | 0.4.2 | backend + umbrella | done |
 | `the_runtime_role_cannot_bypass_rls` | 0.4.2 | backend + umbrella | done |
 | `the_runtime_role_has_bounded_work` | 0.4.2 | backend + umbrella | done |
-| `queries_run_inside_the_tenant_transaction` | 0.4.3 | backend | todo |
-| `a_context_cannot_be_built_from_request_input` | 0.4.3 | backend | todo |
-| `the_setting_does_not_outlive_its_transaction` | 0.4.3 | backend | todo |
-| `foreign_keys_refuse_cross_tenant_edges` | 0.4.4 | backend | todo |
-| `a_treatment_cannot_cite_another_players_record` | 0.4.4 | backend | todo |
-| `attendance_cannot_mix_training_programs` | 0.4.4 | backend | todo |
-| `no_composite_foreign_key_uses_set_null` | 0.4.4 | backend | todo |
-| `no_foreign_key_cascades_a_key_change` | 0.4.4 | backend | todo |
+| `queries_run_inside_the_tenant_transaction` | 0.4.3 | backend | done |
+| `a_context_cannot_be_built_from_request_input` | 0.4.3 | backend | done |
+| `the_setting_does_not_outlive_its_transaction` | 0.4.3 | backend | done |
+| `foreign_keys_refuse_cross_tenant_edges` | 0.4.4 | backend | done |
+| `a_treatment_cannot_cite_another_players_record` | 0.4.4 | backend | done |
+| `attendance_cannot_mix_training_programs` | 0.4.4 | backend | done |
+| `no_composite_foreign_key_uses_set_null` | 0.4.4 | backend | done |
+| `no_foreign_key_cascades_a_key_change` | 0.4.4 | backend | done |
 | `rls_missing_context_denies_reads_and_writes` | 0.4.5 | backend | todo |
 | `rls_pool_reuse_never_leaks_the_previous_tenant` | 0.4.5 | backend | todo |
 | `every_tenant_table_has_forced_rls_and_a_policy` | 0.4.5 | backend | todo |

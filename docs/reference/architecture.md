@@ -102,10 +102,12 @@ export type TenantContext = Readonly<{
   assurance: { authTime?: string; acr?: string; amr: readonly string[] };
 }>;
 export type TenantTransaction = Prisma.TransactionClient;
-export function withTenantTransaction<T>(
-  ctx: TenantContext,
-  run: (tx: TenantTransaction) => Promise<T>,
-): Promise<T>;
+@Injectable() export class TenantTransactions { // the global Prisma module provides it
+  withTenantTransaction<T>(
+    ctx: TenantContext,
+    run: (tx: TenantTransaction) => Promise<T>,
+  ): Promise<T>;
+}
 ```
 
 The helper opens the transaction, sets `app.tenant_id` using parameterized `set_config(..., true)`, and passes that transaction client to every repository. Repository methods receive both the transaction and explicit context/tenant ID; they cannot obtain the root client as a fallback. Policies run before data release or mutation. Repositories require explicit tenant predicates; composite and same-parent foreign keys plus ENABLE/FORCE RLS protect omissions. Runtime is non-owner `sadara_app`, without BYPASSRLS; `sadara_owner` is NOLOGIN and the migrator is separate. See [database](database.md) for the SQL and tests. CLS may carry log correlation, never hidden authorization or query rewriting.

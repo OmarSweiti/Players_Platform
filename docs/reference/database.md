@@ -199,17 +199,17 @@ Every protected request checks PostgreSQL session and membership state. App revo
 seasonId String? @db.Uuid @map("season_id")
 tenantId String  @db.Uuid @map("tenant_id")
 season Season? @relation(fields: [seasonId, tenantId],
-  references: [id, tenantId], onDelete: Restrict, map: "contracts_season_tenant_fk")
+  references: [id, tenantId], onDelete: Restrict, onUpdate: Restrict) // contracts_season_id_tenant_id_fkey
 ```
 
 ```sql
 -- New migration. Do not edit the historical single-column FK.
 BEGIN;
-ALTER TABLE contracts ADD CONSTRAINT contracts_season_tenant_fk
+ALTER TABLE contracts ADD CONSTRAINT contracts_season_id_tenant_id_fkey
   FOREIGN KEY (season_id, tenant_id) REFERENCES seasons(id, tenant_id)
-  ON DELETE RESTRICT NOT VALID;
+  ON DELETE RESTRICT ON UPDATE RESTRICT NOT VALID;
 COMMIT;
-ALTER TABLE contracts VALIDATE CONSTRAINT contracts_season_tenant_fk;
+ALTER TABLE contracts VALIDATE CONSTRAINT contracts_season_id_tenant_id_fkey;
 BEGIN;
 ALTER TABLE contracts DROP CONSTRAINT contracts_season_id_fkey;
 COMMIT;
@@ -235,14 +235,18 @@ CREATE POLICY players_tenant ON players FOR ALL TO sadara_app
 
 ```ts
 export type TenantTransaction = Prisma.TransactionClient; // alias, not a wrapper
-export async function withTenantTransaction<T>(
-  ctx: TenantContext, work: (tx: TenantTransaction) => Promise<T>,
-): Promise<T> {
-  assertAuthorizedTenantContext(ctx);
-  return prisma.$transaction(async tx => {
-    await tx.$queryRaw`SELECT set_config('app.tenant_id', ${ctx.tenantId}, true)`;
-    return work(tx); // repositories receive this client; no root client fallback
-  });
+@Injectable() // provided by the global Prisma module, so Nest wires the client
+export class TenantTransactions {
+  constructor(private readonly prisma: PrismaService) {}
+  async withTenantTransaction<T>(
+    ctx: TenantContext, work: (tx: TenantTransaction) => Promise<T>,
+  ): Promise<T> {
+    assertAuthorizedTenantContext(ctx);
+    return this.prisma.$transaction(async tx => {
+      await tx.$queryRaw`SELECT set_config('app.tenant_id', ${ctx.tenantId}, true)`;
+      return work(tx); // repositories receive this client; no root client fallback
+    });
+  }
 }
 ```
 

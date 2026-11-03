@@ -51,8 +51,8 @@ edit only Status and Evidence.
 | 0.4.0 | One naming scheme in the database: lower snake_case | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/71 |
 | 0.4.1 | Preflight: report every integrity violation before constraining anything | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/48 |
 | 0.4.2 | Database roles: owner, migrator, runtime | backend + umbrella | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/84 · https://github.com/OmarSweiti/Players_Platform/pull/43 |
-| 0.4.3 | Explicit tenant context and the tenant transaction | backend | todo |  |
-| 0.4.4 | Composite and same-parent foreign keys | backend | todo |  |
+| 0.4.3 | Explicit tenant context and the tenant transaction | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/85 |
+| 0.4.4 | Composite and same-parent foreign keys | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/86 |
 | 0.4.5 | Row-level security on every tenant-owned table; tenant ids immutable | backend | todo |  |
 | 0.4.6 | Tenant-leading indexes; duplicate indexes dropped | backend | todo |  |
 | 0.4.7 | Money: NUMERIC(19,4) with currency rules | backend | todo |  |
