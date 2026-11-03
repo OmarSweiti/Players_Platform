@@ -580,8 +580,10 @@ clean one.
 
 ### 0.4.2 — Database roles: owner, migrator, runtime
 **Repo:** backend + umbrella · **Size:** M · **Depends on:** `0.4.0`, `0.2.1`, `0.2.2` · **Requirements:** SR-NFR-SEC-002
-**Files:** umbrella `infra/postgres/init/10-roles.sql`, `infra/compose.yaml`; backend `prisma.config.ts`, `src/config/env.schema.ts`,
-`.github/workflows/ci.yml`, `justfile`, `test/db/roles.integration-spec.ts` (new)
+**Files:** umbrella `infra/postgres/init/10-roles.sql`, `infra/compose.yaml`, `infra/.env.example`, `justfile`; backend
+`scripts/database-roles.sql` (new — the roles' one definition, which the umbrella's init, CI and `just migrations` all
+run), `prisma.config.ts`, `src/config/env.schema.ts`, `.github/workflows/ci.yml`, `justfile`, `test/harness/db.ts`,
+`test/db/roles.integration-spec.ts` (new)
 `sadara_owner` (NOLOGIN) owns the schema; `sadara_migrator` assumes it only to run migrations
 (`MIGRATION_DATABASE_URL`, used by a new `just migrate`); `sadara_app`, the runtime role, is **not an owner and has NOBYPASSRLS**, with
 default privileges granting it only DML. The application never connects as the owner or migrator, in

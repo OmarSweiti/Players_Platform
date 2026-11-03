@@ -85,8 +85,21 @@ up:
     if [ ! -f infra/.env ]; then
       cp infra/.env.example infra/.env
       echo "up: created infra/.env from infra/.env.example (development-only values)"
+    else
+      # A setting added since this machine's infra/.env was made takes its development default.
+      [ -z "$(tail -c 1 infra/.env)" ] || echo >>infra/.env
+      grep -E '^[A-Z_]+=' infra/.env.example | while IFS= read -r line; do
+        grep -q "^${line%%=*}=" infra/.env || {
+          printf '%s\n' "$line" >>infra/.env
+          echo "up: added ${line%%=*} to infra/.env from infra/.env.example (a development-only value)"
+        }
+      done
     fi
     docker compose --file infra/compose.yaml up --detach --wait --wait-timeout 900
+    # The init scripts run only when the database volume is created: one made before 0.4.2 has no roles.
+    docker compose --file infra/compose.yaml exec -T postgres \
+      psql -U postgres -d sadara -Atc "SELECT 1 FROM pg_roles WHERE rolname = 'sadara_app'" | grep -q 1 ||
+      echo "up: WARNING — this database volume predates the database roles (0.4.2): run just reset, then just up" >&2
     python3 infra/objectstore/bootstrap.py
     echo
     echo "  https://sadara.localhost    the web app (:3001) and the API (/api/ → :3000), through the proxy"

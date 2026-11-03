@@ -14,10 +14,16 @@ services:
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?run `just up`, which creates infra/.env}
       POSTGRES_DB: sadara
+      # PostgreSQL's own collation, which no operating-system upgrade can reorder (0.4.2, DB-51)
+      POSTGRES_INITDB_ARGS: --locale-provider=builtin --locale=C.UTF-8
+      # The migrator's and the runtime role's, read by init/10-roles.sql when the volume is created
+      SADARA_MIGRATOR_PASSWORD: ${SADARA_MIGRATOR_PASSWORD:?run `just up`, which adds it to infra/.env}
+      SADARA_APP_PASSWORD: ${SADARA_APP_PASSWORD:?run `just up`, which adds it to infra/.env}
     ports: ["127.0.0.1:${POSTGRES_PORT:-5432}:5432"]
     volumes:
       - postgres:/var/lib/postgresql # PostgreSQL 18 images keep PGDATA below it, in 18/docker
       - ./postgres/init:/docker-entrypoint-initdb.d:ro
+      - ../backend/scripts/database-roles.sql:/sadara/database-roles.sql:ro # the roles' one definition
     healthcheck:
       # Over TCP on purpose: the entrypoint's temporary server runs the init
       # scripts on a socket only, so this passes once the real server is up.
