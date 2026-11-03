@@ -116,9 +116,9 @@ run early.
 stale.*
 
 <!-- plan:milestone:begin -->
-**Demo milestone** — 32 of 126 microsteps done; 524–1048 engineering hours left before the reserve.
+**Demo milestone** — 33 of 126 microsteps done; 520–1040 engineering hours left before the reserve.
 
-Next in build order (every dependency done): `0.4.0`, `0.5.1`, `0.2.6`, `0.8.1`, `0.10.2`.
+Next in build order (every dependency done): `0.4.2`, `0.4.4`, `0.4.7`, `0.4.8`, `0.4.9`, `0.4.11`, `0.5.1`, `0.2.6`. … and 2 more.
 
 | Stage | Step | Title | Repo | Size | Status |
 |---|---|---|---|---|---|
@@ -154,7 +154,7 @@ Next in build order (every dependency done): `0.4.0`, `0.5.1`, `0.2.6`, `0.8.1`,
 | C | 0.3.9 | The committed OpenAPI contract and the breaking-change check | backend | M | done |
 | C | 0.9.4 | A typed client generated from the contract, on the same origin | frontend | M | done |
 | C | 0.10.1 | Structured logs with request correlation | backend | M | done |
-| D | 0.4.0 | One naming scheme in the database: lower snake_case | backend | M | todo |
+| D | 0.4.0 | One naming scheme in the database: lower snake_case | backend | M | done |
 | D | 0.4.2 | Database roles: owner, migrator, runtime | backend + umbrella | M | todo |
 | D | 0.4.3 | Explicit tenant context and the tenant transaction | backend | L | todo |
 | D | 0.4.4 | Composite and same-parent foreign keys | backend | M | todo |
