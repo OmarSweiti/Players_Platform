@@ -98,10 +98,10 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `preflight_reports_cross_tenant_edges` | 0.4.1 | backend | done |
 | `preflight_reports_same_parent_violations` | 0.4.1 | backend | done |
 | `preflight_output_contains_no_personal_data` | 0.4.1 | backend | done |
-| `the_runtime_role_owns_no_table` | 0.4.2 | backend + umbrella | todo |
-| `the_runtime_role_cannot_run_ddl` | 0.4.2 | backend + umbrella | todo |
-| `the_runtime_role_cannot_bypass_rls` | 0.4.2 | backend + umbrella | todo |
-| `the_runtime_role_has_bounded_work` | 0.4.2 | backend + umbrella | todo |
+| `the_runtime_role_owns_no_table` | 0.4.2 | backend + umbrella | done |
+| `the_runtime_role_cannot_run_ddl` | 0.4.2 | backend + umbrella | done |
+| `the_runtime_role_cannot_bypass_rls` | 0.4.2 | backend + umbrella | done |
+| `the_runtime_role_has_bounded_work` | 0.4.2 | backend + umbrella | done |
 | `queries_run_inside_the_tenant_transaction` | 0.4.3 | backend | todo |
 | `a_context_cannot_be_built_from_request_input` | 0.4.3 | backend | todo |
 | `the_setting_does_not_outlive_its_transaction` | 0.4.3 | backend | todo |
