@@ -1,6 +1,6 @@
 # Arabic and English product interface
 
-Target specification for UX-001..012, SR-CORE-007, SR-NFR-I18N-001, SR-NFR-A11Y-001 and TEST-009/010. The shell is delivered in `0.9.1`–`0.9.6`; every later feature ships its Arabic/English states with its API. Accessibility acceptance belongs to `1.10.8`, native Arabic/domain review to `1.10.15`, and subsequent releases repeat both. [i18n ADR](../adr/0008-i18n.md), [API behavior](api.md), [manual testing](../implementation/02-development-workflow.md#manual-testing-playbook).
+Target specification for UX-001..012, SR-CORE-007, SR-NFR-I18N-001, SR-NFR-A11Y-001 and TEST-009/010. The shell is delivered in `0.9.1`–`0.9.6`; every later feature ships its Arabic/English states with its API. Accessibility acceptance belongs to `1.10.8`, native Arabic/domain review to `1.10.15`, and subsequent releases repeat both. [i18n ADR](../adr/0008-i18n.md), [API behavior](api.md), [manual testing](../implementation/02-development-workflow.md#manual-testing-playbook). How the interface looks — direction, principles, the design skills and references — is [visual design](visual-design.md) ([ADR-0026](../adr/0026-interface-design-with-skills-and-references.md)); this contract prevails over it.
 
 ## Baseline and target boundary
 
@@ -87,7 +87,7 @@ Dates: civil `YYYY-MM-DD` values remain the same day in every locale/timezone. I
 
 Amounts: parse/format exact decimal strings using currency definitions, never JS Number arithmetic. Show the currency code where a symbol is ambiguous. Display payable precision according to the currency exponent; never silently round an entered charge. Locale-specific grouping and decimal separators require explicit parsing rules and confirmation. Use stable ASCII digits in identifiers and transport values; ordinary displayed numbers follow the approved locale/numbering preference.
 
-Use an Arabic-capable font with documented licensing and tested shaping. The web app uses IBM Plex Sans Arabic beside Geist, both under the SIL Open Font License 1.1 and self-hosted (`0.9.2`); a browser test asks Chrome which fonts draw Arabic and Latin text. Font loading and fallback must not clip Arabic marks or materially shift critical controls. Browser, email and PDF rendering each need their own shaping/layout evidence; browser success does not qualify a certificate PDF. Theme, contrast and dark-mode behavior use one consistent token system, preserving existing suitable components rather than introducing an unrelated redesign.
+Use an Arabic-capable font with documented licensing and tested shaping. The web app uses IBM Plex Sans Arabic beside Geist, both under the SIL Open Font License 1.1 and self-hosted (`0.9.2`); a browser test asks Chrome which fonts draw Arabic and Latin text. Font loading and fallback must not clip Arabic marks or materially shift critical controls. Browser, email and PDF rendering each need their own shaping/layout evidence; browser success does not qualify a certificate PDF. Theme, contrast and dark-mode behavior use one consistent token system, preserving existing suitable components rather than introducing an unrelated redesign; the token roles, type and contrast rules are in [visual design](visual-design.md#principles).
 
 ## Accessibility acceptance
 

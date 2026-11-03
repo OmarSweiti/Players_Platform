@@ -36,6 +36,9 @@ tenants and members (from `0.5.11`). Open **`https://sadara.localhost`** — the
 and sign in as a development member from the realm (the list is in `infra/keycloak/README.md`). The
 browser only ever talks to one origin, over HTTPS, so the session cookie behaves exactly as in production.
 
+For work on the web app, install the design skills once, at their recorded versions
+([visual design](../reference/visual-design.md#set-up-once-per-machine)).
+
 Needs: `git` ≥ 2.34, `gh` (authenticated, SSH, with the `project` scope for [the
 board](03-github-workflow.md#the-board): `gh auth refresh -s project,read:project`), `just`, `jq`, `gitleaks` ≥ 8.19, Docker with at least 4 GB of
 memory ([why](../../infra/README.md#this-machine)), Python 3, and
@@ -100,7 +103,10 @@ Every change follows ten stations. An agent follows them literally.
 4. **Test first** where the step adds behaviour: write the tests on its **Tests** line — the title
    carries the exact name — and watch them fail for the right reason.
 5. **Build** exactly the step — its **Files**, nothing else. A neighbouring problem becomes a line under
-   "Not in this PR" or a new microstep, not a silent expansion.
+   "Not in this PR" or a new microstep, not a silent expansion. A step that changes the web app runs the
+   [design pass](../reference/visual-design.md#the-design-pass-in-every-ui-step): shape, build on shadcn/ui
+   and the tokens, look in both languages and themes, and review with impeccable until no P0 or P1 is
+   left.
 6. **Verify.** Run the step's **Verify** command; confirm its **Done when** sentence is true; then
    `just check`.
 7. **Validate** — run it as a person would, and keep the proof. Start the stack (`just up`) and both
