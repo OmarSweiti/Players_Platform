@@ -641,15 +641,15 @@ changed parent key would rewrite its children, `tenantId` included (DB-53).
 **Files:** `src/infrastructure/prisma/model-classification.ts` (new), migration `…_tenant_rls`,
 `scripts/generate-rls.ts` (new), `test/db/rls.integration-spec.ts` (new)
 Every model is classified `tenant-owned` or `global` in one table; a test fails on an unclassified model
-or on any table with a `tenantId` column that lacks a policy. Each tenant-owned table gets `ENABLE` and
+or on any table with a `tenant_id` column that lacks a policy. Each tenant-owned table gets `ENABLE` and
 `FORCE ROW LEVEL SECURITY` and one policy for the runtime role:
-`USING ("tenantId" = NULLIF(current_setting('app.tenant_id', true), '')::uuid)` with the same `WITH
+`USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)` with the same `WITH
 CHECK`. A full `tenants` row is visible only to its own tenant; host resolution and job discovery read a
-narrow `tenant_directory` view (`id`, `slug`, `domain`, `isActive` — nothing else) granted to the runtime
+narrow `tenant_directory` view (`id`, `slug`, `domain`, `is_active` — nothing else) granted to the runtime
 and registry roles. Global tables get **per-table** privileges: reference data (permissions, the default
 matrix, currencies) is read-only; `identities` is readable and insertable only through the identity
 adapter; `security_events` is insert-only for the runtime role, with reads through a restricted path
-(`0.7.3`). A trigger refuses any `UPDATE` of `tenantId`. Missing context means no rows and no writes. RLS separates tenants; it does
+(`0.7.3`). A trigger refuses any `UPDATE` of `tenant_id`. Missing context means no rows and no writes. RLS separates tenants; it does
 not replace the policies that separate roles inside one tenant (`0.6`).
 **Tests:** `rls_missing_context_denies_reads_and_writes` · `rls_pool_reuse_never_leaks_the_previous_tenant` · `every_tenant_table_has_forced_rls_and_a_policy` · `tenant_ids_cannot_be_updated` · `the_tenant_directory_exposes_only_routing_columns`
 **Verify:** `just migrations && just test-int -- rls`
