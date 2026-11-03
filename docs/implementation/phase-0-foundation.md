@@ -1376,12 +1376,15 @@ tests pass.
 
 ### 0.9.6 — The application shell
 **Repo:** frontend · **Size:** M · **Depends on:** `0.9.3`, `0.9.5` · **Requirements:** UX-010, UX-011, UX-012, SR-NFR-A11Y-001
-**Files:** `src/components/shell/**`, `src/shared/ui/**`, `src/shared/ui/states/**` (new), `components.json` (new), `app/globals.css`
+**Files:** `src/components/shell/**`, `src/shared/ui/**`, `src/shared/ui/states/**` (new), `components.json` (new), `app/globals.css`, `PRODUCT.md` and `DESIGN.md` (new)
 Components from shadcn/ui through its CLI in right-to-left mode (`rtl: true`), regenerating today's
 hand-copied primitives ([ADR-0025](../adr/0025-the-web-app-data-path.md)); design tokens; navigation built from the member's effective permissions (display only); shared empty,
 loading, error, offline and retry states; light and dark themes with the `dark:` variant bound to the
 theme class (`@custom-variant dark`) — today `globals.css:49` styles `.dark` while `dark:` follows the
-operating system. Landmarks, headings, visible focus and keyboard operation from the start.
+operating system. Landmarks, headings, visible focus and keyboard operation from the start. The first
+[design pass](../reference/visual-design.md#the-design-pass-in-every-ui-step): `impeccable init` and
+`impeccable document` write `PRODUCT.md` and `DESIGN.md` from the visual-design reference and the tokens,
+for every later design command to read ([ADR-0026](../adr/0026-interface-design-with-skills-and-references.md)).
 **Tests:** `navigation_hides_what_the_member_cannot_open` · `empty_states_name_the_next_action` · `a_failed_request_offers_retry`
 **Verify:** `npx vitest run src/components && npx playwright test shell`
 **Done when:** the three tests pass and axe reports no serious violation on the shell in either locale.

@@ -23,6 +23,7 @@ Players_Platform/     ← the umbrella: the plan (docs/), the local stack (infra
 | [`docs/implementation/01-conventions.md`](docs/implementation/01-conventions.md) | the engineering law: fifteen invariants — keep it open |
 | [`docs/implementation/02-development-workflow.md`](docs/implementation/02-development-workflow.md) | every command, the ten-station microstep lifecycle, the rules for agents |
 | [`docs/implementation/03-github-workflow.md`](docs/implementation/03-github-workflow.md) | branches, titles, PRs, pins and progress |
+| [`docs/reference/visual-design.md`](docs/reference/visual-design.md) | **any UI work**: how the interface looks (a football platform's visual language), the design skills and references, and the design pass ([ADR-0026](docs/adr/0026-interface-design-with-skills-and-references.md)) |
 | [`docs/requirements/`](docs/requirements/README.md) | the frozen BRD, PRD, SysRD and SRS — departures are in the master plan's errata |
 
 ## The flow, in one screen
