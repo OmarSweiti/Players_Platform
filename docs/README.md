@@ -7,7 +7,7 @@ it, the rules every change follows, and where the work stands. People and AI age
 |---|---|---|
 | [`requirements/`](requirements/README.md) | the owner's four frozen requirement documents (BRD, PRD, SysRD, SRS) — **what** Sadara must be | the README, then the BRD |
 | [`implementation/`](implementation/README.md) | the plan — the demo milestone (the build order), master plan, engineering law, workflows, one file per phase, progress and handoff — **what to build next and how to prove it** | the README: it shows the live frontier |
-| [`reference/`](reference/) | the contracts every microstep relies on: architecture, API, database, security, observability, UI, domain workflows, the verified current state, the test catalog and requirement traceability | whichever the microstep names |
+| [`reference/`](reference/) | the contracts every microstep relies on: architecture, API, database, security, observability, UI and visual design, domain workflows, the verified current state, the test catalog and requirement traceability | whichever the microstep names |
 | [`adr/`](adr/README.md) | architecture decisions: context, decision, alternatives rejected, consequences, when to revisit | the index |
 
 **Where to begin.** New to the project: [`implementation/README.md`](implementation/README.md), then
@@ -58,3 +58,4 @@ the same pull request.
 | [0023](adr/0023-session-cookies-per-rfc-10017.md) | The session cookies follow RFC 10017 (`__Host-Http-` names; `SameSite=Lax` kept, with fetch-metadata checks) | Accepted |
 | [0024](adr/0024-zod-schemas-and-vitest-on-nestjs-12.md) | On NestJS 12: Zod schemas for validation and the contract, Vitest for tests | Accepted |
 | [0025](adr/0025-the-web-app-data-path.md) | The web app reads on the server, writes through the API, and caches nothing tenant-scoped | Accepted |
+| [0026](adr/0026-interface-design-with-skills-and-references.md) | The interface speaks football's visual language, designed with named skills and references used for inspiration | Accepted |
