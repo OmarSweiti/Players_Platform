@@ -36,7 +36,8 @@ tenants and members (from `0.5.11`). Open **`https://sadara.localhost`** — the
 and sign in as a development member from the realm (the list is in `infra/keycloak/README.md`). The
 browser only ever talks to one origin, over HTTPS, so the session cookie behaves exactly as in production.
 
-Needs: `git` ≥ 2.34, `gh` (authenticated, SSH), `just`, `jq`, `gitleaks` ≥ 8.19, Docker with at least 4 GB of
+Needs: `git` ≥ 2.34, `gh` (authenticated, SSH, with the `project` scope for [the
+board](03-github-workflow.md#the-board): `gh auth refresh -s project,read:project`), `just`, `jq`, `gitleaks` ≥ 8.19, Docker with at least 4 GB of
 memory ([why](../../infra/README.md#this-machine)), Python 3, and
 Node from each application's `.nvmrc` (24.19.0). Work **from the umbrella root** so the plan and both
 applications are in view; an agent opened inside one application reaches the plan through that
@@ -93,7 +94,9 @@ Every change follows ten stations. An agent follows them literally.
 2. **Read.** The microstep in full, every file it names, the requirements it cites, the references it
    links, and the conventions it touches. If the microstep is wrong against the code as it stands, **fix
    the microstep first** (a `docs(plan)` PR): the plan is maintained, not admired.
-3. **Branch** in the repository the step names: `just branch feat/<slug>`.
+3. **Branch** in the repository the step names: `just branch feat/<slug>`. The first PR of a step opens
+   its issue first, in the umbrella — `just step-issue N.N.N` — which puts it on [the
+   board](03-github-workflow.md#the-board) as in progress.
 4. **Test first** where the step adds behaviour: write the tests on its **Tests** line — the title
    carries the exact name — and watch them fail for the right reason.
 5. **Build** exactly the step — its **Files**, nothing else. A neighbouring problem becomes a line under
@@ -111,8 +114,9 @@ Every change follows ten stations. An agent follows them literally.
    shows the rendered page. If something does not work, fix it first: a failure is never posted as
    validation.
 8. **Ship.** Commit `type(scope): summary  [N.N.N]`; `just pr` with the template filled — the Verify
-   output, the hours spent. The **engineering app** opens the PR, assigned to the maintainer with their
-   review requested ([review and approval](03-github-workflow.md#review-and-approval)). Then
+   output, the hours spent, and `Part of OmarSweiti/Players_Platform#<the step's issue>` under *Closes*.
+   The **engineering app** opens the PR, assigned to the maintainer with their review requested ([review
+   and approval](03-github-workflow.md#review-and-approval)), and `just pr` files it on the board. Then
    `just evidence <PR URL> <report.md> <screenshots>` posts the evidence on it, for its head commit, and
    the `validation` check passes. Report the PR to the maintainer and stop: **the maintainer approves
    every PR**, and GitHub refuses the merge until they do. A push after the approval dismisses it —
@@ -120,7 +124,8 @@ Every change follows ten stations. An agent follows them literally.
 9. **Record.** When the umbrella next moves its pins, set the step to `done` in
    [`progress.md`](progress.md) with its PR URL, run `just plan`, and ship that with the pin bump — the
    same route: evidence (the plan check's output, the rendered record), the maintainer's approval, then
-   the merge.
+   the merge. Its PR says `Closes #<the step's issue>`, and `just gh-project-sync` runs in each
+   repository so the board has every card.
 10. **Hand off.** Stopping with work in flight? Overwrite [`handoff.md`](handoff.md): the step, its state,
    the next action, anything surprising. One page; history is git's job.
 
