@@ -1,7 +1,9 @@
 ## Closes
 
-<!-- `Closes #123`, one per line — or "none" and why. Only a closing keyword
-     closes the issue (and moves its board card) on merge. -->
+<!-- `Closes #N` for the issue of each microstep this PR records done (the one
+     `just step-issue` opened), and for any other issue it settles — one per
+     line — or "none" and why. Only a closing keyword closes the issue, and
+     moves its card on the board to Done, on merge. -->
 
 ## What
 

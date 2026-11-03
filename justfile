@@ -187,7 +187,7 @@ pr $title='' $body='':
     just pre-push
     git push -u origin HEAD
     as_app() { GH_TOKEN="$app_token" "$@"; }
-    to=(--assignee "$maintainer" --reviewer "$maintainer" --base development)
+    to=(--assignee "$maintainer" --base development)
     if [ -n "$body" ]; then
       as_app gh pr create "${to[@]}" --title "$title" --body-file "$body"
     elif [ -n "$title" ]; then
@@ -198,8 +198,21 @@ pr $title='' $body='':
       as_app gh pr create "${to[@]}" --fill-first
     fi
     url=$(gh pr view --json url --jq .url)
+    # CODEOWNERS requests the maintainer's review on its own; this asks again, explicitly. Not with
+    # `gh pr create --reviewer`: on a brand-new PR its request can race CODEOWNERS' and fail the
+    # recipe after the PR exists (it did twice on 3 November 2026), so ask once the PR is there.
+    for attempt in 1 2 3; do
+      as_app gh api -X POST "repos/$repo/pulls/${url##*/}/requested_reviewers" -f "reviewers[]=$maintainer" --silent && break
+      [ "$attempt" -lt 3 ] || { echo "pr: REFUSED — the maintainer's review could not be requested: request it on $url" >&2; exit 1; }
+      sleep 5
+    done
+    # The board holds status and is never a gate: a card that fails to file leaves the PR open.
+    board() { bash ./scripts/gh-project-item.sh "$url" ||
+      echo "pr: the PR is open, but its card on the board is not filed or current: run just gh-project-item $url" >&2; }
+    board
     # Every check but `validation`: its evidence can only be posted on a PR that exists.
     bash ./scripts/watch-required-checks.sh "$url" --except validation
+    board # again, now that the labeler has labelled it: its Risk is known
     echo "pr: $url"
     echo "pr: next — validate it running and post the evidence (in the umbrella: just evidence $url <report.md> <screenshots>);"
     echo "    the maintainer reviews and approves it; then: just merge $url"
@@ -249,6 +262,8 @@ merge $pr='':
     get '.body // ""' >"$text"
     gh pr merge "$target" --squash --delete-branch --match-head-commit "$(get .headRefOid)" \
       --subject "$(get .title) (#$(get .number))" --body-file "$text"
+    bash ./scripts/gh-project-item.sh "$target" ||
+      echo "merge: merged, but its card on the board is not Done: run just gh-project-item $target" >&2
 
 # The engineering app opens every PR, so the maintainer can approve it: create it once, or check it (status)
 engineering-app $command='create':
@@ -339,3 +354,19 @@ gh-bootstrap:
 # Read the live configuration back and report drift (read-only)
 gh-audit:
     bash ./scripts/gh-audit.sh
+
+# The delivery board for the three repositories, its fields and links (idempotent); --check only reads
+gh-project *$flag:
+    bash ./scripts/gh-project.sh $flag
+
+# File a PR or a microstep's issue on the board, or bring its card up to date: just gh-project-item <URL>
+gh-project-item $ref:
+    bash ./scripts/gh-project-item.sh "$ref"
+
+# File every PR into development, and every microstep's issue, that the board lacks or has stale
+gh-project-sync:
+    bash ./scripts/gh-project-item.sh --sync
+
+# Open the issue of the microstep you are starting, and file it on the board: just step-issue 0.5.1 [--dry-run]
+step-issue $step *$flag:
+    python3 ./scripts/step-issue.py "$step" $flag

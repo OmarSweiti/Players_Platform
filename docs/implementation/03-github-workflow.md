@@ -50,9 +50,10 @@ docs(plan): record the phase-0 exit criteria  [—]
 ## The daily loop
 
 ```bash
+just step-issue 1.2.4                        # in the umbrella: the step's issue, on the board (once per step)
 just branch feat/player-directory            # validates the name, fresh development, new branch
 git commit -m "feat(players): add the player directory  [1.2.4]"
-just pr 'feat(players): add the player directory  [1.2.4]' notes/pr.md   # gate → push → PR (the engineering app) → waits for checks
+just pr 'feat(players): add the player directory  [1.2.4]' notes/pr.md   # gate → push → PR (the engineering app) → card → waits for checks
 just evidence <the PR URL> report.md shots/  # in the umbrella: the validation evidence, for the head commit
 # … the maintainer reviews and approves on GitHub …
 just merge <the PR URL that just pr printed>  # approval, route, title, attribution, checks, clean merge state
@@ -107,6 +108,53 @@ and asks again. After the approval, `just merge` merges only what GitHub itself 
 maintainer's admin bypass remains, through a PR and logged by GitHub, for emergencies only; no recipe uses
 it.
 
+## The board
+
+[**Sadara delivery**](https://github.com/users/OmarSweiti/projects/5) is one GitHub Project for the three
+repositories, private to the maintainer. It holds **status** — what is in flight, what merged, what is
+blocked. The plan of record stays in this directory: when the board and [`progress.md`](progress.md)
+disagree, the board is stale.
+
+| Card | Filed by | Moves to Done when |
+|---|---|---|
+| every pull request into `development`, in each repository | `just pr`, as *In Progress*, when it opens and again once the labeler has run | `just merge` merges it — GitHub's *Pull request merged* workflow does the same for a merge in the browser |
+| one issue per microstep, in the umbrella | `just step-issue N.N.N`, when the step starts | the umbrella PR that records the step done says `Closes #N` |
+
+**The fields come from what the item says about itself.** `scripts/gh-project-item.sh` sets them; to
+change one, change the label or the title, never the card.
+
+| Field | From |
+|---|---|
+| Status | *In Progress* while open; *Done* once merged, or closed |
+| Phase · Stage · Group · Microstep | the step: `[1.2.4]` at the end of a PR title, `1.2.4 — …` at the start of an issue's. *Stage* is the step's stage in the [demo milestone](demo-milestone.md), else *after the demo*; `[—]` and `[#12]` name no step |
+| Risk | the most consequential `risk:` label — security, then migration, then breaking — else *none* |
+| Priority | its `priority:` label |
+| Blocked | its `needs:` label, else *not blocked* |
+
+**A microstep's issue** is opened by `just step-issue 0.5.1` in the umbrella. It links to the step and
+quotes its *Done when* rather than copying the step, so it cannot drift from the plan. The recipe refuses
+a step that is done, superseded, already has an issue, or has a dependency that is not done. A step
+often spans several PRs in two repositories, so only its record closes the issue: each application PR
+for the step says `Part of OmarSweiti/Players_Platform#N` in its *Closes* section, and the umbrella PR
+that records the step done says `Closes #N`. Work outside the plan — a dependency bump, a tooling fix —
+needs no issue; its PR is still a card.
+
+**Nothing is missed.** GitHub Free gives a project one auto-add workflow, not one per repository, so
+the recipes file the cards, and `just gh-project-sync` in a repository files every PR into `development`
+and every microstep's issue that the board lacks or has stale — Dependabot's PRs merged in the browser
+among them. The record runs it in all three repositories ([pins and
+progress](#the-umbrella-pins-and-progress)).
+
+**Set up once.** The board is the maintainer's, out of reach of a GitHub App, so its scripts run as the
+maintainer's login, which needs the `project` scope: `gh auth refresh -s project,read:project`. Then
+`just gh-project` in the umbrella creates or checks the board, its fields, its four views and its links to
+the three repositories; `just gh-project --check` only reads, and must report `no drift`. A view's
+grouping has no API — *Demo build order* groups by Stage and *Phase plan* by Phase, set once by hand —
+and GitHub's built-in workflows stay as GitHub sets them.
+
+The board holds status and is **never a gate**: a card that fails to file leaves the PR open, and the
+recipe prints the `just gh-project-item <URL>` that files it.
+
 ## What is enforced, and by what
 
 | Layer | Enforces | Bypassable by |
@@ -129,12 +177,15 @@ just branch chore/pin-applications
 just pin                     # both pins → their development tips, staged; refuses a rewind; prints the adopted commits
 # set those microsteps to done in docs/implementation/progress.md, each with its merged PR URL
 just plan                    # regenerate the frontier, test catalog and traceability; then check
+just gh-project-sync         # here and in each application: the board catches up (Dependabot's merges too)
 git commit -am "chore(repo): pin the applications and record 1.2.1–1.2.3  [1.2.1–1.2.3]"
 just pr 'chore(repo): pin the applications and record 1.2.1–1.2.3  [1.2.1–1.2.3]'
 ```
 
 - The plan check verifies every `done` row against the pinned commits: its named tests must exist there
   and must not be skipped.
+- The PR body says `Closes #N` for the issue of each step it records done, so the issue closes and its
+  card moves to Done when the record merges ([the board](#the-board)).
 - `just pin` follows `branch = development` in `.gitmodules`; it never trusts a clone's stale
   `origin/HEAD` (which once "pinned" the old `main` — a rewind the recipe now refuses).
 - `just setup` initialises only submodules that are not initialised, so it never detaches an

@@ -28,9 +28,13 @@ Players_Platform/     ← the umbrella: the plan (docs/), the local stack (infra
 ## The flow, in one screen
 
 - One microstep per PR, in the repository the step names; `just branch feat/<slug>` from a fresh `development`.
+- A step starts with its issue: `just step-issue N.N.N` in the umbrella puts it on
+  [the board](docs/implementation/03-github-workflow.md#the-board). Its application PRs say
+  `Part of OmarSweiti/Players_Platform#N`; the umbrella PR that records it says `Closes #N`.
 - Titles: `type(scope): summary  [N.N.N]`. The PR title becomes the squash commit.
 - `just pr '<title>' <body>` → `just evidence <the URL it printed> <report> <screenshots>` → the
-  maintainer approves → `just merge <the URL>`. **Never guess a PR number.**
+  maintainer approves → `just merge <the URL>`. **Never guess a PR number.** `just pr` and `just merge`
+  keep the PR's card on the board current.
 - **Validate every PR, and show it**: run the stack and both apps, exercise the change (a screen in Arabic
   and English), capture screenshots; `just evidence` posts them for the head commit, and the
   `validation` check refuses a PR without it.

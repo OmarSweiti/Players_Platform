@@ -43,6 +43,10 @@ just merge                                                    # squash, bound to
   infra repo docs`. The PR title becomes the squash commit, so CI checks it.
 - **Promotions** always use a **merge commit**: `just promote-staging`,
   `just promote-main`, then `just promote-merge <PR>`.
+- **The delivery board** (`just gh-project`) holds status for the three
+  repositories: `just pr` and `just merge` keep each PR's card current,
+  `just step-issue N.N.N` opens a microstep's issue when it starts, and the PR
+  that records the step done says `Closes #N`. Details: `docs/implementation/03-github-workflow.md`.
 - **No assistant attribution.** `Co-Authored-By:` trailers for coding
   assistants and "Generated with…" lines are refused everywhere.
 
