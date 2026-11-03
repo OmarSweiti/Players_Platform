@@ -23,9 +23,24 @@ just reset          # destroy the local state; keeps the certificate authority a
 | `proxy` | Caddy 2.11.4 | <https://sadara.localhost>, <https://northwind.localhost> | `/api/` → the API on `:3000`, everything else → the web app on `:3001` |
 
 The development credentials are in `infra/.env`, copied from [`.env.example`](.env.example). They open
-services bound to 127.0.0.1 and nothing else. Until `0.4.2` adds the owner, migrator and runtime roles,
-the API connects as `postgres`:
-`postgresql://postgres:<POSTGRES_PASSWORD>@127.0.0.1:5432/sadara`.
+services bound to 127.0.0.1 and nothing else.
+
+**PostgreSQL's roles (`0.4.2`).** When its volume is created, the database runs
+[`postgres/init/10-roles.sql`](postgres/init/10-roles.sql), which applies the backend's one definition
+(`backend/scripts/database-roles.sql`, the file CI and `just migrations` run too) in `sadara` and
+`sadara_test`:
+
+| Role | Logs in | What it is for |
+|---|---|---|
+| `sadara_owner` | never | owns both databases' schemas and everything in them |
+| `sadara_migrator` | with `SADARA_MIGRATOR_PASSWORD` | `just migrate` and the test harness's migrations; it becomes the owner at login |
+| `sadara_app` | with `SADARA_APP_PASSWORD` | the API, the worker and the tests: data only, never the schema, never past row-level security; statements 15 s, lock waits 5 s, idle in a transaction 60 s |
+
+The API connects as `postgresql://sadara_app:<SADARA_APP_PASSWORD>@127.0.0.1:5432/sadara` and refuses to
+boot as `postgres`. Both databases collate with PostgreSQL's builtin `C.UTF-8` provider (DB-51). The
+roles and the collation take effect only when the volume is created: `just up` adds missing settings to
+an existing `infra/.env` and warns when the volume predates the roles; `just reset`, then `just up`,
+creates it again.
 
 ## The rules, and what enforces them
 
@@ -61,8 +76,9 @@ the API connects as `postgres`:
   In a 2 GB colima VM, the kernel killed clamd while it loaded its signatures, and `just up` timed out on
   ClamAV's health check. With colima, run `colima stop && colima start --memory 6`. Docker Desktop sets it
   under Settings → Resources.
-- **Bind mounts** (`postgres/init`, `proxy/Caddyfile`) need the repository in a directory Docker shares.
-  colima shares your home directory by default.
+- **Bind mounts** (`postgres/init`, `backend/scripts/database-roles.sql`, `proxy/Caddyfile`) need the
+  repository in a directory Docker shares, and the backend checked out (`just setup`). colima shares your
+  home directory by default.
 - **`*.localhost` names.** Browsers and curl resolve `*.localhost` to both loopback addresses themselves.
   - Node.js and Python ask the operating system instead. macOS answers `::1` only, and colima forwards
     only `127.0.0.1`.
