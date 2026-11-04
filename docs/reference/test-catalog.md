@@ -129,9 +129,9 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `emails_are_unique_regardless_of_case_and_spacing` | 0.4.9 | backend | done |
 | `an_archived_members_email_stays_reserved` | 0.4.9 | backend | done |
 | `reactivation_restores_the_same_membership` | 0.4.9 | backend | done |
-| `impossible_values_are_refused_by_the_database` | 0.4.10 | backend | todo |
-| `a_tenant_has_at_most_one_current_season` | 0.4.10 | backend | todo |
-| `legal_notes_are_internal_by_default` | 0.4.10 | backend | todo |
+| `impossible_values_are_refused_by_the_database` | 0.4.10 | backend | done |
+| `a_tenant_has_at_most_one_current_season` | 0.4.10 | backend | done |
+| `legal_notes_are_internal_by_default` | 0.4.10 | backend | done |
 | `high_ingest_ids_are_time_ordered` | 0.4.11 | backend | todo |
 | `medical_reads_see_only_the_context_tenant` | 0.4.12 | backend | todo |
 | `scouting_writes_are_stamped_with_the_context_tenant` | 0.4.12 | backend | todo |

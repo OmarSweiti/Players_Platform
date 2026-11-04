@@ -761,17 +761,27 @@ links an identity (`0.5.3`).
 
 ### 0.4.10 — Integrity constraints in SQL: checks, partial uniques, safe defaults, bounded JSON
 **Repo:** backend · **Size:** M · **Depends on:** `0.4.4` · **Requirements:** SR-DB-007
-**Files:** migration `…_integrity_constraints`, `test/db/constraints.integration-spec.ts` (new)
-CHECK constraints for the existing numeric and date fields (non-negative minutes, goals and capacity;
-end dates not before start dates; finite numerics — money amounts finite and not negative, and a reviewed
-constraint trigger that holds each amount to its currency's minor units, as
-[`database.md`](../reference/database.md) describes; `0.4.7` validates them in `Money`); a partial unique index for **one current season per
-tenant** and **one featured image per player**; legal notes **internal by default** (today
-`isInternal` defaults to `false`, `schema.prisma:1001`); size and shape bounds on the JSON columns so
-metadata cannot become a hidden relational store.
+**Files:** migration `20261104133235_integrity_constraints`, `scripts/integrity-checks.ts` (new),
+`scripts/preflight.sql`, `scripts/preflight.ts`, `prisma/schema.prisma`, `src/common/validation/schemas.ts`,
+`test/db/constraints.integration-spec.ts` (new), `test/db/preflight.integration-spec.ts`
+The database refuses what is impossible; what is merely unwise (a prospect of 45) stays the API's to
+refuse. CHECK constraints for the existing numeric and date fields (non-negative counts, sizes, minutes,
+goals and capacity; end dates not before start dates; a scouting score 1 to 10, a pass accuracy 0 to 100;
+finite numerics — money amounts finite and not negative, a salary with its period, and a reviewed
+constraint trigger that holds each amount to its currency's minor units, with a guard refusing an
+exponent change while any amount is in the currency, as [`database.md`](../reference/database.md)
+describes; `0.4.7` validates them in `Money`); a partial unique index for **one current season per
+tenant** and **one featured image per player**, among live rows; legal notes **internal by default** for
+new rows (existing notes keep their value); one shape and a size cap on each JSON column (16 KiB; audit
+snapshots 1 MiB, the request-body limit) so metadata cannot become a hidden relational store.
 Tenant slugs and domains are lower case by CHECK — a DNS label; the domain in ASCII, punycode for an
-Arabic name — and live seasons are unique by name within their tenant (DB-55); every text column gets a
-length CHECK equal to its API bound (DB-56).
+Arabic name — and live seasons are unique by name within their tenant (DB-55); every TEXT column gets a
+length CHECK equal to its API bound, `PROSE_MAX` (DB-56). `scripts/integrity-checks.ts` is the one list
+of the 81 CHECKs: the migration carries them as it printed them, and the preflight reports a row that
+would break one (`check_violation`), with `duplicate_current_season`, `duplicate_season_name` and
+`duplicate_featured_media` for the indexes. The same spec also holds
+`a_player_has_at_most_one_featured_image`, `a_currency_exponent_cannot_change_under_amounts` and
+`the_catalog_holds_every_integrity_constraint_by_name`.
 **Tests:** `impossible_values_are_refused_by_the_database` · `a_tenant_has_at_most_one_current_season` · `legal_notes_are_internal_by_default`
 **Verify:** `just migrations && just test-int -- constraints`
 **Done when:** each rule refuses its counter-example in raw SQL, and a catalog test lists every
