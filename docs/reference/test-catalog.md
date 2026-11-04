@@ -123,9 +123,9 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `money_never_passes_through_a_javascript_number` | 0.4.7 | backend | done |
 | `every_active_iso_4217_currency_is_seeded_with_its_decimals` | 0.4.7 | backend | done |
 | `money_columns_hold_every_currencys_decimals` | 0.4.7 | backend | done |
-| `a_birth_date_is_the_same_day_in_every_timezone` | 0.4.8 | backend | todo |
-| `instants_round_trip_in_utc` | 0.4.8 | backend | todo |
-| `an_invalid_tenant_timezone_is_refused` | 0.4.8 | backend | todo |
+| `a_birth_date_is_the_same_day_in_every_timezone` | 0.4.8 | backend | done |
+| `instants_round_trip_in_utc` | 0.4.8 | backend | done |
+| `an_invalid_tenant_timezone_is_refused` | 0.4.8 | backend | done |
 | `emails_are_unique_regardless_of_case_and_spacing` | 0.4.9 | backend | todo |
 | `an_archived_members_email_stays_reserved` | 0.4.9 | backend | todo |
 | `reactivation_restores_the_same_membership` | 0.4.9 | backend | todo |
