@@ -71,7 +71,7 @@ The four source documents and their checksums: [`../requirements/README.md`](../
 | SYS-ARC-005 | SysRD | 0.7.6, 1.10.2, 2.6.1 | 0/3 |
 | SYS-TEN-001 | SysRD | 0.4.3, 4.1.3 | 1/2 |
 | SYS-TEN-002 | SysRD | 0.4.3 | 1/1 |
-| SYS-TEN-003 | SysRD | 0.4.12, 1.11.2 | 0/2 |
+| SYS-TEN-003 | SysRD | 0.4.12, 1.11.2 | 1/2 |
 | SYS-TEN-004 | SysRD | 0.4.4 | 1/1 |
 | SYS-TEN-005 | SysRD | 0.4.5, 2.1.6, 4.3.1 | 1/3 |
 | SYS-TEN-006 | SysRD | 0.7.6, 1.8.1, 1.9.1, 2.6.1, 2.9.2, 4.1.5 | 0/6 |
@@ -232,7 +232,7 @@ The four source documents and their checksums: [`../requirements/README.md`](../
 | SR-NFR-MNT-001 | SRD | 0.2.8, 0.2.10 | 2/2 |
 | SR-NFR-MNT-002 | SRD | 0.2.9, 1.2.2, 1.4.8, 1.10.2, 1.10.11, 1.12.2 | 1/6 |
 | SR-DB-001 | SRD | 0.2.1 | 1/1 |
-| SR-DB-002 | SRD | 0.4.11 | 0/1 |
+| SR-DB-002 | SRD | 0.4.11 | 1/1 |
 | SR-DB-003 | SRD | 0.4.1, 1.2.2, 1.4.1, 1.11.1, 2.1.1, 2.4.4, 3.2.1, 3.4.1, 4.1.5 | 1/9 |
 | SR-DB-004 | SRD | 0.4.3 | 1/1 |
 | SR-DB-005 | SRD | 0.2.2, 1.10.11, 4.3.4 | 1/3 |

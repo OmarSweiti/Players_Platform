@@ -789,10 +789,14 @@ constraint by name.
 
 ### 0.4.11 — UUIDv7 for high-ingest tables
 **Repo:** backend · **Size:** S · **Depends on:** `0.4.0` · **Requirements:** SR-DB-002
-**Files:** `prisma/schema.prisma`, `src/infrastructure/prisma/model-classification.ts`
+**Files:** `prisma/schema.prisma`, `src/infrastructure/prisma/model-classification.ts`,
+`test/db/ids.integration-spec.ts` (new)
 UUID keys stay (v4 by default); append-heavy tables whose index locality matters — audit logs, security
 events, outbox and inbox, sessions, messages, notifications — use `@default(uuid(7))`, declared when each
-table is created. The classification records which, so a reviewer sees the choice.
+table is created. The classification records which (`ids: 'time-ordered'` on a model's class), so a
+reviewer sees the choice. Prisma makes the id, so the column has no SQL default and a raw INSERT supplies
+its own; no migration is needed and existing ids are unchanged. Prisma 7's runtime model carries no
+defaults, so the test reads each model's `@default` from the schema.
 **Tests:** `high_ingest_ids_are_time_ordered`
 **Verify:** `just test-int -- ids`
 **Done when:** the test passes for `audit_logs`, the one high-ingest table this step migrates; messages and
@@ -800,13 +804,22 @@ notifications switch in the migrations of the steps that rebuild them.
 
 ### 0.4.12 — The existing modules on the tenant transaction
 **Repo:** backend · **Size:** M · **Depends on:** `0.4.5`, `0.1.8` · **Requirements:** SYS-TEN-003
-**Files:** `src/modules/users/**`, `src/modules/medical/**`, `src/modules/scouting/**`
+**Files:** `src/modules/users/**`, `src/modules/medical/**`, `src/modules/scouting/**`,
+`src/common/decorators/tenant-context.decorator.ts` (new), `src/common/tenancy/tenant-context.ts`,
+`test/harness/session.ts`, `test/legacy-modules/tenant-transaction.e2e-spec.ts` (new),
+`eslint-suppressions.json`, `.dependency-cruiser-known-violations.json`
 Every repository in users, medical and scouting moves onto the transaction client and the verified
 context: a tenant id passed in by a caller becomes `ctx.tenantId`, still written explicitly into each
-predicate. The quarantined modules are exercised with their flags on.
+predicate. A handler receives the context the session guard minted through `@CurrentTenantContext()`
+(in tests, the test session guard mints it, as `0.5.6`'s will); the acting member — a report's scout, a
+record's author — comes from it (`actingMemberOf`). Each use case depends on a port in its module's
+`application/ports/`, which the module wires to the repository, so the reads and deletes controllers made
+directly become small use cases, and the lint suppressions and boundary baseline of both modules go. The
+quarantined modules are exercised with their flags on. `PermissionService` reads only the global
+permission tables and waits for `0.6.1`.
 Their ordinary reads exclude archived rows: the archive rule of `database.md` (DB-57).
 **Tests:** `medical_reads_see_only_the_context_tenant` · `scouting_writes_are_stamped_with_the_context_tenant`
-**Verify:** `FEATURE_MEDICAL=on FEATURE_SCOUTING=on just test-e2e -- test/legacy-modules`
+**Verify:** `just test-e2e -- test/legacy-modules` (the spec switches `FEATURE_MEDICAL` and `FEATURE_SCOUTING` on itself)
 **Done when:** no module repository accepts a caller-supplied tenant id, every query runs on the tenant
 transaction, and both tests pass.
 
@@ -1117,7 +1130,7 @@ milestone rebuilds scouting (`1.11.1`–`1.11.8`), and its defects — a `status
 an edit check that lets anyone edit a draft, reports that embed the whole player — are closed by that
 rebuild, which takes over their three tests (`1.11.1`, `1.11.3`).
 **Tests:** `a_coach_cannot_read_a_medical_record` · `a_player_reads_only_their_own_medical_record` · `the_confidentiality_filter_is_not_caller_controlled` · `treatment_sessions_are_archived_not_deleted`
-**Verify:** `FEATURE_MEDICAL=on just test-e2e -- test/legacy-modules`
+**Verify:** `FEATURE_MEDICAL=true just test-e2e -- test/legacy-modules`
 **Done when:** the four tests pass.
 
 ### 0.6.9 — The two-tenant isolation suite over every route
@@ -1128,7 +1141,7 @@ in tenant B and call it as every role of tenant A: the answer is `404` (or `403`
 denial), never `2xx`, and nothing in B changed. Lists, counts and search never include B's rows. A route
 missing from the inventory fails the suite, so a new route cannot ship unexamined.
 **Tests:** `no_route_reads_another_tenants_object` · `no_route_mutates_another_tenants_object` · `every_route_is_in_the_isolation_inventory`
-**Verify:** `FEATURE_MEDICAL=on FEATURE_SCOUTING=on just test-e2e -- test/isolation`
+**Verify:** `FEATURE_MEDICAL=true FEATURE_SCOUTING=true just test-e2e -- test/isolation`
 **Done when:** the suite covers every route and passes.
 
 ---
