@@ -600,21 +600,26 @@ local volume is recreated once (`just reset`).
 ### 0.4.3 — Explicit tenant context and the tenant transaction
 **Repo:** backend · **Size:** L · **Depends on:** `0.4.2`, `0.2.3` · **Requirements:** SYS-TEN-001, SYS-TEN-002, SR-DB-004
 **Files:** `src/common/tenancy/{tenant-context,tenant-transaction}.ts` (new),
-`src/infrastructure/prisma/prisma.service.ts`, `eslint.config.mjs` (a boundary rule), `test/db/tenant-transaction.integration-spec.ts` (new)
+`src/infrastructure/prisma/{prisma.service,prisma.module}.ts`, `eslint.config.mjs` (a boundary rule) and
+`eslint-suppressions.json` (its baseline), `test/db/tenant-transaction.integration-spec.ts` (new), `test/harness/db.ts`
 Use cases receive an `AuthorizedTenantContext` — minted only by the session guard (`0.5.6`), the worker's
 job loader (`0.7.6`) or an audited platform operation — and run their database work through
 `withTenantTransaction(ctx, fn)`, which sets `app.tenant_id` **transaction-locally** on the connection
-that runs `fn`. The actor is explicit: a signed-in member, or the system acting for a job — never an
+that runs `fn`. It is a method of `TenantTransactions`, an injectable the global Prisma module provides,
+so Nest wires the client. The actor is explicit: a signed-in member, or the system acting for a job — never an
 invented account. Repositories take the transaction client **and the context**, and still write
 `tenantId: ctx.tenantId` into their predicates — row-level security is the backstop, not the only filter;
 what disappears is any tenant id taken from a caller or from ambient state. A lint rule forbids modules
-from importing the root Prisma client. The second, unused tenancy mechanism on `PrismaService` — `runWithTenant`,
+from importing the root Prisma client; the quarantined modules' existing imports sit in the lint baseline
+until each is rebuilt, so a new one fails. The second, unused tenancy mechanism on `PrismaService` — `runWithTenant`,
 `getCurrentTenantId`, `getTenantFilter` (`prisma.service.ts:98–120`) — is deleted.
 ```ts
 export type Actor = { kind: 'USER'; userId: UserId; sessionId: SessionId } | { kind: 'SYSTEM'; job: string };   // PLATFORM arrives in 4.1
 export type AuthorizedTenantContext = Readonly<{ tenantId: TenantId; actor: Actor; requestId: string; locale: 'ar' | 'en' }>;
 export type TenantTx = Prisma.TransactionClient;
-export function withTenantTransaction<T>(ctx: AuthorizedTenantContext, fn: (tx: TenantTx) => Promise<T>): Promise<T>;
+@Injectable() export class TenantTransactions {
+  withTenantTransaction<T>(ctx: AuthorizedTenantContext, fn: (tx: TenantTx) => Promise<T>): Promise<T>;
+}
 ```
 **Tests:** `queries_run_inside_the_tenant_transaction` · `a_context_cannot_be_built_from_request_input` · `the_setting_does_not_outlive_its_transaction`
 **Verify:** `just test-int -- tenant-transaction && npm run lint`
@@ -622,17 +627,19 @@ export function withTenantTransaction<T>(ctx: AuthorizedTenantContext, fn: (tx: 
 
 ### 0.4.4 — Composite and same-parent foreign keys
 **Repo:** backend · **Size:** M · **Depends on:** `0.4.0` · **Requirements:** SYS-TEN-004
-**Files:** `prisma/schema.prisma`, migration `…_tenant_integrity`, `test/db/foreign-keys.integration-spec.ts` (new)
+**Files:** `prisma/schema.prisma`, migration `20261103181236_tenant_integrity`, `test/db/foreign-keys.integration-spec.ts` (new),
+`scripts/preflight.ts` and `test/db/preflight.integration-spec.ts` (`0.4.1`'s preflight reports a rule left with nothing to inspect as
+zero, and its test restores the keys from before this step)
 Make `Contract.season` (`schema.prisma:638`), `Training.season` (`:834`), `PerformanceRecord.season`
 (`:756`), `LegalTicket.assignedTo` (`:975`), `Message.sender` (`:1287`) and `AuditLog.user` (`:1358`)
 composite `(…Id, tenantId)` with `RESTRICT`, and give `Document.uploadedById` the composite relation it
 lacks; change the two composite `SET NULL`
-keys (`scouting_reports_playerId_tenantId_fkey`, `treatment_sessions_medicalRecordId_tenantId_fkey`) to
+keys (`scouting_reports_player_id_tenant_id_fkey`, `treatment_sessions_medical_record_id_tenant_id_fkey`) to
 `RESTRICT`, because `SET NULL` would null `tenantId` too. Add the **same-parent** keys: a treatment
-session references `(medicalRecordId, playerId, tenantId)`, so it cannot cite another player's record;
+session references `(medicalRecordId, tenantId, playerId)`, so it cannot cite another player's record;
 attendance carries `trainingId`, so its enrollment and session must belong to one program. Constraints
 are added `NOT VALID`, validated in a separate statement, and only then is the weaker key dropped.
-Every relation also declares `onUpdate: Restrict`: today all 67 keys are `ON UPDATE CASCADE`, so a
+Every relation also declares `onUpdate: Restrict`: before this step all 67 keys were `ON UPDATE CASCADE`, so a
 changed parent key would rewrite its children, `tenantId` included (DB-53).
 **Tests:** `foreign_keys_refuse_cross_tenant_edges` · `a_treatment_cannot_cite_another_players_record` · `attendance_cannot_mix_training_programs` · `no_composite_foreign_key_uses_set_null` · `no_foreign_key_cascades_a_key_change`
 **Verify:** `just preflight && just migrations && just test-int -- foreign-keys`
