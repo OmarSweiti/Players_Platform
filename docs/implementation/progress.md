@@ -56,7 +56,7 @@ edit only Status and Evidence.
 | 0.4.5 | Row-level security on every tenant-owned table; tenant ids immutable | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/87 |
 | 0.4.6 | Tenant-leading indexes; duplicate indexes dropped | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/88 |
 | 0.4.7 | Money: NUMERIC(19,4) with currency rules | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/89 |
-| 0.4.8 | Calendar dates, instants and tenant time zones | backend | todo |  |
+| 0.4.8 | Calendar dates, instants and tenant time zones | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/91 |
 | 0.4.9 | Normalised emails; lifetime uniqueness with audited reactivation | backend | todo |  |
 | 0.4.10 | Integrity constraints in SQL: checks, partial uniques, safe defaults, bounded JSON | backend | todo |  |
 | 0.4.11 | UUIDv7 for high-ingest tables | backend | todo |  |

@@ -715,12 +715,19 @@ is refused, and no money column keeps scale 2.
 
 ### 0.4.8 — Calendar dates, instants and tenant time zones
 **Repo:** backend · **Size:** M · **Depends on:** `0.4.0` · **Requirements:** SR-CORE-006, UX-007
-**Files:** `prisma/schema.prisma`, migration `…_dates_instants_zones`, `src/common/time/**` (new), `test/db/time.integration-spec.ts` (new)
-Civil values — birth dates, passport expiry, contract and season boundaries — become `DATE`; every
-instant becomes `timestamptz(3)`, converted `AT TIME ZONE 'UTC'` only where the preflight shows the
-source is known to be UTC. `TrainingSession` gains `startsAt` and `endsAt` plus an IANA zone. `Tenant`
-gains typed `timezone` (IANA, validated), `defaultLocale` (`ar` | `en`) and `defaultCurrency`, which
-leave the untyped `settings` JSON. Rules take an injected clock ([ADR-0007](../adr/0007-time.md)).
+**Files:** `prisma/schema.prisma`, migration `20261104083217_dates_instants_zones`, `src/common/time/{clock,civil-date,time-zone}.ts` (new),
+`test/db/time.integration-spec.ts` (new), `scripts/preflight.sql`, `test/db/{preflight,rls,foreign-keys}.integration-spec.ts`
+Civil values — birth dates, passport expiry, contract and season boundaries, and every other field that names
+a day (21 columns) — become `DATE`, each keeping the UTC day it was stored on; every instant (90 columns)
+becomes `timestamptz(3)`, converted `AT TIME ZONE 'UTC'` only where the preflight shows the
+source is known to be UTC — as every value the application wrote is: Prisma stores a DateTime as UTC, the
+roles' session zone is UTC, and no database holds real data (OPEN-11). `TrainingSession` gains `startsAt` and
+`endsAt` plus an IANA zone, which replace its zoneless `start_time` and `end_time` (existing sessions read in
+their tenant's zone). `Tenant` gains typed `timezone` (IANA, validated; default `UTC` until an agency sets its
+own), `defaultLocale` (`ar` | `en`; default `ar`, ADR-0008) and `defaultCurrency` (default JOD), which leave the
+untyped `settings` JSON; a CHECK keeps them out of it, and a trigger refuses any zone PostgreSQL does not know
+by name. Rules take an injected clock ([ADR-0007](../adr/0007-time.md)); `CivilDate` and `TimeZone` are the types
+code handles them as.
 **Tests:** `a_birth_date_is_the_same_day_in_every_timezone` · `instants_round_trip_in_utc` · `an_invalid_tenant_timezone_is_refused`
 **Verify:** `just migrations && just test-int -- time`
 **Done when:** a birth date stored from UTC−10 reads back unchanged from UTC+14, and `Tenant.settings`

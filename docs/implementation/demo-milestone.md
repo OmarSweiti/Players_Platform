@@ -116,9 +116,9 @@ run early.
 stale.*
 
 <!-- plan:milestone:begin -->
-**Demo milestone** — 39 of 126 microsteps done; 490–980 engineering hours left before the reserve.
+**Demo milestone** — 40 of 126 microsteps done; 486–972 engineering hours left before the reserve.
 
-Next in build order (every dependency done): `0.4.8`, `0.4.9`, `0.4.10`, `0.4.11`, `0.4.12`, `0.5.1`, `0.5.2`, `0.5.3`. … and 6 more.
+Next in build order (every dependency done): `0.4.9`, `0.4.10`, `0.4.11`, `0.4.12`, `0.5.1`, `0.5.2`, `0.5.3`, `0.6.1`. … and 5 more.
 
 | Stage | Step | Title | Repo | Size | Status |
 |---|---|---|---|---|---|
@@ -161,7 +161,7 @@ Next in build order (every dependency done): `0.4.8`, `0.4.9`, `0.4.10`, `0.4.11
 | D | 0.4.5 | Row-level security on every tenant-owned table; tenant ids immutable | backend | L | done |
 | D | 0.4.6 | Tenant-leading indexes; duplicate indexes dropped | backend | S | done |
 | D | 0.4.7 | Money: NUMERIC(19,4) with currency rules | backend | M | done |
-| D | 0.4.8 | Calendar dates, instants and tenant time zones | backend | M | todo |
+| D | 0.4.8 | Calendar dates, instants and tenant time zones | backend | M | done |
 | D | 0.4.9 | Normalised emails; lifetime uniqueness with audited reactivation | backend | S | todo |
 | D | 0.4.10 | Integrity constraints in SQL: checks, partial uniques, safe defaults, bounded JSON | backend | M | todo |
 | D | 0.4.11 | UUIDv7 for high-ingest tables | backend | S | todo |
