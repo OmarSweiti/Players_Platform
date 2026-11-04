@@ -10,6 +10,7 @@ just trust-dev-ca   # once per machine: trust the proxy's certificate authority
 just logs [service] # follow the logs
 just down           # stop; every volume is kept
 just reset          # destroy the local state; keeps the certificate authority and the virus signatures
+just realm-reset    # start Keycloak fresh, importing infra/keycloak/realm-sadara.json again (its users go too)
 ```
 
 | Service | Image (pinned by digest) | On this machine | For |
@@ -19,7 +20,7 @@ just reset          # destroy the local state; keeps the certificate authority a
 | `objectstore` | Versity S3 Gateway 1.8.0 | `127.0.0.1:7070`, buckets `sadara` and `sadara-test` | private, versioned files ([ADR-0009](../docs/adr/0009-object-storage.md), [ADR-0020](../docs/adr/0020-local-object-store.md)) |
 | `clamav` | ClamAV 1.5.4 | `127.0.0.1:3310` | the malware scan before a file is promoted |
 | `mailpit` | Mailpit 1.31.2 | SMTP `127.0.0.1:1025`, <http://localhost:8025> | every email the stack sends |
-| `keycloak` | Keycloak 26.7.4 | <http://localhost:8080> | the development identity provider ([keycloak/README.md](keycloak/README.md)) |
+| `keycloak` | Keycloak 26.7.4 | <http://localhost:8080> | the development identity provider, with the `sadara` realm as code ([keycloak/README.md](keycloak/README.md)) |
 | `proxy` | Caddy 2.11.4 | <https://sadara.localhost>, <https://northwind.localhost> | `/api/` → the API on `:3000`, everything else → the web app on `:3001` |
 
 The development credentials are in `infra/.env`, copied from [`.env.example`](.env.example). They open

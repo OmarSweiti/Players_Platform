@@ -63,6 +63,7 @@ repository's `AGENTS.md`.
 | umbrella | `just trust-dev-ca` · `just dev-ca-path` | trust the proxy's local certificate authority, once · print its path for `curl --cacert` |
 | umbrella | `just check` | pins, the plan check, links — CI's `test` |
 | umbrella | `just plan` | regenerate the progress rows, frontier, test catalog and traceability, then check |
+| umbrella | `just realm-reset` · `bash infra/keycloak/test-realm.sh` | import the Keycloak realm file again · prove the running realm, setting by setting *(from 0.5.1)* |
 | umbrella | `just pin` | move both pins to their `development` tips; refuses a rewind |
 | umbrella | `just backup` · `just restore` · `just drill` | local backup, restore into a fresh stack, and the verified drill *(from 0.10.3)* |
 | any | `just branch <prefix>/<slug>` | a fresh `development`, a validated branch name |

@@ -10,7 +10,10 @@
 	}
 }
 
-# Another tenant host? Add it to this list; browsers resolve *.localhost locally.
+# Another tenant host? Add it to this list — browsers resolve *.localhost
+# locally — and to the API client's redirect and post-logout URIs in
+# infra/keycloak/realm-sadara.json; infra/keycloak/test-realm.sh holds the two
+# to the same hosts.
 sadara.localhost, northwind.localhost {
 	tls internal
 	handle /api/* {
