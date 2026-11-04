@@ -135,6 +135,23 @@ reset $confirm='':
       xargs -r docker volume rm
     echo "reset: done — the proxy's certificate authority and ClamAV's signatures were kept; run just up"
 
+# Import infra/keycloak/realm-sadara.json again, into a fresh Keycloak: its users, sessions and events go too
+realm-reset $confirm='':
+    #!/usr/bin/env bash
+    set -euo pipefail
+    # Keycloak imports the realm file only when the realm does not exist (0.5.1),
+    # so a changed file reaches this machine's Keycloak by starting it fresh:
+    # only Keycloak's own volume goes, and nothing else in the stack.
+    if [ "$confirm" != yes ]; then
+      [ -t 0 ] || { echo "realm-reset: REFUSED — not interactive; to confirm, run: just realm-reset yes" >&2; exit 1; }
+      read -r -p "realm-reset: delete Keycloak's state — the realm's users, sessions and events — and import the file again? [y/N] " answer
+      case "$answer" in y | Y) ;; *) echo "realm-reset: cancelled"; exit 1 ;; esac
+    fi
+    docker compose --file infra/compose.yaml rm --stop --force keycloak
+    docker volume rm sadara_keycloak
+    docker compose --file infra/compose.yaml up --detach --wait --wait-timeout 600 keycloak
+    echo "realm-reset: done — Keycloak started fresh and imported infra/keycloak/realm-sadara.json"
+
 # Trust the proxy's local certificate authority on this machine — once; it asks for your password
 trust-dev-ca:
     #!/usr/bin/env bash
