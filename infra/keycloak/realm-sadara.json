@@ -1,0 +1,135 @@
+{
+  "realm": "sadara",
+  "displayName": "Sadara",
+  "enabled": true,
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "editUsernameAllowed": false,
+  "resetPasswordAllowed": true,
+  "rememberMe": false,
+  "verifyEmail": true,
+
+  "passwordPolicy": "length(12) and passwordBlacklist(blocked-passwords.txt) and notUsername(undefined) and notEmail(undefined)",
+
+  "bruteForceProtected": true,
+  "permanentLockout": false,
+  "maxTemporaryLockouts": 0,
+  "bruteForceStrategy": "MULTIPLE",
+  "failureFactor": 30,
+  "waitIncrementSeconds": 60,
+  "maxFailureWaitSeconds": 900,
+  "maxDeltaTimeSeconds": 43200,
+  "quickLoginCheckMilliSeconds": 1000,
+  "minimumQuickLoginWaitSeconds": 60,
+
+  "internationalizationEnabled": true,
+  "supportedLocales": ["ar", "en"],
+  "defaultLocale": "ar",
+
+  "smtpServer": {
+    "host": "mailpit",
+    "port": "1025",
+    "from": "no-reply@sadara.localhost",
+    "fromDisplayName": "Sadara"
+  },
+
+  "eventsEnabled": true,
+  "adminEventsEnabled": true,
+  "adminEventsDetailsEnabled": false,
+
+  "browserFlow": "sadara browser",
+  "authenticationFlows": [
+    {
+      "alias": "sadara browser",
+      "description": "A live session, else the sign-in forms",
+      "providerId": "basic-flow",
+      "topLevel": true,
+      "builtIn": false,
+      "authenticationExecutions": [
+        { "authenticator": "auth-cookie", "authenticatorFlow": false, "requirement": "ALTERNATIVE", "priority": 10, "userSetupAllowed": false },
+        { "flowAlias": "sadara forms", "authenticatorFlow": true, "requirement": "ALTERNATIVE", "priority": 20, "userSetupAllowed": false }
+      ]
+    },
+    {
+      "alias": "sadara forms",
+      "description": "The level the client asks for: a password for 1, a second factor besides for 2",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": false,
+      "authenticationExecutions": [
+        { "flowAlias": "sadara level 1", "authenticatorFlow": true, "requirement": "CONDITIONAL", "priority": 10, "userSetupAllowed": false },
+        { "flowAlias": "sadara level 2", "authenticatorFlow": true, "requirement": "CONDITIONAL", "priority": 20, "userSetupAllowed": false }
+      ]
+    },
+    {
+      "alias": "sadara level 1",
+      "description": "Level of assurance 1: the password",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": false,
+      "authenticationExecutions": [
+        { "authenticator": "conditional-level-of-authentication", "authenticatorConfig": "sadara level 1", "authenticatorFlow": false, "requirement": "REQUIRED", "priority": 10, "userSetupAllowed": false },
+        { "authenticator": "auth-username-password-form", "authenticatorFlow": false, "requirement": "REQUIRED", "priority": 20, "userSetupAllowed": false }
+      ]
+    },
+    {
+      "alias": "sadara level 2",
+      "description": "Level of assurance 2: a second factor, OTP or WebAuthn",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": false,
+      "authenticationExecutions": [
+        { "authenticator": "conditional-level-of-authentication", "authenticatorConfig": "sadara level 2", "authenticatorFlow": false, "requirement": "REQUIRED", "priority": 10, "userSetupAllowed": false },
+        { "flowAlias": "sadara second factor", "authenticatorFlow": true, "requirement": "REQUIRED", "priority": 20, "userSetupAllowed": false }
+      ]
+    },
+    {
+      "alias": "sadara second factor",
+      "description": "Either factor the member has set up",
+      "providerId": "basic-flow",
+      "topLevel": false,
+      "builtIn": false,
+      "authenticationExecutions": [
+        { "authenticator": "auth-otp-form", "authenticatorFlow": false, "requirement": "ALTERNATIVE", "priority": 10, "userSetupAllowed": false },
+        { "authenticator": "webauthn-authenticator", "authenticatorFlow": false, "requirement": "ALTERNATIVE", "priority": 20, "userSetupAllowed": false }
+      ]
+    }
+  ],
+  "authenticatorConfig": [
+    { "alias": "sadara level 1", "config": { "loa-condition-level": "1", "loa-max-age": "43200" } },
+    { "alias": "sadara level 2", "config": { "loa-condition-level": "2", "loa-max-age": "300" } }
+  ],
+
+  "clients": [
+    {
+      "clientId": "sadara-api",
+      "name": "Sadara API",
+      "description": "The API, the confidential OIDC client (ADR-0002, ADR-0003)",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "${SADARA_API_CLIENT_SECRET}",
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "consentRequired": false,
+      "frontchannelLogout": false,
+      "redirectUris": [
+        "https://sadara.localhost/api/v1/auth/callback",
+        "https://northwind.localhost/api/v1/auth/callback"
+      ],
+      "webOrigins": [],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "https://sadara.localhost/##https://northwind.localhost/",
+        "backchannel.logout.url": "http://host.docker.internal:3000/api/v1/auth/backchannel-logout",
+        "backchannel.logout.session.required": "true",
+        "use.refresh.tokens": "false"
+      }
+    }
+  ]
+}
