@@ -118,10 +118,11 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `every_index_on_a_tenant_table_leads_with_tenant_id` | 0.4.6 | backend | done |
 | `every_foreign_key_is_served_by_an_index` | 0.4.6 | backend | done |
 | `no_index_repeats_the_leading_columns_of_another` | 0.4.6 | backend | done |
-| `jod_amounts_keep_three_decimals` | 0.4.7 | backend | todo |
-| `excess_scale_is_refused_not_rounded` | 0.4.7 | backend | todo |
-| `money_never_passes_through_a_javascript_number` | 0.4.7 | backend | todo |
-| `every_active_iso_4217_currency_is_seeded_with_its_decimals` | 0.4.7 | backend | todo |
+| `jod_amounts_keep_three_decimals` | 0.4.7 | backend | done |
+| `excess_scale_is_refused_not_rounded` | 0.4.7 | backend | done |
+| `money_never_passes_through_a_javascript_number` | 0.4.7 | backend | done |
+| `every_active_iso_4217_currency_is_seeded_with_its_decimals` | 0.4.7 | backend | done |
+| `money_columns_hold_every_currencys_decimals` | 0.4.7 | backend | done |
 | `a_birth_date_is_the_same_day_in_every_timezone` | 0.4.8 | backend | todo |
 | `instants_round_trip_in_utc` | 0.4.8 | backend | todo |
 | `an_invalid_tenant_timezone_is_refused` | 0.4.8 | backend | todo |
