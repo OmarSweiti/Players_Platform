@@ -115,8 +115,9 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `every_tenant_table_has_forced_rls_and_a_policy` | 0.4.5 | backend | done |
 | `tenant_ids_cannot_be_updated` | 0.4.5 | backend | done |
 | `the_tenant_directory_exposes_only_routing_columns` | 0.4.5 | backend | done |
-| `every_index_on_a_tenant_table_leads_with_tenant_id` | 0.4.6 | backend | todo |
-| `every_foreign_key_is_served_by_an_index` | 0.4.6 | backend | todo |
+| `every_index_on_a_tenant_table_leads_with_tenant_id` | 0.4.6 | backend | done |
+| `every_foreign_key_is_served_by_an_index` | 0.4.6 | backend | done |
+| `no_index_repeats_the_leading_columns_of_another` | 0.4.6 | backend | done |
 | `jod_amounts_keep_three_decimals` | 0.4.7 | backend | todo |
 | `excess_scale_is_refused_not_rounded` | 0.4.7 | backend | todo |
 | `money_never_passes_through_a_javascript_number` | 0.4.7 | backend | todo |
