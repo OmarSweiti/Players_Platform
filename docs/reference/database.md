@@ -223,7 +223,9 @@ For Attendance add trainingId; Enrollment and TrainingSession each expose a uniq
 
 `0.4.2` provisions `sadara_owner NOLOGIN`, a deployment-only `sadara_migrator` allowed to assume owner, and `sadara_app LOGIN NOBYPASSRLS` without ownership, superuser, CREATEDB, CREATEROLE or membership in either privileged role. Secrets are supplied by environment/hosting provisioning, never migration literals. Revoke PUBLIC schema creation and broad default grants; explicitly grant schema usage and reviewed table/sequence/function privileges. Migration credentials never enter API, worker or realtime containers.
 
-`0.4.5` enables and forces RLS on **every tenant-owned table**; every subsequent tenant-table migration repeats the policy/grant/test pattern, including UserSession, UploadSession, outbox and inbox. Tenant IDs cannot be updated. Catalog tests inventory tables, RLS/FORCE flags, policy roles and predicates, owner identities, runtime grants and role membership; a new unclassified table fails CI.
+`0.4.5` enables and forces RLS on **every tenant-owned table**, classified once in `src/infrastructure/prisma/model-classification.ts`; every subsequent tenant-table migration repeats the policy/grant/test pattern, including UserSession, UploadSession, outbox and inbox, with `scripts/generate-rls.ts <Model>` printing it. Tenant IDs cannot be updated: a trigger refuses any `UPDATE` that changes `tenant_id` (and `tenants.id`, by which the tenants table is held the same way). Catalog tests inventory tables, RLS/FORCE flags, policy roles and predicates, triggers, owner identities, runtime grants and role membership; a new unclassified table fails CI.
+
+`FORCE` holds the tables' owner to the policies too. Each table therefore has a second, read-only policy for `sadara_owner`: the migrator (acting as the owner) reads every tenant's rows, so `just preflight`, which runs as the migrator and refuses any role the policies hide rows from, sees the whole table; so do `tenant_directory` (a view, read with its owner's rights) and a data migration's reads. The owner writes no tenant row: a data migration that must write lifts `FORCE` on its table inside its own transaction and restores it before the transaction ends, and the catalog test fails a table left without it.
 
 ```sql
 ALTER TABLE players ENABLE ROW LEVEL SECURITY;
@@ -231,7 +233,13 @@ ALTER TABLE players FORCE ROW LEVEL SECURITY;
 CREATE POLICY players_tenant ON players FOR ALL TO sadara_app
   USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
   WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
+CREATE POLICY players_owner_reads ON players FOR SELECT TO sadara_owner USING (true);
+CREATE TRIGGER players_tenant_immutable BEFORE UPDATE ON players
+  FOR EACH ROW WHEN (OLD.tenant_id IS DISTINCT FROM NEW.tenant_id)
+  EXECUTE FUNCTION refuse_tenant_change('tenant_id');
 ```
+
+`tenant_directory` (`id`, `slug`, `domain`, `is_active`) is the only cross-tenant read: `SELECT` for the runtime role, and for the registry role once `0.7.6` creates it. Reference data (`permissions`, `role_permissions`) is read-only to the runtime role, and the migration history (`_prisma_migrations`) is the migrator's alone.
 
 ```ts
 export type TenantTransaction = Prisma.TransactionClient; // alias, not a wrapper

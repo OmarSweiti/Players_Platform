@@ -647,19 +647,25 @@ changed parent key would rewrite its children, `tenantId` included (DB-53).
 
 ### 0.4.5 — Row-level security on every tenant-owned table; tenant ids immutable
 **Repo:** backend · **Size:** L · **Depends on:** `0.4.3`, `0.4.4` · **Requirements:** SYS-TEN-005, BR-RULE-01, SR-ACL-001
-**Files:** `src/infrastructure/prisma/model-classification.ts` (new), migration `…_tenant_rls`,
-`scripts/generate-rls.ts` (new), `test/db/rls.integration-spec.ts` (new)
+**Files:** `src/infrastructure/prisma/model-classification.ts` (new), migration `20261104065628_tenant_rls`,
+`scripts/generate-rls.ts` (new), `test/db/rls.integration-spec.ts` (new), `scripts/preflight.ts` and `justfile` (the
+preflight runs as the migrator), `test/harness/{fixtures,session}.ts` and the specs whose fixtures now write as their tenant
 Every model is classified `tenant-owned` or `global` in one table; a test fails on an unclassified model
 or on any table with a `tenant_id` column that lacks a policy. Each tenant-owned table gets `ENABLE` and
 `FORCE ROW LEVEL SECURITY` and one policy for the runtime role:
 `USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)` with the same `WITH
-CHECK`. A full `tenants` row is visible only to its own tenant; host resolution and job discovery read a
-narrow `tenant_directory` view (`id`, `slug`, `domain`, `is_active` — nothing else) granted to the runtime
-and registry roles. Global tables get **per-table** privileges: reference data (permissions, the default
-matrix, currencies) is read-only; `identities` is readable and insertable only through the identity
-adapter; `security_events` is insert-only for the runtime role, with reads through a restricted path
-(`0.7.3`). A trigger refuses any `UPDATE` of `tenant_id`. Missing context means no rows and no writes. RLS separates tenants; it does
-not replace the policies that separate roles inside one tenant (`0.6`).
+CHECK`. `FORCE` holds the owner to the policies too, so each table also gets a read-only policy for the
+owner: the preflight (now run as the migrator), the directory view and a data migration's reads see every
+tenant, and the owner writes no tenant row — a data migration that must write lifts `FORCE` on its table
+inside its own transaction and restores it before the transaction ends. A full `tenants` row is visible
+only to its own tenant; host resolution and job discovery read a narrow `tenant_directory` view (`id`,
+`slug`, `domain`, `is_active` — nothing else) granted to the runtime role, and to the registry role when
+`0.7.6` creates it. Global tables get **per-table** privileges, each in the step that creates the table:
+reference data (permissions, the default matrix, currencies) is read-only; `identities` is readable and
+insertable only through the identity adapter; `security_events` is insert-only for the runtime role, with
+reads through a restricted path (`0.7.3`); the runtime role has no privilege on the migration history. A
+trigger refuses any `UPDATE` that changes `tenant_id` (and `tenants.id`). Missing context means no rows and
+no writes. RLS separates tenants; it does not replace the policies that separate roles inside one tenant (`0.6`).
 **Tests:** `rls_missing_context_denies_reads_and_writes` · `rls_pool_reuse_never_leaks_the_previous_tenant` · `every_tenant_table_has_forced_rls_and_a_policy` · `tenant_ids_cannot_be_updated` · `the_tenant_directory_exposes_only_routing_columns`
 **Verify:** `just migrations && just test-int -- rls`
 **Done when:** raw SQL as the runtime role cannot read or write tenant B while running as tenant A or
@@ -1156,8 +1162,9 @@ delivered. A notification is advisory; the workflow record stays the truth.
 **Repo:** backend + umbrella · **Size:** L · **Depends on:** `0.7.5` · **Requirements:** SYS-ARC-005, SYS-ASY-003, SYS-ASY-004, SYS-TEN-006
 **Files:** backend `src/worker.ts` (new), `src/infrastructure/queue/**` (new), `src/infrastructure/tenancy/tenant-registry.ts` (new),
 migration `…_registry_role`; umbrella `infra/compose.yaml` (a `worker` service), `infra/postgres/init/`
-A second entry point runs BullMQ on Valkey. It finds work without a privileged client: a registry role
-may read only the `tenant_directory` view (`0.4.5`); for each active tenant the relay opens a tenant
+A second entry point runs BullMQ on Valkey. It finds work without a privileged client: a registry role,
+which this step's migration creates and grants `SELECT` on it, may read only the `tenant_directory` view
+(`0.4.5`); for each active tenant the relay opens a tenant
 transaction and claims due events `FOR UPDATE SKIP LOCKED`, then publishes them. Every job carries its tenant and a
 business reference; its handler restores that tenant's context and runs in its own tenant transaction, inside
 the correlation the job carries (`runCorrelatedJob`, `0.10.1`).

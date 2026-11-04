@@ -110,11 +110,11 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `attendance_cannot_mix_training_programs` | 0.4.4 | backend | done |
 | `no_composite_foreign_key_uses_set_null` | 0.4.4 | backend | done |
 | `no_foreign_key_cascades_a_key_change` | 0.4.4 | backend | done |
-| `rls_missing_context_denies_reads_and_writes` | 0.4.5 | backend | todo |
-| `rls_pool_reuse_never_leaks_the_previous_tenant` | 0.4.5 | backend | todo |
-| `every_tenant_table_has_forced_rls_and_a_policy` | 0.4.5 | backend | todo |
-| `tenant_ids_cannot_be_updated` | 0.4.5 | backend | todo |
-| `the_tenant_directory_exposes_only_routing_columns` | 0.4.5 | backend | todo |
+| `rls_missing_context_denies_reads_and_writes` | 0.4.5 | backend | done |
+| `rls_pool_reuse_never_leaks_the_previous_tenant` | 0.4.5 | backend | done |
+| `every_tenant_table_has_forced_rls_and_a_policy` | 0.4.5 | backend | done |
+| `tenant_ids_cannot_be_updated` | 0.4.5 | backend | done |
+| `the_tenant_directory_exposes_only_routing_columns` | 0.4.5 | backend | done |
 | `every_index_on_a_tenant_table_leads_with_tenant_id` | 0.4.6 | backend | todo |
 | `every_foreign_key_is_served_by_an_index` | 0.4.6 | backend | todo |
 | `jod_amounts_keep_three_decimals` | 0.4.7 | backend | todo |

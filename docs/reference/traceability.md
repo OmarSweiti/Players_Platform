@@ -24,7 +24,7 @@ The four source documents and their checksums: [`../requirements/README.md`](../
 | BR-OBJ-07 | BRD | 3.3.1, 3.7.2 | 0/2 |
 | BR-OBJ-08 | BRD | 0.5.9, 1.1.1, 4.1.3, 4.1.5, 4.2.1, 4.6.1, 4.7.1 | 0/7 |
 | BR-OBJ-09 | BRD | 0.11.0, 0.11.1, 1.10.1, 1.10.9, 1.10.13, 1.12.4, 2.10.3, 3.4.1, 3.4.5, 3.7.2, 4.1.5, 4.5.1, 4.7.1 | 0/13 |
-| BR-RULE-01 | BRD | 0.4.5 | 0/1 |
+| BR-RULE-01 | BRD | 0.4.5 | 1/1 |
 | BR-RULE-02 | BRD | 0.6.3, 1.5.3, 2.1.0, 3.4.3, 3.4.5, 4.5.1, 4.5.3 | 0/7 |
 | BR-RULE-03 | BRD | 1.4.2, 1.4.9 | 0/2 |
 | BR-RULE-04 | BRD | 1.4.2, 1.4.5, 3.5.0, 3.5.2 | 0/4 |
@@ -73,7 +73,7 @@ The four source documents and their checksums: [`../requirements/README.md`](../
 | SYS-TEN-002 | SysRD | 0.4.3 | 1/1 |
 | SYS-TEN-003 | SysRD | 0.4.12, 1.11.2 | 0/2 |
 | SYS-TEN-004 | SysRD | 0.4.4 | 1/1 |
-| SYS-TEN-005 | SysRD | 0.4.5, 2.1.6, 4.3.1 | 0/3 |
+| SYS-TEN-005 | SysRD | 0.4.5, 2.1.6, 4.3.1 | 1/3 |
 | SYS-TEN-006 | SysRD | 0.7.6, 1.8.1, 1.9.1, 2.6.1, 2.9.2, 4.1.5 | 0/6 |
 | SYS-TEN-007 | SysRD | 0.10.1, 1.10.4 | 1/2 |
 | SYS-TEN-008 | SysRD | 4.1.2, 4.1.3, 4.1.8 | 0/3 |
@@ -101,7 +101,7 @@ The four source documents and their checksums: [`../requirements/README.md`](../
 | SR-AUTH-007 | SRD | 0.5.7, 1.1.3, 4.2.1, 4.6.1 | 0/4 |
 | SR-AUTH-008 | SRD | 0.5.1, 4.2.2 | 0/2 |
 | SR-AUTH-009 | SRD | 0.6.2 | 0/1 |
-| SR-ACL-001 | SRD | 0.4.5 | 0/1 |
+| SR-ACL-001 | SRD | 0.4.5 | 1/1 |
 | SR-ACL-002 | SRD | 0.4.9, 1.1.1 | 0/2 |
 | SR-ACL-003 | SRD | 0.6.7, 4.1.1, 4.1.2 | 0/3 |
 | SR-ACL-004 | SRD | 0.6.1, 1.1.5, 4.1.4 | 0/3 |
