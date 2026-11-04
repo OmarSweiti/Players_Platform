@@ -34,7 +34,7 @@ edit only Status and Evidence.
 | 0.2.3 | The API test harness on a real database | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/39 · https://github.com/OmarSweiti/Players_Platform_Backend/pull/49 · https://github.com/OmarSweiti/Players_Platform_Backend/pull/62 |
 | 0.2.4 | The web test harness: Vitest, Testing Library, MSW, Playwright in Arabic and English, axe | frontend | done | https://github.com/OmarSweiti/Players_Platform_Frontend/pull/23 |
 | 0.2.5 | Lint and format gates in both applications | backend + frontend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/32 · https://github.com/OmarSweiti/Players_Platform_Backend/pull/33 · https://github.com/OmarSweiti/Players_Platform_Frontend/pull/22 · https://github.com/OmarSweiti/Players_Platform_Frontend/pull/27 · https://github.com/OmarSweiti/Players_Platform_Frontend/pull/29 |
-| 0.2.6 | A production build that starts, in a container | backend | todo |  |
+| 0.2.6 | A production build that starts, in a container | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/95 |
 | 0.2.7 | Declared dependencies only; one naming scheme | backend + frontend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/51 · https://github.com/OmarSweiti/Players_Platform_Backend/pull/52 · https://github.com/OmarSweiti/Players_Platform_Frontend/pull/44 |
 | 0.2.8 | Integration and end-to-end tests in CI | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/41 |
 | 0.2.9 | NestJS 12, TypeScript 6 and an ES-module test setup, together | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/54 |

@@ -74,6 +74,7 @@ repository's `AGENTS.md`.
 | backend | `just test-int` · `just test-e2e` | integration and API tests on a real database *(from 0.2.3)* |
 | backend | `just migrations` | replay every migration on a throwaway PostgreSQL 18; no drift allowed |
 | backend | `just preflight` | the read-only integrity report *(from 0.4.1)* |
+| backend | `bash scripts/smoke-start.sh` | build the production image, start it beside a throwaway database and Valkey, and run its test — CI's `image` *(from 0.2.6)* |
 | backend | `just seed` | synthetic data, idempotent *(from 0.5.11)* |
 | backend | `npm run openapi` | regenerate the committed contract *(from 0.3.9)* |
 | backend | `just contract` | the committed contract is the code's, and breaks nothing in `development`'s *(from 0.3.9)* |

@@ -276,12 +276,23 @@ and `eslint --max-warnings=0` join `just check` and CI's `test` job in both.
 
 ### 0.2.6 — A production build that starts, in a container
 **Repo:** backend · **Size:** M · **Depends on:** `0.1.5`, `0.3.7` · **Requirements:** TEST-006
-**Files:** `tsconfig.build.json`, `package.json`, `Dockerfile` (new), `.dockerignore` (new),
-`scripts/smoke-start.sh` (new), `.github/workflows/ci.yml`
+**Files:** `tsconfig.build.json`, `Dockerfile` (new), `.dockerignore` (new), `scripts/smoke-start.sh` (new),
+`test/image/image.image-spec.ts` (new), `vitest.config.mts`, `.github/workflows/ci.yml`
 `npm run start:prod` runs `node dist/main`, but the build emits `dist/src/main.js` because
-`prisma.config.ts` sits in the compilation root — fix the root so the entry point is where the script
-looks. A multi-stage `Dockerfile` builds a non-root image; CI builds it, scans it for known
-vulnerabilities, and runs the smoke test against it.
+`tsconfig.json` roots the compilation at the repository, where `prisma.config.ts` sits — fix the root so
+the entry point is where the script looks: `tsconfig.build.json` compiles `src` alone, rooted there, and
+`tsconfig.json` (the type-check over `test/` and `scripts/`) is unchanged. A two-stage `Dockerfile` on
+Node 24 Alpine, pinned by digest, builds from the lockfile and keeps only `package.json`, the production
+`node_modules` and `dist`, owned by root; it runs as the unprivileged `node` user with a health check on
+`/health/live`, and its one writable directory is `uploads/` until the object store replaces the local
+storage service. The runtime stage removes npm, npx, corepack and yarn: the first scan found every
+vulnerability in npm's bundled dependencies, a critical one among them. `.dockerignore` is an allowlist.
+The smoke script starts the image beside a throwaway PostgreSQL 18 (with the `0.4.2` roles) and Valkey on
+a network of its own, makes every request inside the container (no published port), and runs the image
+test as a fourth Vitest project, `image`. CI's `image` job builds the image, scans it with Trivy (pinned
+by digest), failing on a critical vulnerability that has a fix, and runs the smoke test; it is not yet a
+required check. The test holds that live and ready answer 200, the process is uid 1000, and it cannot
+write its own `dist/main.js`.
 **Tests:** `the_built_image_answers_liveness`
 **Verify:** `npm run build && bash scripts/smoke-start.sh`
 **Done when:** the image starts as a non-root user and answers `/health/live`, and CI fails on a critical

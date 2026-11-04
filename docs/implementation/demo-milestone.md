@@ -116,9 +116,9 @@ run early.
 stale.*
 
 <!-- plan:milestone:begin -->
-**Demo milestone** — 41 of 126 microsteps done; 484–968 engineering hours left before the reserve.
+**Demo milestone** — 42 of 126 microsteps done; 480–960 engineering hours left before the reserve.
 
-Next in build order (every dependency done): `0.4.10`, `0.4.11`, `0.4.12`, `0.5.1`, `0.5.2`, `0.5.3`, `0.6.1`, `0.2.6`. … and 4 more.
+Next in build order (every dependency done): `0.4.10`, `0.4.11`, `0.4.12`, `0.5.1`, `0.5.2`, `0.5.3`, `0.6.1`, `0.7.1`. … and 3 more.
 
 | Stage | Step | Title | Repo | Size | Status |
 |---|---|---|---|---|---|
@@ -184,7 +184,7 @@ Next in build order (every dependency done): `0.4.10`, `0.4.11`, `0.4.12`, `0.5.
 | E | 0.6.6 | Effective permissions for the web app | backend | S | todo |
 | E | 0.6.7 | No implicit platform access | backend | S | todo |
 | E | 0.6.9 | The two-tenant isolation suite over every route | backend | L | todo |
-| F | 0.2.6 | A production build that starts, in a container | backend | M | todo |
+| F | 0.2.6 | A production build that starts, in a container | backend | M | done |
 | F | 0.7.1 | Audit evidence is append-only in the database | backend | M | todo |
 | F | 0.7.2 | Audit inside the business transaction, redacted; a failed audit aborts the change | backend | M | todo |
 | F | 0.7.3 | Security events that have no tenant | backend | S | todo |
