@@ -673,13 +673,18 @@ with no context, including across interleaved transactions on one small pool.
 
 ### 0.4.6 — Tenant-leading indexes; duplicate indexes dropped
 **Repo:** backend · **Size:** S · **Depends on:** `0.4.4` · **Requirements:** SR-DB-006
-**Files:** `prisma/schema.prisma`, migration `…_tenant_indexes`, `test/db/indexes.integration-spec.ts` (new)
+**Files:** `prisma/schema.prisma`, migration `20261104073137_tenant_indexes`, `test/db/indexes.integration-spec.ts` (new)
 Prefix the unprefixed filter indexes ([`../reference/database.md`](../reference/database.md)) with
 `tenantId` and drop the redundant `tenants.slug` index that duplicates its unique constraint
-(`schema.prisma:278`, `:318`).
-The same catalog test asserts that an index serves every foreign key and that no index is a left prefix
-of another: six foreign keys gain an index, and 25 redundant indexes go (DB-54).
-**Tests:** `every_index_on_a_tenant_table_leads_with_tenant_id` · `every_foreign_key_is_served_by_an_index`
+(`schema.prisma:278`, `:318`). Only the row's own `id` (the primary key and the unique keys composite foreign
+keys reference) may lead instead, and six reviewed uniqueness rules over a parent's id — tenant-safe, since the
+parent's id is unique across tenants and the composite key ties it to the row's tenant.
+The same catalog test asserts that an index serves every foreign key and that no plain index is a left prefix
+of another (a unique index enforces its rule, so it is never redundant). An index serves a key when every
+column it leads with, up to and including the one naming the parent's id, is a key column. Seven foreign keys
+gain an index — DB-54's six and the uploader's key `0.4.4` added — and 39 redundant indexes go: DB-54's 25,
+DB-39's `tenants.slug`, and 13 made redundant once their table's indexes lead with `tenant_id`.
+**Tests:** `every_index_on_a_tenant_table_leads_with_tenant_id` · `every_foreign_key_is_served_by_an_index` · `no_index_repeats_the_leading_columns_of_another`
 **Verify:** `just migrations && just test-int -- indexes`
 **Done when:** the catalog test passes with a short, reviewed allowlist of tenant-safe exceptions.
 
