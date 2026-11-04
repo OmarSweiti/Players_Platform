@@ -735,11 +735,15 @@ no longer holds the three typed values.
 
 ### 0.4.9 — Normalised emails; lifetime uniqueness with audited reactivation
 **Repo:** backend · **Size:** S · **Depends on:** `0.4.0` · **Requirements:** SR-ACL-002
-**Files:** `prisma/schema.prisma`, migration `…_normalized_email`, `src/modules/users/**`
-`normalizedEmail` (trimmed, lowercased, Unicode-normalised) is unique per tenant **for the life of the
-membership**: an archived member keeps the address reserved, and bringing them back is an audited
-`reactivateMembership` command, not a second account. Email is contact data; it never links an identity
-(`0.5.3`).
+**Files:** `prisma/schema.prisma`, migration `20261104100021_normalized_email`, `src/modules/users/{domain/email.ts,application/use-cases/reactivate-membership.usecase.ts,users.module.ts}`,
+`test/db/users.integration-spec.ts` (new), `scripts/preflight.sql`, `test/harness/fixtures.ts`, `src/database/seed.ts`
+`normalizedEmail` (NFKC, trimmed, lowercased — `lower(btrim(normalize(email, NFKC), E' \t\r\n'))`, which a
+CHECK holds every row to) is unique per tenant **for the life of the membership**: an archived member
+(`deletedAt` set) keeps the address reserved, and bringing them back is an audited `ReactivateMembership`
+use case — the same membership, its audit entry in the same transaction until `0.7.2`'s audit service writes
+it — not a second account. The migration stops, rather than merges, on two members whose addresses collide
+once normalised; the preflight's `duplicate_email` rule uses the same form. Email is contact data; it never
+links an identity (`0.5.3`).
 **Tests:** `emails_are_unique_regardless_of_case_and_spacing` · `an_archived_members_email_stays_reserved` · `reactivation_restores_the_same_membership`
 **Verify:** `just migrations && just test-int -- users`
 **Done when:** the three tests pass and the preflight reports no duplicate normalised email.

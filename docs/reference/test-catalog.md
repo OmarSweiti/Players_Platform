@@ -126,9 +126,9 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `a_birth_date_is_the_same_day_in_every_timezone` | 0.4.8 | backend | done |
 | `instants_round_trip_in_utc` | 0.4.8 | backend | done |
 | `an_invalid_tenant_timezone_is_refused` | 0.4.8 | backend | done |
-| `emails_are_unique_regardless_of_case_and_spacing` | 0.4.9 | backend | todo |
-| `an_archived_members_email_stays_reserved` | 0.4.9 | backend | todo |
-| `reactivation_restores_the_same_membership` | 0.4.9 | backend | todo |
+| `emails_are_unique_regardless_of_case_and_spacing` | 0.4.9 | backend | done |
+| `an_archived_members_email_stays_reserved` | 0.4.9 | backend | done |
+| `reactivation_restores_the_same_membership` | 0.4.9 | backend | done |
 | `impossible_values_are_refused_by_the_database` | 0.4.10 | backend | todo |
 | `a_tenant_has_at_most_one_current_season` | 0.4.10 | backend | todo |
 | `legal_notes_are_internal_by_default` | 0.4.10 | backend | todo |

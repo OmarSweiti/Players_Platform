@@ -102,7 +102,7 @@ The four source documents and their checksums: [`../requirements/README.md`](../
 | SR-AUTH-008 | SRD | 0.5.1, 4.2.2 | 0/2 |
 | SR-AUTH-009 | SRD | 0.6.2 | 0/1 |
 | SR-ACL-001 | SRD | 0.4.5 | 1/1 |
-| SR-ACL-002 | SRD | 0.4.9, 1.1.1 | 0/2 |
+| SR-ACL-002 | SRD | 0.4.9, 1.1.1 | 1/2 |
 | SR-ACL-003 | SRD | 0.6.7, 4.1.1, 4.1.2 | 0/3 |
 | SR-ACL-004 | SRD | 0.6.1, 1.1.5, 4.1.4 | 0/3 |
 | SR-ACL-005 | SRD | 0.6.3, 1.1.5, 1.2.3, 4.1.4, 4.4.2, 4.5.2 | 0/6 |
