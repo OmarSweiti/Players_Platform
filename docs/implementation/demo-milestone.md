@@ -116,9 +116,9 @@ run early.
 stale.*
 
 <!-- plan:milestone:begin -->
-**Demo milestone** — 42 of 126 microsteps done; 480–960 engineering hours left before the reserve.
+**Demo milestone** — 43 of 126 microsteps done; 476–952 engineering hours left before the reserve.
 
-Next in build order (every dependency done): `0.4.10`, `0.4.11`, `0.4.12`, `0.5.1`, `0.5.2`, `0.5.3`, `0.6.1`, `0.7.1`. … and 3 more.
+Next in build order (every dependency done): `0.4.11`, `0.4.12`, `0.5.1`, `0.5.2`, `0.5.3`, `0.6.1`, `0.7.1`, `0.7.7`. … and 2 more.
 
 | Stage | Step | Title | Repo | Size | Status |
 |---|---|---|---|---|---|
@@ -163,7 +163,7 @@ Next in build order (every dependency done): `0.4.10`, `0.4.11`, `0.4.12`, `0.5.
 | D | 0.4.7 | Money: NUMERIC(19,4) with currency rules | backend | M | done |
 | D | 0.4.8 | Calendar dates, instants and tenant time zones | backend | M | done |
 | D | 0.4.9 | Normalised emails; lifetime uniqueness with audited reactivation | backend | S | done |
-| D | 0.4.10 | Integrity constraints in SQL: checks, partial uniques, safe defaults, bounded JSON | backend | M | todo |
+| D | 0.4.10 | Integrity constraints in SQL: checks, partial uniques, safe defaults, bounded JSON | backend | M | done |
 | D | 0.4.11 | UUIDv7 for high-ingest tables | backend | S | todo |
 | D | 0.4.12 | The existing modules on the tenant transaction | backend | M | todo |
 | E | 0.5.1 | The Keycloak realm as code | umbrella | M | todo |
