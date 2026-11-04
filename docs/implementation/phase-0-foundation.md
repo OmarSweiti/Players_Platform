@@ -690,20 +690,26 @@ DB-39's `tenants.slug`, and 13 made redundant once their table's indexes lead wi
 
 ### 0.4.7 — Money: NUMERIC(19,4) with currency rules
 **Repo:** backend · **Size:** M · **Depends on:** `0.4.0` · **Requirements:** —
-**Files:** `src/common/money/money.ts` (new), `prisma/schema.prisma`, migration `…_money`, contract and training DTOs
+**Files:** `src/common/money/{money,iso-4217}.ts` (new), `prisma/schema.prisma`, migration `20261104080023_money`,
+`src/infrastructure/prisma/model-classification.ts`, `scripts/preflight.{ts,sql}`, `test/db/{money,indexes,preflight}.integration-spec.ts`;
+the contract and training DTOs take `Money` when their modules are built (both are empty today)
 Money columns become `Decimal @db.Decimal(19, 4)` (today `Decimal(…, 2)` — JOD has three decimals;
 `schema.prisma:616, 621, 825, 898`); a global `CurrencyDefinition(code, minorUnitExponent, enabled)` is
-seeded with **every active ISO 4217 currency and its official decimals** — 0 to 4, all of which
-`NUMERIC(19,4)` holds — all enabled (owner decision, 29 September 2026); a tenant's default is JOD;
-enrollment payments capture their own currency; amounts in different currencies are never added without
-a recorded exchange rate. `Money` wraps Prisma's exact decimal and a currency code, validates payable amounts to the
-currency's exponent, refuses NaN, infinity and excess scale **before** PostgreSQL could round them, and
-travels as `{ "amount": "1250.500", "currency": "JOD" }` ([ADR-0006](../adr/0006-money.md)).
+seeded with **every active ISO 4217 currency and its official decimals** — every code of list one with
+defined minor units, currencies and funds, 165 as published on 17 September 2026 (`iso-4217.ts` records the
+source); 0 to 4 decimals, all of which `NUMERIC(19,4)` holds — all enabled (owner decision, 29 September
+2026), and read-only to the runtime role; a tenant's default is JOD (the columns' default until `0.4.8` types
+`Tenant.defaultCurrency`); enrollment payments capture their own currency, and a stored payment's currency
+is never guessed (the migration stops on one without); amounts in different currencies are never added
+without a recorded exchange rate. `Money` wraps Prisma's exact decimal and a currency code, validates payable
+amounts to the currency's exponent, refuses NaN, infinity, negatives and excess scale **before** PostgreSQL
+could round them, and travels as `{ "amount": "1250.500", "currency": "JOD" }` ([ADR-0006](../adr/0006-money.md)).
+A key to reference data such as the currencies needs no serving index (`0.4.6`'s test exempts it).
 ```ts
-export class Money { static parse(amount: string, currency: CurrencyCode): Money; add(other: Money): Money; toWire(): { amount: string; currency: CurrencyCode }; format(locale: 'ar' | 'en'): string }
+export class Money { static parse(amount: string, currency: string, at?: string): Money; static fromDatabase(amount: Prisma.Decimal, currency: string): Money; add(other: Money): Money; toDecimal(): Prisma.Decimal; toWire(): { amount: string; currency: CurrencyCode }; format(locale: 'ar' | 'en'): string }
 ```
-**Tests:** `jod_amounts_keep_three_decimals` · `excess_scale_is_refused_not_rounded` · `money_never_passes_through_a_javascript_number` · `every_active_iso_4217_currency_is_seeded_with_its_decimals`
-**Verify:** `npx vitest run src/common/money && just migrations`
+**Tests:** `jod_amounts_keep_three_decimals` · `excess_scale_is_refused_not_rounded` · `money_never_passes_through_a_javascript_number` · `every_active_iso_4217_currency_is_seeded_with_its_decimals` · `money_columns_hold_every_currencys_decimals`
+**Verify:** `npx vitest run src/common/money && just migrations && just test-int -- money`
 **Done when:** `Money.parse('1.255', 'JOD').toWire()` round-trips exactly, `Money.parse('1.255', 'USD')`
 is refused, and no money column keeps scale 2.
 
@@ -735,7 +741,9 @@ membership**: an archived member keeps the address reserved, and bringing them b
 **Repo:** backend · **Size:** M · **Depends on:** `0.4.4` · **Requirements:** SR-DB-007
 **Files:** migration `…_integrity_constraints`, `test/db/constraints.integration-spec.ts` (new)
 CHECK constraints for the existing numeric and date fields (non-negative minutes, goals and capacity;
-end dates not before start dates; finite numerics); a partial unique index for **one current season per
+end dates not before start dates; finite numerics — money amounts finite and not negative, and a reviewed
+constraint trigger that holds each amount to its currency's minor units, as
+[`database.md`](../reference/database.md) describes; `0.4.7` validates them in `Money`); a partial unique index for **one current season per
 tenant** and **one featured image per player**; legal notes **internal by default** (today
 `isInternal` defaults to `false`, `schema.prisma:1001`); size and shape bounds on the JSON columns so
 metadata cannot become a hidden relational store.
