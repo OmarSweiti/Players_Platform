@@ -116,9 +116,9 @@ run early.
 stale.*
 
 <!-- plan:milestone:begin -->
-**Demo milestone** — 43 of 126 microsteps done; 476–952 engineering hours left before the reserve.
+**Demo milestone** — 45 of 126 microsteps done; 470–940 engineering hours left before the reserve.
 
-Next in build order (every dependency done): `0.4.11`, `0.4.12`, `0.5.1`, `0.5.2`, `0.5.3`, `0.6.1`, `0.7.1`, `0.7.7`. … and 2 more.
+Next in build order (every dependency done): `0.5.1`, `0.5.2`, `0.5.3`, `0.6.1`, `0.7.1`, `0.7.7`, `0.8.1`, `0.10.2`.
 
 | Stage | Step | Title | Repo | Size | Status |
 |---|---|---|---|---|---|
@@ -164,8 +164,8 @@ Next in build order (every dependency done): `0.4.11`, `0.4.12`, `0.5.1`, `0.5.2
 | D | 0.4.8 | Calendar dates, instants and tenant time zones | backend | M | done |
 | D | 0.4.9 | Normalised emails; lifetime uniqueness with audited reactivation | backend | S | done |
 | D | 0.4.10 | Integrity constraints in SQL: checks, partial uniques, safe defaults, bounded JSON | backend | M | done |
-| D | 0.4.11 | UUIDv7 for high-ingest tables | backend | S | todo |
-| D | 0.4.12 | The existing modules on the tenant transaction | backend | M | todo |
+| D | 0.4.11 | UUIDv7 for high-ingest tables | backend | S | done |
+| D | 0.4.12 | The existing modules on the tenant transaction | backend | M | done |
 | E | 0.5.1 | The Keycloak realm as code | umbrella | M | todo |
 | E | 0.5.2 | Resolve the tenant from the host | backend | S | todo |
 | E | 0.5.3 | Identities, memberships and sessions in the schema | backend | M | todo |

@@ -132,9 +132,9 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `impossible_values_are_refused_by_the_database` | 0.4.10 | backend | done |
 | `a_tenant_has_at_most_one_current_season` | 0.4.10 | backend | done |
 | `legal_notes_are_internal_by_default` | 0.4.10 | backend | done |
-| `high_ingest_ids_are_time_ordered` | 0.4.11 | backend | todo |
-| `medical_reads_see_only_the_context_tenant` | 0.4.12 | backend | todo |
-| `scouting_writes_are_stamped_with_the_context_tenant` | 0.4.12 | backend | todo |
+| `high_ingest_ids_are_time_ordered` | 0.4.11 | backend | done |
+| `medical_reads_see_only_the_context_tenant` | 0.4.12 | backend | done |
+| `scouting_writes_are_stamped_with_the_context_tenant` | 0.4.12 | backend | done |
 | `the_api_client_requires_pkce` | 0.5.1 | umbrella | todo |
 | `brute_force_detection_is_enabled` | 0.5.1 | umbrella | todo |
 | `mfa_maps_to_assurance_level_2` | 0.5.1 | umbrella | todo |
