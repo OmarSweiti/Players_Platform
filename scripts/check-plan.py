@@ -56,8 +56,10 @@ JS_FILES = (".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs")
 PY_SKIP = re.compile(r"^\s*@(?:unittest\.skip\w*|unittest\.expectedFailure|pytest\.mark\.(?:skip|skipif|xfail))")
 REPO_OF = {"umbrella": "Players_Platform", "backend": "Players_Platform_Backend", "frontend": "Players_Platform_Frontend"}
 PR_PARTS = re.compile(r"https://github\.com/OmarSweiti/(Players_Platform(?:_Backend|_Frontend)?)/pull/(\d+)")
+# Where a named test may be declared. The umbrella's live in its scripts and
+# hooks, and beside the infrastructure they prove (infra/keycloak/test-realm.sh).
 TEST_PATHS = {"backend": ["src", "test"], "frontend": ["src", "app", "tests", "e2e"],
-              "umbrella": ["scripts", ".githooks"]}
+              "umbrella": ["scripts", ".githooks", "infra"]}
 MILESTONE = "docs/implementation/demo-milestone.md"
 MILESTONE_ROW = re.compile(r"^\|\s*([A-Z])\b[^|]*\|(.*)\|\s*$", re.M)  # | A — stage name | `0.2.3` · `0.1.5` |
 WEIGHT = {"S": 4, "M": 8, "L": 16}  # the size ceilings, in hours (00-master-plan.md, Effort model)
@@ -829,6 +831,19 @@ def self_test():
     done1 = edit(prog, "| 0.1.1 | First | umbrella | todo |  |", "| 0.1.1 | First | umbrella | done | %s |" % pr)
     expect("a_name_only_in_a_comment_is_refused", lambda t: (
         done1(t), write(os.path.join(t, "scripts", "selftest.sh"), '# "first_step_proves_itself"\n')),
+        "no test declares first_step_proves_itself")
+    no_script_test = edit("scripts/selftest.sh", 'echo "first_step_proves_itself"', "echo nothing")
+
+    def write_new(path, text):
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        write(path, text)
+    expect("a_test_beside_the_infrastructure_is_found", lambda t: (
+        done1(t), no_script_test(t), write_new(os.path.join(t, "infra", "keycloak", "test-selftest.sh"),
+                                               "python3 - <<'PY'\ndef first_step_proves_itself():\n    pass\nPY\n")),
+        "", regenerate=True)
+    expect("a_name_only_in_an_infra_comment_is_refused", lambda t: (
+        done1(t), no_script_test(t), write_new(os.path.join(t, "infra", "compose.yaml"),
+                                               "# first_step_proves_itself\nservices: {}\n")),
         "no test declares first_step_proves_itself")
     expect("a_skipped_suite_is_refused", lambda t: (
         done1(t), write(os.path.join(t, "scripts", "selftest.spec.ts"),
