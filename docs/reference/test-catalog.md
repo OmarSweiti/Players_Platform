@@ -143,10 +143,10 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `an_inactive_tenant_cannot_sign_in` | 0.5.2 | backend | done |
 | `an_identity_links_to_at_most_one_membership_per_tenant` | 0.5.3 | backend | done |
 | `sessions_store_only_token_hashes` | 0.5.3 | backend | done |
-| `id_tokens_from_another_issuer_are_refused` | 0.5.4 | backend | todo |
-| `id_tokens_for_another_audience_are_refused` | 0.5.4 | backend | todo |
-| `a_mismatched_nonce_is_refused` | 0.5.4 | backend | todo |
-| `rotated_signing_keys_are_accepted` | 0.5.4 | backend | todo |
+| `id_tokens_from_another_issuer_are_refused` | 0.5.4 | backend + umbrella | done |
+| `id_tokens_for_another_audience_are_refused` | 0.5.4 | backend + umbrella | done |
+| `a_mismatched_nonce_is_refused` | 0.5.4 | backend + umbrella | done |
+| `rotated_signing_keys_are_accepted` | 0.5.4 | backend + umbrella | done |
 | `a_member_signs_in_end_to_end` | 0.5.5 | backend | todo |
 | `a_non_member_gets_no_session` | 0.5.5 | backend | todo |
 | `a_replayed_or_mismatched_state_is_refused` | 0.5.5 | backend | todo |
