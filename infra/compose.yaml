@@ -109,8 +109,9 @@ services:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?run `just up`, which creates infra/.env}
       KC_HEALTH_ENABLED: "true"
-      # The realm file reads the API client's secret from here, never from itself.
+      # The realm file reads the API's client secrets from here, never from itself.
       SADARA_API_CLIENT_SECRET: ${SADARA_API_CLIENT_SECRET:?run `just up`, which adds it to infra/.env}
+      SADARA_ADMIN_CLIENT_SECRET: ${SADARA_ADMIN_CLIENT_SECRET:?run `just up`, which adds it to infra/.env}
     mem_limit: 1g # the JVM sizes its heap from this, not from the whole Docker machine
     ports: ["127.0.0.1:${KEYCLOAK_PORT:-8080}:8080"]
     volumes:
