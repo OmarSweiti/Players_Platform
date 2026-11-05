@@ -92,7 +92,7 @@ The four source documents and their checksums: [`../requirements/README.md`](../
 | SR-CORE-008 | SRD | 0.10.1, 1.10.4, 2.6.1 | 1/3 |
 | SR-CORE-009 | SRD | 0.1.4, 1.10.3, 4.4.3, 4.5.1 | 1/4 |
 | SR-CORE-010 | SRD | 0.7.7, 3.4.2, 3.5.1, 4.1.3 | 0/4 |
-| SR-AUTH-001 | SRD | 0.5.4, 4.2.1 | 0/2 |
+| SR-AUTH-001 | SRD | 0.5.4, 4.2.1 | 1/2 |
 | SR-AUTH-002 | SRD | 0.5.8, 1.1.2, 1.1.3, 4.2.1, 4.2.2 | 0/5 |
 | SR-AUTH-003 | SRD | 0.5.6 | 0/1 |
 | SR-AUTH-004 | SRD | 0.3.8, 0.5.1 | 2/2 |

@@ -914,26 +914,48 @@ reason and the revision from 1; the identity's issuer and subject are never empt
 **Done when:** both tests pass as the runtime role and the new tables carry forced RLS.
 
 ### 0.5.4 — The identity-provider port and the Keycloak adapter
-**Repo:** backend · **Size:** L · **Depends on:** `0.5.1`, `0.5.3` · **Requirements:** SR-AUTH-001
-**Files:** `src/modules/identity/application/identity-provider.port.ts` (new),
-`src/modules/identity/infrastructure/keycloak/**` (new), `test/support/test-issuer.ts` (new)
+**Repo:** backend + umbrella · **Size:** L · **Depends on:** `0.5.1`, `0.5.3` · **Requirements:** SR-AUTH-001
+**Files:** backend `src/modules/identity/application/ports/identity-provider.port.ts` (new),
+`src/modules/identity/infrastructure/keycloak/{oidc-relying-party,keycloak-identity-provider}.ts` (new),
+`src/modules/identity/identity.module.ts` (new), `src/app.module.ts`, `src/config/env.schema.ts`, `.env.example`,
+`vitest.config.mts` (a `keycloak` project), `test/support/test-issuer.ts` (new),
+`test/identity/identity-provider.integration-spec.ts` (new), `test/identity/keycloak-accounts.keycloak-spec.ts`
+(new); umbrella `infra/keycloak/{realm-sadara.json,test-realm.sh,README.md}`, `infra/compose.yaml`, `infra/.env.example`
 One port hides the provider. Protocol calls use a certified OIDC client library: discovery, JWKS cached
 with rotation, an allowlisted issuer, and ID-token verification of `iss`, `aud`, `azp`, `exp`, `iat` and
 `nonce`. Administration calls use the provider's admin API with a least-privilege service account.
 Automated tests run against an in-process test issuer (which can mint malformed and hostile tokens);
 realm behaviour is proven against Keycloak itself in `0.5.1` and at the gate.
 ```ts
-export interface IdentityProviderPort {
-  authorizationUrl(p: { state: string; nonce: string; codeChallenge: string; loginHint?: string; acrValues?: string; locale: 'ar' | 'en' }): URL;
-  exchange(code: string, codeVerifier: string, expectedNonce: string): Promise<VerifiedSignIn>;   // issuer, subject, sid, acr, amr, authTime, email, emailVerified
+export abstract class IdentityProviderPort {
+  authorizationUrl(p: { redirectUri: URL; state: string; nonce: string; codeChallenge: string; loginHint?: string; acrValues?: string; locale: 'ar' | 'en' }): Promise<URL>;
+  exchange(p: { callbackUrl: URL; codeVerifier: string; expectedState: string; expectedNonce: string }): Promise<VerifiedSignIn>;   // issuer, subject, sid, acr, amr, authTime, email, emailVerified
   verifyLogoutToken(jwt: string): Promise<{ subject?: string; sid?: string }>;
   createAccount(email: string, locale: 'ar' | 'en', requiredActions: RequiredAction[]): Promise<{ subject: string }>;
   sendSetupEmail(subject: string): Promise<void>;
   disableAccount(subject: string): Promise<void>;
 }
 ```
+As built: the port is an abstract class in `application/ports/`, as every port is since `0.4.12`, and
+two signatures changed. `authorizationUrl` takes the callback of the host the browser came from and
+returns a promise, because discovery happens on first use, never at boot. `exchange` takes the URL
+the browser came back to, with the expected state and nonce, because the token request repeats that
+host's callback and Keycloak's answer carries `iss`, which is checked. The library is openid-client 6
+(OpenID Certified), with jose 6 for logout tokens. ID-token signatures are checked against the
+issuer's keys (`enableNonRepudiationChecks`; the library otherwise trusts TLS) and RS256 is pinned,
+since Keycloak also advertises HMAC algorithms; the adapter refuses an `iat` in the future, which the
+library does not. The key set is the library's cache: five minutes, or one when a token names an
+unknown key. A refusal is `ProviderAnswerRefusedError` (401 `AUTHENTICATION_REQUIRED`), naming the
+failed check and never a value; a provider that does not answer is `DependencyUnavailableError`.
+The admin calls go through the realm's admin REST API as `sadara-admin`, an umbrella service account
+holding only `manage-users` (`test-realm.sh` proves its reach); a subject that is not shaped like a
+Keycloak id is not found, every call times out after 10 s, and an expired admin token is renewed once.
+Five settings are required (`OIDC_ISSUER`: HTTPS, or HTTP on this machine; two client ids and their
+secrets). Readiness (`0.3.7`) does not call the provider: its settings are checked at boot, and a
+provider that is down stops new sign-ins, not the sessions Sadara already holds. Accounts are created
+without a name, so Keycloak's default profile asks for one at the first sign-in (`0.5.10`).
 **Tests:** `id_tokens_from_another_issuer_are_refused` · `id_tokens_for_another_audience_are_refused` · `a_mismatched_nonce_is_refused` · `rotated_signing_keys_are_accepted`
-**Verify:** `just test-int -- identity-provider`
+**Verify:** `just test-int -- identity-provider`; the admin calls, with the stack up: `npx vitest run --project keycloak`
 **Done when:** the four tests pass against the test issuer and the adapter's admin calls pass against
 the compose Keycloak.
 
