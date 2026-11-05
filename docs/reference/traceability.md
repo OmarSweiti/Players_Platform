@@ -94,7 +94,7 @@ The four source documents and their checksums: [`../requirements/README.md`](../
 | SR-CORE-010 | SRD | 0.7.7, 3.4.2, 3.5.1, 4.1.3 | 0/4 |
 | SR-AUTH-001 | SRD | 0.5.4, 4.2.1 | 1/2 |
 | SR-AUTH-002 | SRD | 0.5.8, 1.1.2, 1.1.3, 4.2.1, 4.2.2 | 0/5 |
-| SR-AUTH-003 | SRD | 0.5.6 | 0/1 |
+| SR-AUTH-003 | SRD | 0.5.6 | 1/1 |
 | SR-AUTH-004 | SRD | 0.3.8, 0.5.1 | 2/2 |
 | SR-AUTH-005 | SRD | 0.1.6 | 1/1 |
 | SR-AUTH-006 | SRD | 0.1.6 | 1/1 |
@@ -107,7 +107,7 @@ The four source documents and their checksums: [`../requirements/README.md`](../
 | SR-ACL-004 | SRD | 0.6.1, 1.1.5, 4.1.4 | 0/3 |
 | SR-ACL-005 | SRD | 0.6.3, 1.1.5, 1.2.3, 4.1.4, 4.4.2, 4.5.2 | 0/6 |
 | SR-ACL-006 | SRD | 0.7.2, 1.1.1, 1.1.4, 4.1.4 | 0/4 |
-| SR-ACL-007 | SRD | 0.5.6, 1.1.1 | 0/2 |
+| SR-ACL-007 | SRD | 0.5.6, 1.1.1 | 1/2 |
 | SR-ACL-008 | SRD | 0.6.4, 1.1.8, 1.2.3, 1.8.1, 3.4.4, 4.1.4, 4.4.2, 4.5.2 | 0/8 |
 | SR-ACL-009 | SRD | 1.9.1, 1.9.2, 2.9.1, 3.4.4, 3.4.6, 3.6.1, 4.1.6 | 0/7 |
 | SR-PL-001 | SRD | 1.2.1, 1.2.6, 1.2.8 | 0/3 |

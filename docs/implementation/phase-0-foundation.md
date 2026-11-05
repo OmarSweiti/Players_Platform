@@ -1005,7 +1005,13 @@ callback completed in a browser that did not start the sign-in creates no sessio
 ### 0.5.6 — Server sessions, the session cookie and CSRF
 **Repo:** backend · **Size:** L · **Depends on:** `0.5.5`, `0.3.8` · **Requirements:** SR-AUTH-003, SR-ACL-007
 **Files:** `src/modules/identity/application/session.service.ts` (new), `src/common/guards/session.guard.ts`
-(replaces the placeholder), `src/common/security/csrf.guard.ts` (new), `test/auth/sessions.e2e-spec.ts` (new)
+(replaces the placeholder), `src/common/security/{csrf.guard,csrf-tokens}.ts` (new), `src/common/tenancy/auth-bootstrap.ts`,
+`src/modules/identity/application/{ports/session-views.port,use-cases/read-session.usecase}.ts` (new),
+`src/modules/identity/infrastructure/repositories/session-view.repository.ts` (new),
+`src/modules/identity/presentation/{auth.controller,dto/session.dto}.ts`, `src/common/interfaces/request-with-user.interface.ts`,
+`src/config/env.schema.ts` (`CSRF_SECRET`, `CSRF_SECRET_PREVIOUS`), `eslint.config.mjs` (the guard mints contexts),
+`src/common/openapi/contract.ts`, `openapi/openapi.json`, `test/harness/session.ts` (real sessions),
+`test/auth/sessions.e2e-spec.ts` (new), and the six earlier tests that sign in through the harness
 The session `0.5.5` issued is one random 256-bit value in `__Host-Http-sadara_session` (HttpOnly, Secure,
 SameSite=Lax, Path=/ — [ADR-0023](../adr/0023-session-cookies-per-rfc-10017.md)); PostgreSQL holds only its hash. This step makes it authenticate requests. **Every request checks the session, the membership and the
 tenant against PostgreSQL** — not a cache — so revocation and deactivation take effect on the very next
@@ -1016,6 +1022,22 @@ fetch metadata; non-JSON bodies are refused. The token is derived, not stored �
 an HMAC of the session's token hash under a keyed, rotatable secret — so it stays the same in every tab
 until the session rotates. `GET /api/v1/auth/session` returns
 the member, the tenant and the CSRF token. The guard mints the `AuthorizedTenantContext`.
+As built: the session is found by the SHA-256 of its cookie in the host's tenant, through
+`AuthBootstrap.sessionOf`, and the guard mints the context from it alone — a tenant the request names
+changes nothing. No cookie, a host with no active tenant, an unknown or revoked session, or a member no
+longer active is `401 AUTHENTICATION_REQUIRED`; past either expiry, `401 SESSION_EXPIRED`. Renewal moves
+the idle expiry 30 minutes on, never past the absolute one, and writes at most once a minute per session,
+so a session may lapse up to a minute early, never late. The `Origin` a write needs is `https://` and the
+host it came to: each tenant has its own host (`0.5.2`), so one configured origin cannot serve them, and
+another tenant's host is refused. The CSRF guard runs after the session guard and the rate limit, before
+permissions; a failure is `403 CSRF_FAILED`, then a body that is not JSON is `415`. The token is
+HMAC-SHA-256 under `CSRF_SECRET` (32 characters at least, no default) with a purpose prefix;
+`CSRF_SECRET_PREVIOUS` keeps the old key's tokens valid while it rotates. `GET /api/v1/auth/session`
+answers the member (id, role, name), the tenant (id, slug, name, language) and the token, `no-store`,
+read through the tenant transaction as the context's own session. The request holds the session's member
+only (id, tenant, role), never a user row. The test harness's stand-in guard is retired: `signedInAs`
+opens a real session and returns its host, cookie, `Origin` and token, so every API test goes through
+the real guards.
 **Tests:** `the_session_cookie_is_host_only_httponly_and_secure` · `a_write_without_the_csrf_token_is_refused` · `a_write_from_another_origin_is_refused` · `a_cross_site_fetch_is_refused_even_with_the_token` · `a_revoked_session_fails_on_the_next_request` · `a_deactivated_member_loses_access_on_the_next_request`
 **Verify:** `just test-e2e -- test/auth/sessions.e2e-spec.ts`
 **Done when:** the six tests pass.

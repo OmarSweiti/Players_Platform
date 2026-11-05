@@ -66,7 +66,7 @@ edit only Status and Evidence.
 | 0.5.3 | Identities, memberships and sessions in the schema | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/100 |
 | 0.5.4 | The identity-provider port and the Keycloak adapter | backend + umbrella | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/101 · https://github.com/OmarSweiti/Players_Platform/pull/75 |
 | 0.5.5 | Sign-in through the API: authorization code with PKCE | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/102 |
-| 0.5.6 | Server sessions, the session cookie and CSRF | backend | todo |  |
+| 0.5.6 | Server sessions, the session cookie and CSRF | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/103 |
 | 0.5.7 | Sign-out, back-channel logout and session management | backend | todo |  |
 | 0.5.8 | MFA assurance for privileged roles; recent authentication for sensitive actions | backend | todo |  |
 | 0.5.9 | The tenant provisioning command | backend | todo |  |

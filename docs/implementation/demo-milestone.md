@@ -116,9 +116,9 @@ run early.
 stale.*
 
 <!-- plan:milestone:begin -->
-**Demo milestone** — 50 of 126 microsteps done; 444–888 engineering hours left before the reserve.
+**Demo milestone** — 51 of 126 microsteps done; 436–872 engineering hours left before the reserve.
 
-Next in build order (every dependency done): `0.5.6`, `0.5.9`, `0.6.1`, `0.7.1`, `0.7.7`, `0.8.1`, `0.10.2`.
+Next in build order (every dependency done): `0.5.7`, `0.5.8`, `0.5.9`, `0.6.1`, `0.7.1`, `0.7.7`, `0.8.1`, `0.10.2`.
 
 | Stage | Step | Title | Repo | Size | Status |
 |---|---|---|---|---|---|
@@ -171,7 +171,7 @@ Next in build order (every dependency done): `0.5.6`, `0.5.9`, `0.6.1`, `0.7.1`,
 | E | 0.5.3 | Identities, memberships and sessions in the schema | backend | M | done |
 | E | 0.5.4 | The identity-provider port and the Keycloak adapter | backend + umbrella | L | done |
 | E | 0.5.5 | Sign-in through the API: authorization code with PKCE | backend | L | done |
-| E | 0.5.6 | Server sessions, the session cookie and CSRF | backend | L | todo |
+| E | 0.5.6 | Server sessions, the session cookie and CSRF | backend | L | done |
 | E | 0.5.7 | Sign-out, back-channel logout and session management | backend | M | todo |
 | E | 0.5.8 | MFA assurance for privileged roles; recent authentication for sensitive actions | backend | M | todo |
 | E | 0.5.9 | The tenant provisioning command | backend | M | todo |
