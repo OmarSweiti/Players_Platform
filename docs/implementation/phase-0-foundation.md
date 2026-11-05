@@ -889,13 +889,26 @@ the e2e test asks the resolver through a test-only probe route.
 
 ### 0.5.3 — Identities, memberships and sessions in the schema
 **Repo:** backend · **Size:** M · **Depends on:** `0.4.5` · **Requirements:** —
-**Files:** `prisma/schema.prisma`, migration `…_identity_sessions`, `test/db/identity.integration-spec.ts` (new)
+**Files:** `prisma/schema.prisma`, migration `20261105075926_identity_sessions`,
+`src/infrastructure/prisma/model-classification.ts`, `scripts/generate-rls.ts`,
+`test/db/identity.integration-spec.ts` (new), and the catalog tests whose inventories grew
+(`test/db/{rls,indexes,constraints,ids,time}.integration-spec.ts`)
 `Identity(id, issuer, subject, createdAt)` is global and unique on `(issuer, subject)`; the tenant `User`
 is the **membership**, with `identityId` unique per tenant, and keeps its id so every business foreign
 key survives. `UserSession` (tenant-owned, UUIDv7, under RLS) stores only the hash of the session
 token — the CSRF token is derived from it and never stored (`0.5.6`) — the identity provider's `sid`,
 the `acr`, `amr` and `auth_time` it asserted, idle and absolute
 expiry, and revocation. An identity is never linked by email alone.
+As built: identities take a new global class, `append-only`: the runtime role reads and adds them and
+never updates or deletes one (`generate-rls.ts` prints the `REVOKE`); being global, they have no tenant
+policy. The subject is at most 255 characters (OpenID Connect Core 1.0 §2), the issuer 500. One
+membership per identity and tenant is keyed `(identity_id, tenant_id)`, so the same index serves the key
+to identities. A session's key to `users` is `(user_id, tenant_id, identity_id)`: it names the member,
+its tenant and its linked identity together. The token's SHA-256 digest is unique within its tenant,
+`(tenant_id, token_hash)`, since every tenant index leads with `tenant_id` (`0.4.6`) and a session is
+looked up only inside the host's tenant. `revoke_reason` is an enum of the five ways `0.5.7` and `0.5.8`
+end a session early. CHECKs hold the digest to 32 bytes, idle expiry to the absolute, a revocation to its
+reason and the revision from 1; the identity's issuer and subject are never empty.
 **Tests:** `an_identity_links_to_at_most_one_membership_per_tenant` · `sessions_store_only_token_hashes`
 **Verify:** `just migrations && just test-int -- identity`
 **Done when:** both tests pass as the runtime role and the new tables carry forced RLS.

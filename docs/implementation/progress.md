@@ -63,7 +63,7 @@ edit only Status and Evidence.
 | 0.4.12 | The existing modules on the tenant transaction | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/98 |
 | 0.5.1 | The Keycloak realm as code | umbrella | done | https://github.com/OmarSweiti/Players_Platform/pull/68 |
 | 0.5.2 | Resolve the tenant from the host | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/99 |
-| 0.5.3 | Identities, memberships and sessions in the schema | backend | todo |  |
+| 0.5.3 | Identities, memberships and sessions in the schema | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/100 |
 | 0.5.4 | The identity-provider port and the Keycloak adapter | backend | todo |  |
 | 0.5.5 | Sign-in through the API: authorization code with PKCE | backend | todo |  |
 | 0.5.6 | Server sessions, the session cookie and CSRF | backend | todo |  |
