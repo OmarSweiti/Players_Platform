@@ -58,7 +58,7 @@ Use `application/problem+json` following [RFC 9457](https://www.rfc-editor.org/r
 }
 ```
 
-`code` and field codes are stable machine identifiers. `type` is a stable problem-type URI; `title` identifies that type. `message` is localized and mirrors safe `detail` when detail is provided. `fieldErrors` is an empty array when no field is implicated. Fields use JSON Pointer paths; errors never echo submitted values. Unknown exceptions become a generic internal error with a request ID, without raw Prisma errors, SQL, paths, cookies, token queries or stack traces. `instance` identifies the occurrence without a sensitive URL.
+`code` and field codes are stable machine identifiers. `type` is a stable problem-type URI; `title` identifies that type. `message` is localized and mirrors safe `detail` when detail is provided. `fieldErrors` is an empty array when no field is implicated. A `STEP_UP_REQUIRED` problem alone adds `stepUpUrl`, the allowlisted step-up route (`/api/v1/auth/step-up`, `0.5.8`); the client sends the browser there with `returnTo` and retries once it returns. Fields use JSON Pointer paths; errors never echo submitted values. Unknown exceptions become a generic internal error with a request ID, without raw Prisma errors, SQL, paths, cookies, token queries or stack traces. `instance` identifies the occurrence without a sensitive URL.
 
 | HTTP | Stable code | Meaning / client behavior |
 |---|---|---|

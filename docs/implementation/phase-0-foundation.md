@@ -1085,13 +1085,36 @@ addresses the retired credential system used (`POST /auth/logout`, `POST /auth/l
 
 ### 0.5.8 — MFA assurance for privileged roles; recent authentication for sensitive actions
 **Repo:** backend · **Size:** M · **Depends on:** `0.5.6` · **Requirements:** SR-AUTH-002
-**Files:** `src/modules/identity/application/assurance.policy.ts` (new), `src/common/decorators/requires-recent-auth.decorator.ts` (new), `test/auth/assurance.e2e-spec.ts` (new)
+**Files:** `src/modules/identity/application/assurance.policy.ts` (new), `src/common/decorators/requires-recent-auth.decorator.ts` (new),
+`src/common/guards/recent-auth.guard.ts` (new), `src/app.module.ts`, `src/common/errors/domain-error.ts` (`StepUpRequiredError`),
+`src/common/filters/problem-details.filter.ts` and `src/common/openapi/{contract,responses}.ts` (`stepUpUrl`),
+`src/common/tenancy/auth-bootstrap.ts`, `src/common/guards/session.guard.ts`, `src/modules/identity/application/{session.service,use-cases/sign-in.usecase,ports/*}.ts`,
+`src/modules/identity/infrastructure/{keycloak,valkey}/**`, `src/modules/identity/presentation/auth.controller.ts`,
+`src/modules/scouting/presentation/scouting.controller.ts`, `openapi/openapi.json`, `test/harness/session.ts`,
+`test/identity/identity-provider.integration-spec.ts`, `test/auth/assurance.e2e-spec.ts` (new)
 Members holding a privileged role — owner, admin, legal, finance, medical, physiotherapist, sporting
 director by default; tenant-configurable in `1.1.2` — get **no session** until the provider asserts level
 of assurance 2: the callback sends them back with `acr_values` for step-up. Sensitive actions (role and
 permission changes, approvals, signature evidence, confidential exports, support grants) require
 authentication within the last five minutes, else `403 STEP_UP_REQUIRED` with a re-authentication URL;
 a successful step-up updates the existing session.
+As built: the privileged roles are the plan's seven and `SUPER_ADMIN`, as the safe default; a second
+factor is the realm's `acr` "2" (`0.5.1`). A privileged member's level-1 sign-in gets no session: the
+callback sends the same browser back with `acr_values=2`, keeping its pre-auth binding, and refuses (`401`)
+if the factor is asked for and still not given, so it never loops. The rule holds on every request too:
+a session whose member's role now needs level 2, and which never proved it, is refused, so a promotion
+cannot skip the factor. `@RequiresRecentAuth()` (`RecentAuthGuard`, global, after permissions) needs an
+authentication within five minutes; otherwise `403 STEP_UP_REQUIRED` carries `stepUpUrl`, an RFC 9457
+extension member naming `/api/v1/auth/step-up`, to which the client adds `returnTo` — the API cannot
+know the page a request came from. Scouting's approve and reject are marked; the other sensitive actions
+take the decorator as their steps build them. `GET /api/v1/auth/step-up` asks the provider for a fresh
+authentication (`max_age=0`, checked against `auth_time`) and, for a privileged role, level 2; the attempt
+is bound to the session the browser holds. Its callback updates that session in one transaction — the
+same id, sign-in time and absolute expiry; new `auth_time`, `acr`, `amr` and provider `sid`; **its token
+replaced** (OWASP, on a rise in privilege), the cookie living only to the absolute expiry — and only if
+the same person authenticated in the same browser, the row still holds the current token, and the
+assurance holds; otherwise nothing changes. The test harness opens a privileged member's session at
+level 2, as sign-in requires.
 **Tests:** `a_privileged_member_without_mfa_gets_no_session` · `a_sensitive_action_requires_recent_authentication` · `step_up_upgrades_the_existing_session`
 **Verify:** `just test-e2e -- test/auth/assurance.e2e-spec.ts`
 **Done when:** the three tests pass against the test issuer, and the gate repeats the first against

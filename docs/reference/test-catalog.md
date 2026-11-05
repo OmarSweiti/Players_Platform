@@ -163,9 +163,9 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `a_member_cannot_revoke_another_members_session` | 0.5.7 | backend | done |
 | `a_valid_back_channel_logout_revokes_matching_sessions` | 0.5.7 | backend | done |
 | `a_forged_or_replayed_logout_token_is_refused` | 0.5.7 | backend | done |
-| `a_privileged_member_without_mfa_gets_no_session` | 0.5.8 | backend | todo |
-| `a_sensitive_action_requires_recent_authentication` | 0.5.8 | backend | todo |
-| `step_up_upgrades_the_existing_session` | 0.5.8 | backend | todo |
+| `a_privileged_member_without_mfa_gets_no_session` | 0.5.8 | backend | done |
+| `a_sensitive_action_requires_recent_authentication` | 0.5.8 | backend | done |
+| `step_up_upgrades_the_existing_session` | 0.5.8 | backend | done |
 | `provisioning_creates_a_tenant_and_an_invited_owner` | 0.5.9 | backend | todo |
 | `provisioning_is_idempotent_per_slug` | 0.5.9 | backend | todo |
 | `provisioning_never_accepts_a_password` | 0.5.9 | backend | todo |

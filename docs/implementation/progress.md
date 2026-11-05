@@ -68,7 +68,7 @@ edit only Status and Evidence.
 | 0.5.5 | Sign-in through the API: authorization code with PKCE | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/102 |
 | 0.5.6 | Server sessions, the session cookie and CSRF | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/103 |
 | 0.5.7 | Sign-out, back-channel logout and session management | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/104 |
-| 0.5.8 | MFA assurance for privileged roles; recent authentication for sensitive actions | backend | todo |  |
+| 0.5.8 | MFA assurance for privileged roles; recent authentication for sensitive actions | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/105 |
 | 0.5.9 | The tenant provisioning command | backend | todo |  |
 | 0.5.10 | Invitations | backend | todo |  |
 | 0.5.11 | Development identities and the synthetic seed | backend + umbrella + frontend | todo |  |
