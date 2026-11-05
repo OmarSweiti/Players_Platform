@@ -116,9 +116,9 @@ run early.
 stale.*
 
 <!-- plan:milestone:begin -->
-**Demo milestone** — 47 of 126 microsteps done; 464–928 engineering hours left before the reserve.
+**Demo milestone** — 48 of 126 microsteps done; 460–920 engineering hours left before the reserve.
 
-Next in build order (every dependency done): `0.5.3`, `0.6.1`, `0.7.1`, `0.7.7`, `0.8.1`, `0.10.2`.
+Next in build order (every dependency done): `0.5.4`, `0.6.1`, `0.7.1`, `0.7.7`, `0.8.1`, `0.10.2`.
 
 | Stage | Step | Title | Repo | Size | Status |
 |---|---|---|---|---|---|
@@ -168,7 +168,7 @@ Next in build order (every dependency done): `0.5.3`, `0.6.1`, `0.7.1`, `0.7.7`,
 | D | 0.4.12 | The existing modules on the tenant transaction | backend | M | done |
 | E | 0.5.1 | The Keycloak realm as code | umbrella | M | done |
 | E | 0.5.2 | Resolve the tenant from the host | backend | S | done |
-| E | 0.5.3 | Identities, memberships and sessions in the schema | backend | M | todo |
+| E | 0.5.3 | Identities, memberships and sessions in the schema | backend | M | done |
 | E | 0.5.4 | The identity-provider port and the Keycloak adapter | backend | L | todo |
 | E | 0.5.5 | Sign-in through the API: authorization code with PKCE | backend | L | todo |
 | E | 0.5.6 | Server sessions, the session cookie and CSRF | backend | L | todo |
