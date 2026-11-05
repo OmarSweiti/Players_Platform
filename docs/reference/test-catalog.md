@@ -147,11 +147,11 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `id_tokens_for_another_audience_are_refused` | 0.5.4 | backend + umbrella | done |
 | `a_mismatched_nonce_is_refused` | 0.5.4 | backend + umbrella | done |
 | `rotated_signing_keys_are_accepted` | 0.5.4 | backend + umbrella | done |
-| `a_member_signs_in_end_to_end` | 0.5.5 | backend | todo |
-| `a_non_member_gets_no_session` | 0.5.5 | backend | todo |
-| `a_replayed_or_mismatched_state_is_refused` | 0.5.5 | backend | todo |
-| `a_callback_from_another_browser_is_refused` | 0.5.5 | backend | todo |
-| `return_to_cannot_leave_the_origin` | 0.5.5 | backend | todo |
+| `a_member_signs_in_end_to_end` | 0.5.5 | backend | done |
+| `a_non_member_gets_no_session` | 0.5.5 | backend | done |
+| `a_replayed_or_mismatched_state_is_refused` | 0.5.5 | backend | done |
+| `a_callback_from_another_browser_is_refused` | 0.5.5 | backend | done |
+| `return_to_cannot_leave_the_origin` | 0.5.5 | backend | done |
 | `the_session_cookie_is_host_only_httponly_and_secure` | 0.5.6 | backend | todo |
 | `a_write_without_the_csrf_token_is_refused` | 0.5.6 | backend | todo |
 | `a_write_from_another_origin_is_refused` | 0.5.6 | backend | todo |

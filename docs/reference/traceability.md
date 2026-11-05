@@ -82,7 +82,7 @@ The four source documents and their checksums: [`../requirements/README.md`](../
 | SYS-ASY-003 | SysRD | 0.7.6, 2.9.1, 3.6.1, 4.4.1, 4.4.3 | 0/5 |
 | SYS-ASY-004 | SysRD | 0.7.6, 2.9.1, 3.6.1, 4.1.7, 4.4.1 | 0/5 |
 | SYS-ASY-005 | SysRD | 0.7.5, 3.4.2, 4.4.1 | 0/3 |
-| SR-CORE-001 | SRD | 0.5.5 | 0/1 |
+| SR-CORE-001 | SRD | 0.5.5 | 1/1 |
 | SR-CORE-002 | SRD | 0.3.9, 4.6.1 | 1/2 |
 | SR-CORE-003 | SRD | 0.3.1, 4.6.1 | 1/2 |
 | SR-CORE-004 | SRD | 0.3.5, 1.2.4, 4.6.1 | 1/3 |
