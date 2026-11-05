@@ -116,9 +116,9 @@ run early.
 stale.*
 
 <!-- plan:milestone:begin -->
-**Demo milestone** — 52 of 126 microsteps done; 432–864 engineering hours left before the reserve.
+**Demo milestone** — 53 of 126 microsteps done; 428–856 engineering hours left before the reserve.
 
-Next in build order (every dependency done): `0.5.8`, `0.5.9`, `0.6.1`, `0.7.1`, `0.7.7`, `0.8.1`, `0.10.2`.
+Next in build order (every dependency done): `0.5.9`, `0.6.1`, `0.7.1`, `0.7.7`, `0.8.1`, `0.10.2`.
 
 | Stage | Step | Title | Repo | Size | Status |
 |---|---|---|---|---|---|
@@ -173,7 +173,7 @@ Next in build order (every dependency done): `0.5.8`, `0.5.9`, `0.6.1`, `0.7.1`,
 | E | 0.5.5 | Sign-in through the API: authorization code with PKCE | backend | L | done |
 | E | 0.5.6 | Server sessions, the session cookie and CSRF | backend | L | done |
 | E | 0.5.7 | Sign-out, back-channel logout and session management | backend | M | done |
-| E | 0.5.8 | MFA assurance for privileged roles; recent authentication for sensitive actions | backend | M | todo |
+| E | 0.5.8 | MFA assurance for privileged roles; recent authentication for sensitive actions | backend | M | done |
 | E | 0.5.9 | The tenant provisioning command | backend | M | todo |
 | E | 0.5.10 | Invitations | backend | M | todo |
 | E | 0.5.11 | Development identities and the synthetic seed | backend + umbrella + frontend | M | todo |
