@@ -24,6 +24,8 @@ Arabic sign-in page.
 |---|---|---|
 | Client `sadara-api` | confidential, standard flow only, **PKCE S256 required**; no implicit flow, direct grants or service account; refresh tokens off | the API is the OIDC client and stores no provider token ([ADR-0003](../../docs/adr/0003-browser-sessions.md)) |
 | Its secret | `${SADARA_API_CLIENT_SECRET}`, from `infra/.env` | the file holds a placeholder, never a secret |
+| Client `sadara-admin` | confidential, **service account only**: no browser flow, no direct grants; its secret is `${SADARA_ADMIN_CLIENT_SECRET}`, from `infra/.env` | the API manages accounts (create, setup email, disable) through the admin API as this account (`0.5.4`) |
+| Its service account | realm-management's **`manage-users` and nothing else**: no realm role; its token reads and changes users, and is refused the realm's clients, roles and events and every other realm | least privilege ([ADR-0002](../../docs/adr/0002-identity-oidc.md)); events are read by `0.7.3`, which adds what it needs |
 | Redirect URIs | exactly `https://{host}/api/v1/auth/callback`, per tenant host | the proxy's hosts (`infra/proxy/Caddyfile`); `test-realm.sh` holds the two lists equal |
 | Post-logout URIs | exactly `https://{host}/`, per tenant host | the web app's root; `0.5.7` returns the browser there |
 | Back-channel logout | `http://host.docker.internal:3000/api/v1/auth/backchannel-logout`, session required; no front-channel logout | the API on this machine (`0.5.7`) |

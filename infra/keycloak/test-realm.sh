@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# The sadara realm, proved from the running server (0.5.1; SR-AUTH-004, SR-AUTH-008).
+# The sadara realm, proved from the running server (0.5.1, 0.5.4; SR-AUTH-004, SR-AUTH-008).
 # Every setting is read back through Keycloak's admin API, never from
 # realm-sadara.json, and the rules that can be exercised are: an authorization
 # request without PKCE, passwords the policy must refuse, the Arabic login page.
@@ -234,11 +234,50 @@ def sign_in_events_are_stored():
     # Kept until 0.7.3 imports them and a retention policy exists (OPEN-06).
     expect(not events.get("eventsExpiration"), "events expire after %ss" % events.get("eventsExpiration"))
 
+def the_admin_account_manages_users_only():
+    # 0.5.4: the API manages accounts as sadara-admin's service account, which
+    # holds realm-management's manage-users and nothing else.
+    clients = admin("/clients?clientId=sadara-admin")
+    expect(len(clients) == 1, "the realm has no client sadara-admin")
+    client = clients[0]
+    flows = {k: client[k] for k in ("publicClient", "standardFlowEnabled", "implicitFlowEnabled",
+                                    "directAccessGrantsEnabled", "serviceAccountsEnabled")}
+    expect(flows == {"publicClient": False, "standardFlowEnabled": False, "implicitFlowEnabled": False,
+                     "directAccessGrantsEnabled": False, "serviceAccountsEnabled": True},
+           "not a confidential service account alone: %s" % flows)
+    status, _, secret = call("GET", "/admin/realms/%s/clients/%s/client-secret" % (REALM, client["id"]), TOKEN)
+    expect(status == 200 and "${" not in (secret.get("value") or ""), "the server holds no secret, or the placeholder")
+    expect(secrets.compare_digest(secret.get("value") or "", setting("SADARA_ADMIN_CLIENT_SECRET") or ""),
+           "the server's secret is not infra/.env's SADARA_ADMIN_CLIENT_SECRET")
+    account = admin("/clients/%s/service-account-user" % client["id"])
+    roles = admin("/users/%s/role-mappings" % account["id"])
+    granted = {name: sorted(r["name"] for r in mapping["mappings"])
+               for name, mapping in roles.get("clientMappings", {}).items()}
+    expect(not roles.get("realmMappings") and granted == {"realm-management": ["manage-users"]},
+           "the service account holds %s and realm roles %s" % (granted, [r["name"] for r in roles.get("realmMappings", [])]))
+    # Exercised: its token reads users, and is refused the realm's clients,
+    # roles and events and every other realm.
+    status, _, grant = call("POST", "/realms/%s/protocol/openid-connect/token" % REALM, form={
+        "client_id": "sadara-admin", "client_secret": setting("SADARA_ADMIN_CLIENT_SECRET"),
+        "grant_type": "client_credentials"})
+    expect(status == 200, "the service account cannot sign in (%s)" % status)
+    answers = {path: call("GET", path, grant["access_token"])[0] for path in (
+        "/admin/realms/%s/users?max=1" % REALM, "/admin/realms/%s/clients" % REALM,
+        "/admin/realms/%s/roles" % REALM, "/admin/realms/%s/events" % REALM, "/admin/realms/master/users")}
+    expect(answers == {"/admin/realms/%s/users?max=1" % REALM: 200, "/admin/realms/%s/clients" % REALM: 403,
+                       "/admin/realms/%s/roles" % REALM: 403, "/admin/realms/%s/events" % REALM: 403,
+                       "/admin/realms/master/users": 403}, "the service account's reach: %s" % answers)
+    # And the sign-in client has no service account to sign in as.
+    status, _, _ = call("POST", "/realms/%s/protocol/openid-connect/token" % REALM, form={
+        "client_id": CLIENT, "client_secret": setting("SADARA_API_CLIENT_SECRET"), "grant_type": "client_credentials"})
+    expect(status in (400, 401), "%s signed in by client credentials (%s)" % (CLIENT, status))
+
 TESTS = [the_api_client_requires_pkce, the_client_secret_comes_from_the_environment,
          exact_redirect_and_logout_uris_per_tenant_host,
          brute_force_detection_is_enabled, the_password_policy_refuses_short_and_blocked_passwords,
          email_is_verified_and_sent_to_mailpit, mfa_maps_to_assurance_level_2,
-         webauthn_and_passkeys_are_available_not_required, arabic_and_english, sign_in_events_are_stored]
+         webauthn_and_passkeys_are_available_not_required, arabic_and_english, sign_in_events_are_stored,
+         the_admin_account_manages_users_only]
 
 failed = 0
 for test in TESTS:

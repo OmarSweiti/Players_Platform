@@ -130,6 +130,37 @@
         "backchannel.logout.session.required": "true",
         "use.refresh.tokens": "false"
       }
+    },
+    {
+      "clientId": "sadara-admin",
+      "name": "Sadara account administration",
+      "description": "The API's service account for the admin API (0.5.4): it manages users and nothing else",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "${SADARA_ADMIN_CLIENT_SECRET}",
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "consentRequired": false,
+      "frontchannelLogout": false,
+      "redirectUris": [],
+      "webOrigins": [],
+      "attributes": {
+        "use.refresh.tokens": "false"
+      }
+    }
+  ],
+
+  "users": [
+    {
+      "username": "service-account-sadara-admin",
+      "enabled": true,
+      "serviceAccountClientId": "sadara-admin",
+      "realmRoles": [],
+      "clientRoles": { "realm-management": ["manage-users"] }
     }
   ]
 }
