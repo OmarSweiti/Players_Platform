@@ -141,8 +141,8 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `sign_in_uses_the_tenant_of_the_host` | 0.5.2 | backend | done |
 | `an_unknown_host_looks_like_no_account` | 0.5.2 | backend | done |
 | `an_inactive_tenant_cannot_sign_in` | 0.5.2 | backend | done |
-| `an_identity_links_to_at_most_one_membership_per_tenant` | 0.5.3 | backend | todo |
-| `sessions_store_only_token_hashes` | 0.5.3 | backend | todo |
+| `an_identity_links_to_at_most_one_membership_per_tenant` | 0.5.3 | backend | done |
+| `sessions_store_only_token_hashes` | 0.5.3 | backend | done |
 | `id_tokens_from_another_issuer_are_refused` | 0.5.4 | backend | todo |
 | `id_tokens_for_another_audience_are_refused` | 0.5.4 | backend | todo |
 | `a_mismatched_nonce_is_refused` | 0.5.4 | backend | todo |

@@ -90,7 +90,7 @@ Severity describes potential release impact, not a demonstrated production explo
 | DB-13 high / gap | Contract has signedAt/status but no envelope, signatory or evidence relation (`backend/prisma/schema.prisma:609`, `:626`, `:640`). Add signature evidence before enabling SIGNED; require approved signature policy. Do not fabricate signed evidence from timestamps. | 1.4.5; provider integration 3.5.1 |
 | DB-14 high / defect | Decimal money scale is two places across contracts/training/enrollment; enrollment has no captured currency (`backend/prisma/schema.prisma:616`, `:621`, `:825`, `:898`). Standardize Decimal(19, 4), explicit currency/exponent validation, denomination snapshot and nonnegative checks. Existing two-place values cannot recover already-rounded precision. **Done in `0.4.7`** (Players_Platform_Backend#89): every money column is NUMERIC(19,4) beside a currency of `currency_definitions`, and an enrollment's payment records its own currency. The database checks against the exponent followed in `0.4.10` (Players_Platform_Backend#96). | 0.4.7; snapshots 1.4.1, 2.2.4 |
 | DB-15 high / defect | Calendar dates and instants are undifferentiated DateTime; migrations use TIMESTAMP(3) without timezone (`backend/prisma/schema.prisma:480`, `:611`; `backend/prisma/migrations/20260506200624_init/migration.sql:136`, `:214`, `:228`). Add DATE for civil dates, TIMESTAMPTZ for instants, and explicit historical timezone conversion plan. **Done in `0.4.8`** (Players_Platform_Backend#91): 21 civil columns are DATE and every instant is timestamptz(3), converted as UTC, the provenance of every value the application wrote (OPEN-11). | 0.4.1, 0.4.8 |
-| DB-16 high / gap | Tenant-owned User with one role has no provider identity or durable sessions (`backend/prisma/schema.prisma:323`, `:330`); refresh verified a JWT and created another access token without session state (`backend/src/modules/auth/application/use-cases/refresh-token.usecase.ts:16`); since `0.1.6` a placeholder session guard answers 401 on every non-public route (tip `backend/src/common/guards/session.guard.ts:25`). Add Identity and revocable server-side sessions; preserve User IDs as memberships. | 0.5.3, 0.5.6 |
+| DB-16 high / gap | Tenant-owned User with one role has no provider identity or durable sessions (`backend/prisma/schema.prisma:323`, `:330`); refresh verified a JWT and created another access token without session state (`backend/src/modules/auth/application/use-cases/refresh-token.usecase.ts:16`); since `0.1.6` a placeholder session guard answers 401 on every non-public route (tip `backend/src/common/guards/session.guard.ts:25`). Add Identity and revocable server-side sessions; preserve User IDs as memberships. **`0.5.3`'s part done** (Players_Platform_Backend#100): Identity, the membership's link to it and UserSession exist; `0.5.6` makes sessions authenticate requests. | 0.5.3, 0.5.6 |
 | DB-17 high / gap | Player and User have no account/guardian ownership relation (`backend/prisma/schema.prisma:371`, `:509`); permissions merely comment "own"/"linked" (`backend/src/modules/users/application/services/permission.service.ts:223`). Add PlayerAccountLink and GuardianLink with scope, validity and audited approval; no player/guardian portal until present. | 0.6.5, 1.2.3 |
 | DB-18 high / defect | LegalNote defaults `isInternal=false` (`backend/prisma/schema.prisma:1001`), while ticket lacks an explicit confidential visibility class (`backend/prisma/schema.prisma:959`). Default restricted; record audience explicitly, avoid automatic public-to-requester notes. Existing rows require owner classification, not automatic relabeling. **Default done in `0.4.10`** (Players_Platform_Backend#96): a new note is internal unless its author says otherwise; existing notes kept their value. The ticket's class and each note's audience remain. | 0.4.10; 1.5.1, 1.5.3 |
 | DB-19 high / gap | File URL/size/mime appear separately on Document, PlayerMedia, ContractVersion and Message (`backend/prisma/schema.prisma:448`, `:538`, `:670`, `:1270`); no quarantine/hash/object-version state accompanies these shapes. Consolidate FileObject metadata and typed references; no stored permanent public URL. | 0.8.2, 0.8.4; domain owners in the eight-column map |
@@ -164,20 +164,23 @@ UUID v4 remains the ordinary default. `0.4.11` changes AuditLog to Prisma `@defa
 
 ### Identity, memberships and sessions
 
-`0.5.3` creates the following minimum model. Signatures enumerate stored fields and constraints; all tenant tables also get RLS/grants/catalog tests in that migration.
+`0.5.3` created the following model (Players_Platform_Backend#100). Signatures enumerate stored fields and constraints; the tenant table got its RLS, grants and catalog tests in that migration, and the global `identities` its narrowed grants. `User` takes its `revision` with its own domain step, as every editable aggregate does (`0.3.6`).
 
 ```text
-Identity(id UUID, issuer TEXT, subject TEXT, createdAt TIMESTAMPTZ)
-  UNIQUE(issuer, subject)
-User(existing id, tenantId, identityId UUID?, normalizedEmail, role, isActive, revision, ...)
-  UNIQUE(tenantId, identityId), UNIQUE(tenantId, normalizedEmail)
+Identity(id UUID, issuer VARCHAR(500), subject VARCHAR(255), createdAt TIMESTAMPTZ)
+  UNIQUE(issuer, subject)        -- global: the runtime role reads and adds, never updates or deletes
+User(existing id, tenantId, identityId UUID?, normalizedEmail, role, isActive, ...)
+  UNIQUE(identityId, tenantId), UNIQUE(tenantId, normalizedEmail)
   UNIQUE(id, tenantId, identityId); FK identityId -> Identity.id
-UserSession(id UUID, tokenHash BYTEA UNIQUE, tenantId, userId, identityId,
-  issuer, subject, providerSid?, acr?, amr TEXT[], authTime TIMESTAMPTZ,
+UserSession(id UUIDv7, tokenHash BYTEA, tenantId, userId, identityId,
+  issuer, subject, providerSid?, acr?, amr VARCHAR(64)[], authTime TIMESTAMPTZ,
   createdAt, lastSeenAt, idleExpiresAt, absoluteExpiresAt, revokedAt?, revokeReason?,
   revision)                      -- no CSRF column: the token is derived by HMAC (0.5.6)
   FK(userId, tenantId, identityId) -> User(id, tenantId, identityId)
-  UNIQUE(id, tenantId); INDEX(tenantId, identityId, providerSid)
+  UNIQUE(tenantId, tokenHash), UNIQUE(id, tenantId)
+  INDEX(tenantId, userId), INDEX(tenantId, identityId, providerSid)
+  CHECK tokenHash is 32 bytes (a SHA-256 digest); idleExpiresAt <= absoluteExpiresAt;
+        revokedAt and revokeReason set together; revision >= 1
 -- login attempts are not a table: 0.5.5 keeps {state, nonce, PKCE verifier, tenant, returnTo,
 -- browser binding} in Valkey for ten minutes, consumed once; losing one only aborts a sign-in
 Invitation(id UUID, tenantId, normalizedEmail, rolePolicyKey, tokenHash UNIQUE NULL,   -- set by the delivery handler
@@ -240,7 +243,7 @@ CREATE TRIGGER players_tenant_immutable BEFORE UPDATE ON players
   EXECUTE FUNCTION refuse_tenant_change('tenant_id');
 ```
 
-`tenant_directory` (`id`, `slug`, `domain`, `is_active`) is the only cross-tenant read: `SELECT` for the runtime role, and for the registry role once `0.7.6` creates it. Reference data (`permissions`, `role_permissions`) is read-only to the runtime role, and the migration history (`_prisma_migrations`) is the migrator's alone.
+`tenant_directory` (`id`, `slug`, `domain`, `is_active`) is the only cross-tenant read: `SELECT` for the runtime role, and for the registry role once `0.7.6` creates it. Reference data (`permissions`, `role_permissions`) is read-only to the runtime role, and the migration history (`_prisma_migrations`) is the migrator's alone. Identities (`0.5.3`) belong to no tenant: the runtime role reads them and adds them, and never updates or deletes one.
 
 ```ts
 export type TenantTransaction = Prisma.TransactionClient; // alias, not a wrapper
