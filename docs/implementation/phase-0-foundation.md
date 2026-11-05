@@ -1044,7 +1044,15 @@ the real guards.
 
 ### 0.5.7 — Sign-out, back-channel logout and session management
 **Repo:** backend · **Size:** M · **Depends on:** `0.5.6` · **Requirements:** SR-AUTH-007
-**Files:** `src/modules/identity/presentation/auth.controller.ts`, `src/modules/identity/application/*.usecase.ts`, `test/auth/session-management.e2e-spec.ts` (new)
+**Files:** `src/modules/identity/presentation/{auth.controller,dto/session-management.dto}.ts`,
+`src/modules/identity/application/use-cases/{sign-out,own-sessions,backchannel-logout}.usecase.ts` (new),
+`src/modules/identity/application/ports/{own-sessions,logout-token-replays,identity-provider}.port.ts`,
+`src/modules/identity/infrastructure/repositories/own-session.repository.ts` (new),
+`src/modules/identity/infrastructure/valkey/{identity-valkey,valkey-logout-token-replays,valkey-sign-in-attempts}.ts`,
+`src/modules/identity/infrastructure/keycloak/{oidc-relying-party,keycloak-identity-provider}.ts`,
+`src/common/tenancy/auth-bootstrap.ts`, `src/common/validation/schemas.ts` (`cursorPaging`), `openapi/openapi.json`,
+`test/harness/session.ts`, `test/identity/identity-provider.integration-spec.ts`, `test/auth/session-management.e2e-spec.ts`
+(new), and the route inventories (`test/auth/retirement.e2e-spec.ts`, `test/platform/versioning.e2e-spec.ts`)
 `POST /api/v1/auth/logout` revokes the session, clears the cookie with its original attributes and
 returns the provider's end-session URL; `POST /api/v1/auth/logout-all` revokes every session of the
 member; `GET /api/v1/auth/sessions` and `DELETE /api/v1/auth/sessions/{id}` manage one's **own** sessions
@@ -1054,6 +1062,23 @@ sessions. **The exposure window, stated:** app-side revocation and deactivation 
 provider-side changes (a disabled account, a reset) reach Sadara through a back-channel event, and if that
 event is lost, at the session's idle or absolute expiry at the latest. The owner accepts this window
 (OPEN); offboarding is therefore done in Sadara, which is immediate.
+As built: the sessions end in PostgreSQL first (`SIGN_OUT`, `SIGN_OUT_EVERYWHERE`, `REVOKED_BY_MEMBER`); the
+end-session URL returns to `https://{host}/`, which the realm registers per host (`0.5.1`), and names the
+client, since no ID token is kept; if the provider does not answer it is `null` and the sign-out holds.
+"Everywhere" is the member's membership of this tenant: the same person's membership of another tenant
+keeps its sessions. The list shows a session's id, its sign-in and last use, its expiries, its `acr` and
+whether it is this browser's, by cursor (`0.3.5`), the cursor bound to its member; ending this browser's
+own session clears its cookie. Back-channel logout is public — the signed token is its proof, and a test
+holds it to being the only public write, since the CSRF guard exempts public routes. The adapter (`0.5.4`)
+now refuses a logout token older than five minutes or issued in the future, and returns its issuer,
+`jti` and `iat`; the `jti` is recorded in Valkey with `SET NX` for ten minutes, and released if ending
+the sessions fails, so the provider may retry. A named subject is resolved to its identity first, so each
+tenant's lookup is the `(tenant_id, identity_id, provider_sid)` index; every tenant is visited, switched
+off or not, each in its own transaction; a token naming only a `sid` ends that session, one naming
+neither ends nothing. A refused or replayed token is `400` on `/logout_token`, as OpenID Connect
+Back-Channel Logout 1.0 (2.8) asks. The identity module shares one Valkey connection. The three
+addresses the retired credential system used (`POST /auth/logout`, `POST /auth/logout-all`,
+`GET /auth/sessions`) return as session routes, which the retirement test (`0.1.6`) names explicitly.
 **Tests:** `logout_revokes_the_session_server_side` · `logout_everywhere_revokes_every_session` · `a_member_cannot_revoke_another_members_session` · `a_valid_back_channel_logout_revokes_matching_sessions` · `a_forged_or_replayed_logout_token_is_refused`
 **Verify:** `just test-e2e -- test/auth/session-management.e2e-spec.ts`
 **Done when:** the five tests pass.

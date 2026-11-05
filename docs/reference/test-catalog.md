@@ -158,11 +158,11 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `a_cross_site_fetch_is_refused_even_with_the_token` | 0.5.6 | backend | done |
 | `a_revoked_session_fails_on_the_next_request` | 0.5.6 | backend | done |
 | `a_deactivated_member_loses_access_on_the_next_request` | 0.5.6 | backend | done |
-| `logout_revokes_the_session_server_side` | 0.5.7 | backend | todo |
-| `logout_everywhere_revokes_every_session` | 0.5.7 | backend | todo |
-| `a_member_cannot_revoke_another_members_session` | 0.5.7 | backend | todo |
-| `a_valid_back_channel_logout_revokes_matching_sessions` | 0.5.7 | backend | todo |
-| `a_forged_or_replayed_logout_token_is_refused` | 0.5.7 | backend | todo |
+| `logout_revokes_the_session_server_side` | 0.5.7 | backend | done |
+| `logout_everywhere_revokes_every_session` | 0.5.7 | backend | done |
+| `a_member_cannot_revoke_another_members_session` | 0.5.7 | backend | done |
+| `a_valid_back_channel_logout_revokes_matching_sessions` | 0.5.7 | backend | done |
+| `a_forged_or_replayed_logout_token_is_refused` | 0.5.7 | backend | done |
 | `a_privileged_member_without_mfa_gets_no_session` | 0.5.8 | backend | todo |
 | `a_sensitive_action_requires_recent_authentication` | 0.5.8 | backend | todo |
 | `step_up_upgrades_the_existing_session` | 0.5.8 | backend | todo |
