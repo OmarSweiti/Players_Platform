@@ -835,7 +835,9 @@ origin as the web app ([ADR-0003](../adr/0003-browser-sessions.md)); no provider
 
 ### 0.5.1 — The Keycloak realm as code
 **Repo:** umbrella · **Size:** M · **Depends on:** `0.2.1` · **Requirements:** SR-AUTH-008, SR-AUTH-004
-**Files:** `infra/keycloak/realm-sadara.json` (new), `infra/keycloak/test-realm.sh` (new), `infra/compose.yaml`
+**Files:** `infra/keycloak/realm-sadara.json` (new), `infra/keycloak/blocked-passwords.txt` (new),
+`infra/keycloak/test-realm.sh` (new), `infra/keycloak/README.md`, `infra/compose.yaml`, `infra/.env.example`,
+`infra/proxy/Caddyfile`, `justfile` (`realm-reset`)
 The realm is a reviewed file, imported at start. Client `sadara-api`: confidential, standard flow only,
 **PKCE S256 required**, exact redirect and post-logout URIs per tenant host, back-channel logout URL
 with session required. Authentication: password policy length ≥ 12 with no composition rules and a
@@ -846,6 +848,16 @@ mail to Mailpit. Capabilities the pinned release does not provide (for example a
 recorded, not assumed.
 The realm stores its login and admin events — failed sign-ins, lockouts, MFA changes — for a stated
 retention, so that `0.7.3` can import them (DB-61).
+As built: the client secret is a placeholder the import resolves from `infra/.env`
+(`SADARA_API_CLIENT_SECRET`); the redirect URIs are `https://{host}/api/v1/auth/callback` and the post-logout
+URIs `https://{host}/` for each host of the proxy's Caddyfile; back-channel logout goes to the API on this
+machine. The blocked list is the 12-character-and-longer entries of the NCSC's 100,000 most-used passwords
+(SecLists, pinned; provenance in the README). The lockout is Keycloak's default temporary one (30 failures,
+waits from 60 s to 15 minutes), within NIST SP 800-63B's limit. Level 1 lasts 12 hours (the session's
+absolute lifetime, OPEN-02), level 2 five minutes (the step-up window). Events are kept without expiry
+(OPEN-06). Keycloak 26.7.4 has an `amr` mapper; the realm asserts assurance through `acr` instead. Keycloak
+imports a realm only when it is missing, so `just realm-reset` starts Keycloak fresh on a changed file.
+`test-realm.sh` holds ten checks, the three named tests among them.
 **Tests:** `the_api_client_requires_pkce` · `brute_force_detection_is_enabled` · `mfa_maps_to_assurance_level_2`
 **Verify:** `just up && bash infra/keycloak/test-realm.sh`
 **Done when:** the realm imports on a fresh stack and the script proves each setting from the running
@@ -853,13 +865,24 @@ server's admin API, not from the file.
 
 ### 0.5.2 — Resolve the tenant from the host
 **Repo:** backend · **Size:** S · **Depends on:** `0.4.5` · **Requirements:** —
-**Files:** `src/common/tenancy/tenant-resolver.ts` (new), `src/config/app.config.ts`, `test/auth/tenant-resolution.e2e-spec.ts` (new)
+**Files:** `src/common/tenancy/tenant-resolver.ts` (new), `src/common/tenancy/tenant-resolver.spec.ts` (new),
+`src/config/env.schema.ts`, `src/config/env.schema.spec.ts`, `.env.example`,
+`src/infrastructure/prisma/prisma.module.ts`, `test/auth/tenant-resolution.e2e-spec.ts` (new)
 Before anyone is signed in, the tenant comes from the host, read through the `tenant_directory` view:
 an exact `Tenant.domain`, else `{slug}.{APEX_DOMAIN}`; the single-agency launch may map an **explicitly
 allowlisted** host to `DEFAULT_TENANT_SLUG`, and every other host is refused. The host is taken from a
 forwarded header only when the request came through the configured trusted proxy. An inactive tenant is
 refused, and an unknown host looks exactly like "no account here". The resolved tenant scopes the
 sign-in transaction and the membership lookup; after sign-in the session is the only source of tenant.
+As built: `TenantResolver.resolve(request)` reads the host Express reads — `X-Forwarded-Host` only from a
+peer `TRUSTED_PROXIES` names (`0.3.8`) — in lower case, without the port or a trailing dot; anything that
+is not a host name resolves to nothing. The slug is one label under `APEX_DOMAIN`, never two. "No account
+here" is `NoAccountHereError`, an ordinary 404 `NOT_FOUND` that never repeats the host; `0.5.5` gives a
+person with no membership the same answer. The settings live in `src/config/env.schema.ts` beside every
+other variable, not in an `app.config.ts`: `APEX_DOMAIN` (`localhost` locally), and `DEFAULT_TENANT_SLUG`
+with `DEFAULT_TENANT_HOSTS`, which must be set together or the API refuses to boot. An empty `NAME=`
+counts as unset, and a setting that fails its pattern says what the pattern wants. Until sign-in exists,
+the e2e test asks the resolver through a test-only probe route.
 **Tests:** `sign_in_uses_the_tenant_of_the_host` · `an_unknown_host_looks_like_no_account` · `an_inactive_tenant_cannot_sign_in`
 **Verify:** `just test-e2e -- test/auth/tenant-resolution.e2e-spec.ts`
 **Done when:** the three tests pass on `sadara.localhost` and `other.localhost`.
