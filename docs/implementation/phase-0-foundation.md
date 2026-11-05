@@ -961,7 +961,14 @@ the compose Keycloak.
 
 ### 0.5.5 — Sign-in through the API: authorization code with PKCE
 **Repo:** backend · **Size:** L · **Depends on:** `0.5.2`, `0.5.4` · **Requirements:** SR-CORE-001
-**Files:** `src/modules/identity/presentation/auth.controller.ts` (new), `src/modules/identity/application/sign-in.usecase.ts` (new), `test/auth/sign-in.e2e-spec.ts` (new)
+**Files:** `src/modules/identity/presentation/{auth.controller,dto/sign-in.dto}.ts` (new),
+`src/modules/identity/application/use-cases/sign-in.usecase.ts` (new), `src/modules/identity/application/ports/sign-in-attempts.port.ts`
+(new), `src/modules/identity/infrastructure/valkey/valkey-sign-in-attempts.ts` (new),
+`src/modules/identity/domain/{return-path,secrets,session-lifetime}.ts` (new), `src/modules/identity/identity.module.ts`,
+`src/common/tenancy/auth-bootstrap.ts` (new), `src/infrastructure/prisma/prisma.module.ts`,
+`src/common/security/session-cookies.ts` (new), `src/common/openapi/{responses,contract}.ts` (`@Redirects`),
+`openapi/openapi.json`, `test/harness/app.ts`, `test/auth/sign-in.e2e-spec.ts` (new), and the route inventories that
+now hold sign-in's routes (`test/auth/retirement.e2e-spec.ts`, `test/platform/{versioning,contract}.e2e-spec.ts`)
 `GET /api/v1/auth/login?returnTo=` stores a one-time login transaction (state, nonce, PKCE verifier,
 tenant, validated same-origin `returnTo`) in Valkey for ten minutes — losing it only aborts a sign-in —
 and **binds it to the initiating browser** with a short-lived `__Host-Http-sadara_preauth` cookie (HttpOnly,
@@ -973,6 +980,23 @@ host's tenant**: none, archived or inactive means a refusal page and no session 
 the browser to `returnTo`. Both routes are in the `auth` rate-limit category (`0.3.8`): the guard counts by
 address, and the callback also counts by account, through `RateLimiter.take('auth', 'account:<id>')`, once
 the ID token names the identity. Authenticating later requests with it, expiry and CSRF are `0.5.6`.
+As built: both routes answer a `303` with `Cache-Control: no-store`; the contract declares it with
+`@Redirects` (a `Location`, no body), the one success that is not `{ data }`. The attempt is keyed in
+Valkey by the SHA-256 of its state and taken with `GETDEL`; it holds the digest of the pre-auth cookie,
+never its value, and a browser that already holds a pre-auth cookie keeps it, so sign-ins begun in two
+tabs both finish. The callback checks, in order, the pre-auth cookie, the state, the cookie's digest
+(constant-time), the host's tenant against the attempt's, then exchanges the code; it clears the pre-auth
+cookie whatever the outcome. An ID token without `auth_time` is refused, since `0.5.8` measures recent
+authentication from it; the account counted is the digest of issuer and subject. The membership is read,
+and the session opened, in one transaction of the host's tenant by `AuthBootstrap` (`src/common/tenancy`),
+the narrow pre-session access [architecture](../reference/architecture.md) calls AuthBootstrapRepository:
+it selects authentication fields only, mints no context, and a module still cannot reach the root client.
+The session cookie holds 256 random bits for 12 hours; the row holds its SHA-256, the provider's `sid`,
+`acr`, `amr` and `auth_time`, idle expiry at 30 minutes and absolute at 12 hours. The refusal page is the
+`404` "no account here" problem `0.5.2` gives an unknown host; the web app's page comes with `0.9.5`. A
+return path is a path on this origin: one leading `/`, no backslash, white space or control character,
+at most 2,048 characters, still on this origin once resolved. A browser that signs in again gets a new
+session; the one its old cookie named expires idle, and revoking it belongs to `0.5.7`/`0.5.8`.
 **Tests:** `a_member_signs_in_end_to_end` · `a_non_member_gets_no_session` · `a_replayed_or_mismatched_state_is_refused` · `a_callback_from_another_browser_is_refused` · `return_to_cannot_leave_the_origin`
 **Verify:** `just test-e2e -- test/auth/sign-in.e2e-spec.ts`
 **Done when:** the five tests pass against the test issuer — including a login-CSRF attempt, in which a
