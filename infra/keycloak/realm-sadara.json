@@ -151,6 +151,27 @@
       "attributes": {
         "use.refresh.tokens": "false"
       }
+    },
+    {
+      "clientId": "sadara-provisioner",
+      "name": "Sadara tenant provisioning",
+      "description": "The provisioning command's service account (0.5.9): it registers a tenant's hosts on the sign-in client, and manages clients and nothing else; the running API never holds it",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "${SADARA_PROVISIONER_CLIENT_SECRET}",
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "consentRequired": false,
+      "frontchannelLogout": false,
+      "redirectUris": [],
+      "webOrigins": [],
+      "attributes": {
+        "use.refresh.tokens": "false"
+      }
     }
   ],
 
@@ -161,6 +182,13 @@
       "serviceAccountClientId": "sadara-admin",
       "realmRoles": [],
       "clientRoles": { "realm-management": ["manage-users"] }
+    },
+    {
+      "username": "service-account-sadara-provisioner",
+      "enabled": true,
+      "serviceAccountClientId": "sadara-provisioner",
+      "realmRoles": [],
+      "clientRoles": { "realm-management": ["manage-clients"] }
     }
   ]
 }
