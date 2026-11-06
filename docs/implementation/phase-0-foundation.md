@@ -1121,8 +1121,15 @@ level 2, as sign-in requires.
 Keycloak.
 
 ### 0.5.9 — The tenant provisioning command
-**Repo:** backend · **Size:** M · **Depends on:** `0.5.4` · **Requirements:** BR-OBJ-08
-**Files:** `src/cli/provision-tenant.ts` (new), `package.json` (`tenant:provision`), `test/cli/provision-tenant.e2e-spec.ts` (new)
+**Repo:** backend + umbrella · **Size:** M · **Depends on:** `0.5.4` · **Requirements:** BR-OBJ-08
+**Files:** backend `src/cli/provision-tenant.ts` (new), `package.json` (`tenant:provision`),
+`src/modules/platform/{provisioning.module,application/ports/provisioning-records.port,application/use-cases/provision-tenant.usecase,infrastructure/repositories/provisioning.repository}.ts`
+(new), `src/modules/identity/identity-admin.module.ts` (new), `src/modules/identity/application/ports/provider-clients.port.ts` (new),
+`src/modules/identity/application/ports/identity-provider.port.ts` (`findAccount`),
+`src/modules/identity/infrastructure/keycloak/{keycloak-admin-api,keycloak-provider-clients}.ts` (new),
+`src/modules/identity/infrastructure/keycloak/keycloak-identity-provider.ts`, `src/config/env.schema{,.spec}.ts`, `.env.example`,
+`eslint.config.mjs` (a context minter), `vitest.config.mts`, `test/cli/provision-tenant.keycloak-spec.ts` (new); umbrella
+`infra/keycloak/{realm-sadara.json,test-realm.sh,README.md}`, `infra/compose.yaml`, `infra/.env.example`
 A command, not an endpoint, and an audited platform operation: it creates the tenant and its domain,
 registers the tenant's redirect URIs with the provider, creates the owner's provider account with the
 required actions (verify email, set password, configure MFA), links the identity to an `OWNER`
@@ -1132,8 +1139,33 @@ per slug.
 npm run tenant:provision -- --slug sadara --name "Sadara Sports Agency" --domain sadara.example --owner-email owner@sadara.test
 ```
 The slug and domain are stored in lower case (DB-55).
+As built: the command is the third context minter `0.4.3` allows, listed in `eslint.config.mjs`; its work
+is `ProvisionTenantUseCase` in a `platform` module, which `ProvisioningModule` composes with the database
+and the provider's administration only — no routes, sessions or Valkey. Arguments are parsed strictly:
+an option naming a password, a secret or a credential is refused (exit 2) before anything is read, its
+value never repeated, and every other unknown option or stray value is refused too. Beyond the plan,
+`--locale ar|en` sets the tenant's language and the setup email's, `--resend-setup-email` sends it again,
+and `--domain` is optional when `APEX_DOMAIN` gives the host `{slug}.APEX_DOMAIN`. A membership already
+holding the owner's address must be the owner's identity's, as `OWNER`, checked before the provider is
+touched so that a refusal leaves nothing there; one with no identity is never linked by address alone
+(`0.5.3`). Each host is registered on `sadara-api` by its exact callback and post-logout address, never a
+wildcard, by read-and-replace as Keycloak's admin API requires (two runs at once could race; a rerun
+repairs it). That needs `manage-clients`, which the API's account deliberately lacks, so the umbrella
+adds `sadara-provisioner`, a service account holding only that role, which the command alone uses
+(`OIDC_PROVISIONER_CLIENT_ID`, `OIDC_PROVISIONER_CLIENT_SECRET`; the API neither reads nor requires them);
+`test-realm.sh` proves its reach. The role reaches every client in the realm; fine-grained admin
+permissions could narrow it later. The admin-API plumbing — token, one renewal, 10 s timeout, no redirect
+— is `KeycloakAdminApi`, shared with `sadara-admin`. The owner's account is found by exact address or
+created with verify email, set password and configure OTP, never a credential; the identity, the
+membership and one `tenant.provisioned` audit entry (what changed; no address, no name) are written in
+one transaction, and only when something changed. The setup email goes when the account is made, or on
+request. The report is JSON without the address; exit 1 is a failed operation, whose message holds no
+value, and a rerun finishes what it left. The Done-when needs the compose Keycloak, which CI does not
+have, so the tests are a `keycloak` project spec, which now has a schema of its own; a fourth,
+`provisioning_never_links_a_membership_by_address_alone`, covers the membership check. Keycloak's
+default profile asks the new owner for a name at their first sign-in (`0.5.10`).
 **Tests:** `provisioning_creates_a_tenant_and_an_invited_owner` · `provisioning_is_idempotent_per_slug` · `provisioning_never_accepts_a_password`
-**Verify:** `just test-e2e -- test/cli/provision-tenant.e2e-spec.ts`
+**Verify:** with the stack up, `bash -c 'source ./scripts/test-database.sh && npx vitest run --project keycloak test/cli'`
 **Done when:** the three tests pass against the compose Keycloak.
 
 ### 0.5.10 — Invitations

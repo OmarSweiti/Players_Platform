@@ -166,9 +166,9 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `a_privileged_member_without_mfa_gets_no_session` | 0.5.8 | backend | done |
 | `a_sensitive_action_requires_recent_authentication` | 0.5.8 | backend | done |
 | `step_up_upgrades_the_existing_session` | 0.5.8 | backend | done |
-| `provisioning_creates_a_tenant_and_an_invited_owner` | 0.5.9 | backend | todo |
-| `provisioning_is_idempotent_per_slug` | 0.5.9 | backend | todo |
-| `provisioning_never_accepts_a_password` | 0.5.9 | backend | todo |
+| `provisioning_creates_a_tenant_and_an_invited_owner` | 0.5.9 | backend + umbrella | done |
+| `provisioning_is_idempotent_per_slug` | 0.5.9 | backend + umbrella | done |
+| `provisioning_never_accepts_a_password` | 0.5.9 | backend + umbrella | done |
 | `accepting_binds_the_invited_role_to_the_signed_in_identity` | 0.5.10 | backend | todo |
 | `an_invitation_works_once` | 0.5.10 | backend | todo |
 | `an_expired_invitation_is_refused` | 0.5.10 | backend | todo |
