@@ -174,8 +174,8 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `an_expired_invitation_is_refused` | 0.5.10 | backend | done |
 | `an_admin_cannot_invite_above_their_role` | 0.5.10 | backend | done |
 | `invitation_tokens_are_stored_hashed` | 0.5.10 | backend | done |
-| `the_seed_is_idempotent` | 0.5.11 | backend + umbrella + frontend | todo |
-| `seed_data_uses_only_reserved_domains` | 0.5.11 | backend + umbrella + frontend | todo |
+| `the_seed_is_idempotent` | 0.5.11 | backend + umbrella + frontend | done |
+| `seed_data_uses_only_reserved_domains` | 0.5.11 | backend + umbrella + frontend | done |
 | `every_catalog_entry_can_be_stored` | 0.6.1 | backend | todo |
 | `the_database_matrix_equals_the_code_matrix` | 0.6.1 | backend | todo |
 | `the_permission_sync_is_idempotent` | 0.6.1 | backend | todo |
