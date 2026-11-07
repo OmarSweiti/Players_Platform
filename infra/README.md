@@ -11,6 +11,7 @@ just logs [service] # follow the logs
 just down           # stop; every volume is kept
 just reset          # destroy the local state; keeps the certificate authority and the virus signatures
 just realm-reset    # start Keycloak fresh, importing infra/keycloak/realm-sadara.json again (its users go too)
+just dev-cookie coach@sadara.test > jar   # sign a development member in, headlessly: a curl cookie jar for the API
 ```
 
 | Service | Image (pinned by digest) | On this machine | For |
