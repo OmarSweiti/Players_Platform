@@ -176,9 +176,9 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `invitation_tokens_are_stored_hashed` | 0.5.10 | backend | done |
 | `the_seed_is_idempotent` | 0.5.11 | backend + umbrella + frontend | done |
 | `seed_data_uses_only_reserved_domains` | 0.5.11 | backend + umbrella + frontend | done |
-| `every_catalog_entry_can_be_stored` | 0.6.1 | backend | todo |
-| `the_database_matrix_equals_the_code_matrix` | 0.6.1 | backend | todo |
-| `the_permission_sync_is_idempotent` | 0.6.1 | backend | todo |
+| `every_catalog_entry_can_be_stored` | 0.6.1 | backend | done |
+| `the_database_matrix_equals_the_code_matrix` | 0.6.1 | backend | done |
+| `the_permission_sync_is_idempotent` | 0.6.1 | backend | done |
 | `a_route_without_a_permission_or_public_fails_startup` | 0.6.2 | backend | todo |
 | `each_route_refuses_a_member_without_its_permission` | 0.6.2 | backend | todo |
 | `a_read_denied_by_policy_is_not_found` | 0.6.3 | backend | todo |
