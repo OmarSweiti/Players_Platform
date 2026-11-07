@@ -1170,7 +1170,13 @@ default profile asks the new owner for a name at their first sign-in (`0.5.10`).
 
 ### 0.5.10 — Invitations
 **Repo:** backend · **Size:** M · **Depends on:** `0.5.9`, `0.5.6`, `0.5.8` · **Requirements:** —
-**Files:** `prisma/schema.prisma` + migration `…_invitations`, `src/modules/users/**`, `test/users/invitations.e2e-spec.ts` (new)
+**Files:** `prisma/schema.prisma` + migrations `…_invitations` and `…_invite_permission`,
+`src/modules/users/{users.module,application/role-grants.policy{,.spec},application/ports/invitation-records.port,application/use-cases/{invite-member,manage-invitations,issue-invitation-token}.usecase,domain/invitation{,.spec},domain/email{,.spec},infrastructure/repositories/invitation.repository,presentation/invitations.controller,presentation/dto/invitation.dto}.ts`
+(new or changed), `src/modules/users/application/services/permission.service.ts`, `src/shared/constants/permissions.constants.ts`,
+`src/common/tenancy/auth-bootstrap.ts`, `src/modules/identity/{application/ports/sign-in-attempts.port,application/use-cases/sign-in.usecase,infrastructure/valkey/valkey-sign-in-attempts,presentation/auth.controller,presentation/dto/sign-in.dto}.ts`,
+`src/infrastructure/prisma/model-classification.ts`, `scripts/generate-rls.ts`, `openapi/openapi.json`,
+`test/db/{invitations,constraints,rls,time}.integration-spec.ts` (the first new), `test/legacy-modules/tenant-transaction.e2e-spec.ts`,
+`test/users/invitations.e2e-spec.ts` (new)
 `POST /api/v1/users/invitations` (`user.invite`, recent authentication) creates or finds the invitee's
 provider account and an `Invitation` — email, role, seven-day expiry. Its single-use token is generated
 **by the delivery handler at send time** (`0.7.8`), which stores only its hash and puts the raw value only
@@ -1182,6 +1188,39 @@ rate-limit category (`0.3.8`), counted by address and, once the invitation names
 list shows pending, accepted, expired and revoked.
 The invitation records the locale its email is written in: the inviter's choice, else the tenant's
 default (DB-68).
+As built: the plan gives no order for "above their own", and `ROLE_HIERARCHY` goes in `0.6.2` (DB-58
+forbids comparing by enum order), so `role-grants.policy.ts` writes one out: an owner grants any tenant
+role, another owner included; an administrator any but ownership; every other role nothing; nobody
+`SUPER_ADMIN`, which the request schema, the policy and a CHECK each refuse. The invitation stores a typed
+`role` where the schema contract wrote `rolePolicyKey`, until per-tenant roles (`4.1.4`). Inviting checks
+the grant, that no membership (archived ones included, `0.4.9`) holds the address and that no pending
+invitation names it, before the provider is asked for anything and again as the row is written; it finds
+or makes the invitee's provider account with verify email and set password, and a second factor for a
+privileged role (`0.5.8`), never a password. An expired open invitation is revoked when its address is
+invited again, and one open invitation per address is a partial unique index. `IssueInvitationToken` is
+what `0.7.8`'s delivery calls: 256 random bits at send time, only the SHA-256 digest stored, a new one
+replacing the last, and only for a pending invitation. Acceptance is a sign-in, so it lives in the
+identity module and `AuthBootstrap`, not only `src/modules/users/**`: `GET /api/v1/auth/login?invitation=`
+starts one only while the invitation is pending (else `404`), with `login_hint` and the invitation's
+language, the attempt keeping the digest, never the token; the callback counts the proven account
+(`0.5.5`'s count) and then `acceptInvitation` holds the row and binds the membership in one audited
+transaction only with the token, the provider's verified address and the inviter's authority, which is
+checked again at acceptance — an administrator demoted before their invitation is used no longer grants
+`ADMIN` ("active inviter authority", `domain-workflows.md`). A refusal changes nothing and answers `401`
+as any refused sign-in does. Two migrations, since PostgreSQL cannot use an enum value in the transaction
+that adds it: `…_invitations` adds `permission_action` `INVITE` and the table, and `…_invite_permission`
+writes `user.invite` for `OWNER` and `ADMIN`, the only permission row until `0.6.1` syncs the catalog.
+The row records the member it made as well as the identity, through the composite key to
+`users(id, tenant_id, identity_id)`; the runtime role cannot delete invitations, which the model
+classification now says with a `kept` class that `generate-rls` and the catalog tests read. Beyond the
+plan: a status filter on the list, and six more tests — the second factor, the inviter's authority, the
+token and verified address each required, the list and revoking, a taken address, recent authentication
+— with `invitations_hold_their_rules_in_the_database` for the CHECKs. CodeQL found `normalizeEmail`'s
+anchored trim quadratic on a run of spaces, which invitations now feed with untrusted input; it is a
+linear scan from each end with PostgreSQL's result. No email is sent yet: the invitation notice and the
+provider's setup email for a new invitee are both `0.7.8`'s, so until then an invitee is told nothing.
+The invitation carries no name, so Keycloak's default profile asks the invitee for one at the first
+sign-in, as it asks a provisioned owner (`0.5.9`).
 **Tests:** `accepting_binds_the_invited_role_to_the_signed_in_identity` · `an_invitation_works_once` · `an_expired_invitation_is_refused` · `an_admin_cannot_invite_above_their_role` · `invitation_tokens_are_stored_hashed`
 **Verify:** `just test-e2e -- test/users/invitations.e2e-spec.ts`
 **Done when:** the five tests pass.
