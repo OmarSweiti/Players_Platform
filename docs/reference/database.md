@@ -183,8 +183,17 @@ UserSession(id UUIDv7, tokenHash BYTEA, tenantId, userId, identityId,
         revokedAt and revokeReason set together; revision >= 1
 -- login attempts are not a table: 0.5.5 keeps {state, nonce, PKCE verifier, tenant, returnTo,
 -- browser binding} in Valkey for ten minutes, consumed once; losing one only aborts a sign-in
-Invitation(id UUID, tenantId, normalizedEmail, rolePolicyKey, tokenHash UNIQUE NULL,   -- set by the delivery handler
-  tokenIssuedAt?, invitedById, expiresAt, acceptedAt?, revokedAt?, acceptedIdentityId?)
+Invitation(id UUID, tenantId, email, normalizedEmail, role, locale,      -- 0.5.10 (Players_Platform_Backend#107)
+  tokenHash BYTEA?, tokenIssuedAt?,      -- set by the delivery handler
+  invitedById, expiresAt, acceptedAt?, acceptedMemberId?, acceptedIdentityId?, revokedAt?,
+  createdAt, updatedAt)                  -- role is typed until TenantRole (4.1.4); never deleted
+  FK(invitedById, tenantId) -> User(id, tenantId)
+  FK(acceptedMemberId, tenantId, acceptedIdentityId) -> User(id, tenantId, identityId)
+  UNIQUE(tenantId, tokenHash), UNIQUE(id, tenantId)
+  UNIQUE(tenantId, normalizedEmail) WHERE acceptedAt IS NULL AND revokedAt IS NULL
+  CHECK tokenHash is 32 bytes, set with tokenIssuedAt; acceptedAt, acceptedMemberId and
+        acceptedIdentityId set together; never both accepted and revoked; expiresAt > createdAt;
+        role <> SUPER_ADMIN; normalizedEmail is email's normal form
 ```
 
 Keep User IDs as tenant membership IDs; do not rename the underlying table merely to change vocabulary. Expand identityId nullable, link only through approved proof of issuer/subject, keep unlinked legacy accounts disabled, then enforce required identityId for active members. Preserve archived normalized-email reservations. Reactivation is an audited command, never automatic account linking. One identity can have multiple memberships; no email-only linking, merging, or role assignment from arbitrary IdP claims.

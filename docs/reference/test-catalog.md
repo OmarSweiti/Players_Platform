@@ -169,11 +169,11 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `provisioning_creates_a_tenant_and_an_invited_owner` | 0.5.9 | backend + umbrella | done |
 | `provisioning_is_idempotent_per_slug` | 0.5.9 | backend + umbrella | done |
 | `provisioning_never_accepts_a_password` | 0.5.9 | backend + umbrella | done |
-| `accepting_binds_the_invited_role_to_the_signed_in_identity` | 0.5.10 | backend | todo |
-| `an_invitation_works_once` | 0.5.10 | backend | todo |
-| `an_expired_invitation_is_refused` | 0.5.10 | backend | todo |
-| `an_admin_cannot_invite_above_their_role` | 0.5.10 | backend | todo |
-| `invitation_tokens_are_stored_hashed` | 0.5.10 | backend | todo |
+| `accepting_binds_the_invited_role_to_the_signed_in_identity` | 0.5.10 | backend | done |
+| `an_invitation_works_once` | 0.5.10 | backend | done |
+| `an_expired_invitation_is_refused` | 0.5.10 | backend | done |
+| `an_admin_cannot_invite_above_their_role` | 0.5.10 | backend | done |
+| `invitation_tokens_are_stored_hashed` | 0.5.10 | backend | done |
 | `the_seed_is_idempotent` | 0.5.11 | backend + umbrella + frontend | todo |
 | `seed_data_uses_only_reserved_domains` | 0.5.11 | backend + umbrella + frontend | todo |
 | `every_catalog_entry_can_be_stored` | 0.6.1 | backend | todo |

@@ -116,9 +116,9 @@ run early.
 stale.*
 
 <!-- plan:milestone:begin -->
-**Demo milestone** — 54 of 126 microsteps done; 424–848 engineering hours left before the reserve.
+**Demo milestone** — 55 of 126 microsteps done; 420–840 engineering hours left before the reserve.
 
-Next in build order (every dependency done): `0.5.10`, `0.6.1`, `0.7.1`, `0.7.7`, `0.8.1`, `0.10.2`.
+Next in build order (every dependency done): `0.5.11`, `0.6.1`, `0.7.1`, `0.7.7`, `0.8.1`, `0.10.2`.
 
 | Stage | Step | Title | Repo | Size | Status |
 |---|---|---|---|---|---|
@@ -175,7 +175,7 @@ Next in build order (every dependency done): `0.5.10`, `0.6.1`, `0.7.1`, `0.7.7`
 | E | 0.5.7 | Sign-out, back-channel logout and session management | backend | M | done |
 | E | 0.5.8 | MFA assurance for privileged roles; recent authentication for sensitive actions | backend | M | done |
 | E | 0.5.9 | The tenant provisioning command | backend + umbrella | M | done |
-| E | 0.5.10 | Invitations | backend | M | todo |
+| E | 0.5.10 | Invitations | backend | M | done |
 | E | 0.5.11 | Development identities and the synthetic seed | backend + umbrella + frontend | M | todo |
 | E | 0.6.1 | The permission catalog is code; the seed cannot crash | backend | M | todo |
 | E | 0.6.2 | Deny by default: every route declares its permission | backend | M | todo |
