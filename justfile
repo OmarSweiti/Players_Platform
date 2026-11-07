@@ -184,6 +184,28 @@ dev-ca-path:
       { echo "dev-ca-path: the proxy is not running — run just up first" >&2; exit 1; }
     echo "$PWD/infra/.local/dev-ca.crt"
 
+# Sign a development member in, headlessly, and print a curl cookie jar for the API: just dev-cookie coach@sadara.test > jar
+dev-cookie $member:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    # The member's password and authenticator secret are infra/.env's (0.5.11):
+    # handed to the script through its environment, never on a command line.
+    [ -f infra/.env ] || { echo "dev-cookie: infra/.env is missing — run just up" >&2; exit 1; }
+    [ -f frontend/scripts/dev-cookie.mts ] ||
+      { echo "dev-cookie: frontend/scripts/dev-cookie.mts is missing — the frontend pin predates 0.5.11: git submodule update" >&2; exit 1; }
+    setting() {
+      local value
+      value=$(sed -n "s/^$1=//p" infra/.env | tail -n 1)
+      case "$value" in \"*\" | \'*\') value=${value:1:${#value}-2} ;; esac
+      printf '%s' "$value"
+    }
+    ca=$(just dev-ca-path)
+    password=$(setting SADARA_DEV_MEMBER_PASSWORD)
+    otp=$(setting SADARA_DEV_OTP_SECRET)
+    cd frontend
+    SADARA_DEV_MEMBER_PASSWORD="$password" SADARA_DEV_OTP_SECRET="$otp" NODE_EXTRA_CA_CERTS="$ca" \
+      node scripts/dev-cookie.mts "$member"
+
 # The complete local gate: the CI checks, every guard, and a full-history secret scan
 pre-push: check guards
     gitleaks git --config .gitleaks.toml --redact=100 --no-banner --ignore-gitleaks-allow .

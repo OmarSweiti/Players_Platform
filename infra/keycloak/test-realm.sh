@@ -1,21 +1,23 @@
 #!/usr/bin/env bash
-# The sadara realm, proved from the running server (0.5.1, 0.5.4, 0.5.9; SR-AUTH-004, SR-AUTH-008).
+# The sadara realm, proved from the running server (0.5.1, 0.5.4, 0.5.9, 0.5.11; SR-AUTH-004, SR-AUTH-008).
 # Every setting is read back through Keycloak's admin API, never from
 # realm-sadara.json, and the rules that can be exercised are: an authorization
-# request without PKCE, passwords the policy must refuse, the Arabic login page.
+# request without PKCE, passwords the policy must refuse, the Arabic login page,
+# a development member's sign-in, with and without a second factor.
 # The expected values are the plan's, so a file that drifts from them fails here.
 #
 #   just up && bash infra/keycloak/test-realm.sh
 #   KEYCLOAK_URL=http://localhost:8181 bash infra/keycloak/test-realm.sh   another server
 #
 # It signs in to the master realm as the bootstrap admin, with the password in
-# infra/.env, which it never prints. It creates one throwaway user to try
-# passwords on, and deletes it again.
+# infra/.env, which it never prints, nor the development members' password and
+# authenticator secret. It creates one throwaway user to try passwords on, and
+# deletes it again.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 [ -f infra/.env ] || { echo "test-realm: infra/.env is missing — run just up" >&2; exit 2; }
 exec python3 -I - <<'PY'
-import json, os, re, secrets, sys, urllib.error, urllib.parse, urllib.request
+import base64, hashlib, hmac, http.cookiejar, json, os, re, secrets, struct, sys, time, urllib.error, urllib.parse, urllib.request, uuid
 
 def setting(name, default=None):
     """The last assignment of `name` in infra/.env, as Compose reads it."""
@@ -32,6 +34,27 @@ REALM = "sadara"
 CLIENT = "sadara-api"
 HOSTS = re.findall(r"^([a-z0-9.-]+(?:, [a-z0-9.-]+)*) \{", open("infra/proxy/Caddyfile").read(), re.M)
 HOSTS = sorted(h.strip() for line in HOSTS for h in line.split(","))
+
+# The development members (0.5.11): one per tenant role — the backend's
+# UserRole, less the platform's SUPER_ADMIN — in each tenant the proxy serves.
+# Each account's id is derived from its address, as the backend's seed derives
+# it too (src/database/development-data.ts), so the two agree without either
+# reading the other: RFC 9562's name-based UUIDv8, SHA-256 (its Appendix B.2).
+DEVELOPMENT_NAMESPACE = uuid.UUID("b17a1124-e87a-42a1-8686-85b091391c55")
+
+def development_id(name):
+    digest = bytearray(hashlib.sha256(DEVELOPMENT_NAMESPACE.bytes + name.encode()).digest()[:16])
+    digest[6] = (digest[6] & 0x0F) | 0x80
+    digest[8] = (digest[8] & 0x3F) | 0x80
+    return str(uuid.UUID(bytes=bytes(digest)))
+ROLES = [r for r in re.findall(r"^\s*([A-Z_]+)\b", re.search(
+    r"^enum UserRole \{(.*?)^\}", open("backend/prisma/schema.prisma").read(), re.S | re.M).group(1), re.M)
+         if r != "SUPER_ADMIN"]
+# The roles that hold no session without a second factor (0.5.8): their
+# accounts come with one, an authenticator already enrolled.
+PRIVILEGED = {"OWNER", "ADMIN", "LEGAL", "FINANCE_MANAGER", "MEDICAL", "PHYSIOTHERAPIST", "SPORTING_DIRECTOR"}
+MEMBERS = {"%s@%s.test" % (role.lower().replace("_", "-"), host.split(".")[0]): role
+           for host in HOSTS for role in ROLES}
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
     def redirect_request(self, *args, **kwargs):
@@ -309,12 +332,86 @@ def the_provisioning_account_manages_clients_only():
                        "/admin/realms/%s/events" % REALM: 403, "/admin/realms/master/clients": 403},
            "the service account's reach: %s" % answers)
 
+def development_members_one_per_role_in_each_tenant():
+    expect(len(ROLES) >= 17 and "OWNER" in ROLES, "the backend's roles were not read: %s" % ROLES)
+    expect(development_id("tenant:sadara") == "0b8bcd4b-0465-8de0-ae58-1b5acbb6c58e",
+           "the id rule is not the seed's: tenant:sadara gives %s" % development_id("tenant:sadara"))
+    for address, role in sorted(MEMBERS.items()):
+        found = admin("/users?exact=true&username=" + urllib.parse.quote(address))
+        expect(len(found) == 1, "no development account %s" % address)
+        user = found[0]
+        expect(user["id"] == development_id("account:" + address), "%s's id is not derived from its address" % address)
+        expect(user["email"] == address and user["emailVerified"] and user["enabled"],
+               "%s is not enabled with its address verified" % address)
+        expect(not user.get("requiredActions"), "%s must first %s" % (address, user.get("requiredActions")))
+        expect(user.get("firstName") and user.get("lastName"), "%s has no name: the first sign-in would ask" % address)
+        kinds = sorted(c["type"] for c in admin("/users/%s/credentials" % user["id"]))
+        expect(kinds == (["otp", "password"] if role in PRIVILEGED else ["password"]),
+               "%s, %s, holds %s" % (address, role, kinds))
+
+def totp(secret, at):
+    """RFC 6238 as Keycloak computes it: HMAC-SHA1 over the secret's UTF-8 bytes, 30 s, six digits."""
+    digest = hmac.new(secret.encode(), struct.pack(">Q", int(at // 30)), hashlib.sha1).digest()
+    offset = digest[-1] & 15
+    return "%06d" % ((struct.unpack(">I", digest[offset:offset + 4])[0] & 0x7FFFFFFF) % 1000000)
+
+def form_action(page):
+    match = re.search(r'<form[^>]*\baction="([^"]+)"', page or "")
+    expect(match, "no sign-in form on the page")
+    return match.group(1).replace("&amp;", "&")
+
+class LoopbackIsSecure(http.cookiejar.DefaultCookiePolicy):
+    """A browser treats http://localhost as a secure context, so Keycloak's Secure cookies go there too."""
+    def return_ok_secure(self, cookie, request):
+        return (urllib.parse.urlsplit(request.get_full_url()).hostname in ("localhost", "127.0.0.1")
+                or super().return_ok_secure(cookie, request))
+
+def sign_in(address, level):
+    """Through the realm's own forms, as a browser would: the redirect it ends with carries a code."""
+    jar = http.cookiejar.CookieJar(LoopbackIsSecure())
+    browser = urllib.request.build_opener(NoRedirect, urllib.request.HTTPCookieProcessor(jar))
+    def go(url, form=None):
+        data = urllib.parse.urlencode(form).encode() if form is not None else None
+        try:
+            response = browser.open(urllib.request.Request(url, data=data), timeout=30)
+            return response.status, response.headers, response.read().decode("utf-8", "replace")
+        except urllib.error.HTTPError as error:
+            return error.code, error.headers, error.read().decode("utf-8", "replace")
+    verifier = secrets.token_urlsafe(48)
+    challenge = base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).rstrip(b"=").decode()
+    callback = "https://%s/api/v1/auth/callback" % HOSTS[0]
+    query = dict(client_id=CLIENT, response_type="code", scope="openid", state="test-realm", redirect_uri=callback,
+                 code_challenge=challenge, code_challenge_method="S256", acr_values=level)
+    status, _, page = go("%s/realms/%s/protocol/openid-connect/auth?%s" % (BASE, REALM, urllib.parse.urlencode(query)))
+    expect(status == 200, "the sign-in page answered %s" % status)
+    status, headers, page = go(form_action(page), {"username": address,
+                                                   "password": setting("SADARA_DEV_MEMBER_PASSWORD") or ""})
+    for attempt in range(2):
+        if status != 200 or 'name="otp"' not in page:
+            break
+        # A code is good once: one already used waits for the next window.
+        status, headers, page = go(form_action(page), {"otp": totp(setting("SADARA_DEV_OTP_SECRET") or "", time.time())})
+        if status == 200 and 'name="otp"' in page and attempt == 0:
+            time.sleep(31 - time.time() % 30)
+    location = headers.get("Location") or ""
+    expect(status == 302 and location.startswith(callback + "?") and "code=" in location,
+           "%s at level %s did not sign in (%s)" % (address, level, status))
+
+def a_development_member_signs_in_with_infra_env_credentials():
+    # The password and the authenticator secret are infra/.env's, which the
+    # realm file reads: a placeholder left unresolved would fail here.
+    plain = next(a for a, r in sorted(MEMBERS.items()) if r not in PRIVILEGED)
+    privileged = next(a for a, r in sorted(MEMBERS.items()) if r in PRIVILEGED)
+    sign_in(plain, "1")
+    sign_in(privileged, "2")
+
 TESTS = [the_api_client_requires_pkce, the_client_secret_comes_from_the_environment,
          exact_redirect_and_logout_uris_per_tenant_host,
          brute_force_detection_is_enabled, the_password_policy_refuses_short_and_blocked_passwords,
          email_is_verified_and_sent_to_mailpit, mfa_maps_to_assurance_level_2,
          webauthn_and_passkeys_are_available_not_required, arabic_and_english, sign_in_events_are_stored,
-         the_admin_account_manages_users_only, the_provisioning_account_manages_clients_only]
+         the_admin_account_manages_users_only, the_provisioning_account_manages_clients_only,
+         development_members_one_per_role_in_each_tenant, a_development_member_signs_in_with_infra_env_credentials]
 
 failed = 0
 for test in TESTS:
