@@ -17,6 +17,9 @@ Read `docs/reference/database.md` and `docs/implementation/01-conventions.md#mig
 - **A data migration that writes tenant rows** lifts `FORCE ROW LEVEL SECURITY` on its table inside its
   own transaction and restores it before the transaction ends: the owner otherwise reads every row and
   writes none (`docs/reference/database.md`, "Database identities, grants and RLS").
+- **A change to the permission catalog or the default role matrix**
+  (`src/modules/users/domain/{permission-catalog,default-role-matrix}.ts`) ships a new migration carrying
+  `scripts/generate-permission-sync.ts`'s output as printed; the API refuses to boot until it is applied (`0.6.1`).
 - Partial indexes, CHECKs, policies, triggers and grants are hand-written SQL: comment them in
   `schema.prisma` and assert them with a catalog test — Prisma's drift check neither sees nor protects
   them. Do not enable the `partialIndexes` preview.
