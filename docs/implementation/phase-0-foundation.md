@@ -1256,7 +1256,7 @@ membership linked to another identity, and writes no audit entry, since this is 
 command refuses any argument and any `NODE_ENV` but `development` or `test`, composes only the
 configuration and the database, and mints its own contexts, so it is a fourth context minter in
 `eslint.config.mjs`. The old seed's call to `seedDefaultPermissions`, which crashes, goes with its tenants:
-`0.6.1` syncs the catalog into the seed, and until then `user.invite` (`0.5.10`'s migration) is the only
+`0.6.1` writes the catalog by migration, and until then `user.invite` (`0.5.10`'s migration) is the only
 permission row. A database seeded before this keeps the old rows until `just reset`. The frontend script
 is `dev-cookie.mts`, not `.ts`: the package declares no module type, so Node warned about a `.ts` file on
 every run. It requests the API's two legs from Node, verified against the proxy's certificate authority,
@@ -1283,9 +1283,14 @@ object policies in use cases, and confidential fields that never leave the serve
 
 ### 0.6.1 — The permission catalog is code; the seed cannot crash
 **Repo:** backend · **Size:** M · **Depends on:** `0.4.3` · **Requirements:** SR-ACL-004
-**Files:** `src/modules/users/domain/{permission-catalog,default-role-matrix}.ts` (new),
+**Files:** `src/modules/users/domain/{permission-catalog,default-role-matrix,catalog-differences}{,.spec}.ts` (new),
 `src/modules/users/application/services/permission.service.ts`, `src/shared/constants/permissions.constants.ts` (delete),
-`prisma/schema.prisma` + migration if enums change, `test/authz/catalog.integration-spec.ts` (new)
+`prisma/schema.prisma` + migrations `…_permission_catalog_types` and `…_permission_catalog`,
+`scripts/generate-permission-sync.ts` (new), `src/common/authz/permission-catalog-check.ts` (new), `src/app.module.ts`,
+`src/modules/users/{users.module,application/ports/permission-records.port,infrastructure/repositories/permission.repository}.ts`
+(new or changed), `src/common/{guards/roles.guard,decorators/permissions.decorator}.ts`, the medical, scouting and
+invitations controllers, `test/legacy-modules/tenant-transaction.e2e-spec.ts`, `eslint-suppressions.json`,
+`scripts/smoke-start.sh`, `test/authz/catalog.integration-spec.ts` (new)
 The seeding splits each name into enums that have no `REJECT`, `SUBMIT`, `VIEW`, `UPLOAD`, `SEND`,
 `ASSIGN_ROLE`, `SCOUTING.REPORT` or `PERFORMANCE` (`permission.service.ts:46–54`, called from
 `seed.ts:18`). Each catalog entry now declares its key, category, action and confidentiality explicitly
@@ -1294,6 +1299,30 @@ the default matrix sync in one transaction, idempotently; the API refuses to boo
 disagrees with the code. `SUPER_ADMIN: Object.values(PERMISSIONS)` (`permission.service.ts:93`) is gone.
 `role_permissions` stops deleting with its permission (`RESTRICT`), and nothing sorts or compares roles
 by enum order, which differs between the database and the schema (DB-53, DB-58).
+As built: the catalog is an object literal of the 64 legacy names, `user.invite` included, so no key can
+appear twice; each declares its category, its action, a short description and whether it is a confidential
+grant — the explicit permission `security-privacy.md`'s matrix requires before a confidential class is read,
+of which only `medical.view_confidential` exists yet. Viewing is `READ`, uploading and sending are `CREATE`
+and `user.assign_role` is `ASSIGN`; `REJECT`, `SUBMIT` and the `PERFORMANCE` category are new, in a
+migration of their own, since PostgreSQL cannot use an enum value in the transaction that adds it, which
+also makes `role_permissions → permissions` `RESTRICT`. The matrix is the legacy seed's, stored for the
+first time, less `SUPER_ADMIN`'s every permission and the owner's `medical.view_confidential`; the other
+medical cells are `0.6.8`'s. The sync is not the seed's: permissions are reference data that only the
+migrations write (`0.4.5`), so `scripts/generate-permission-sync.ts` prints the SQL that makes both tables
+the code's — upserting only what differs, granting the matrix and no more, removing an undeclared permission
+once nothing holds it — and `…_permission_catalog` carries it as printed, in its migration's transaction; a
+later catalog or matrix change ships a new migration with the script's output. The seed no longer touches
+permissions, so two seeds succeed on a fresh database. `PermissionCatalogCheck` reads both tables as the
+runtime role at boot and refuses to start the API on any difference, naming each; it fails closed, so an API
+that cannot read its database at boot does not start either. Permission checks read the stored matrix
+through a port and repository inside the member's tenant transaction, so no module reaches the root client
+and two ESLint bulk suppressions went; routes name catalog keys, so an undeclared permission does not
+compile. Nothing sorted or compared roles by enum order; `ROLE_HIERARCHY` numbers them explicitly and goes in
+`0.6.2`. CI's image test started the API on a database it never migrated, so `scripts/smoke-start.sh` now
+migrates it as the migrator (approved by the maintainer). Beyond the plan:
+`the_api_refuses_to_boot_when_the_database_is_not_the_code`, `the_runtime_role_cannot_change_the_catalog`
+and `a_permission_never_takes_its_grants_with_it`. The legacy scouting routes guard report reads with
+`report.view` though `scouting.report.read` exists; the rebuild (`1.11`) replaces those routes.
 **Tests:** `every_catalog_entry_can_be_stored` · `the_database_matrix_equals_the_code_matrix` · `the_permission_sync_is_idempotent`
 **Verify:** `just test-int -- catalog && just seed && just seed`
 **Done when:** the three tests pass and two consecutive seeds succeed on a fresh database.
