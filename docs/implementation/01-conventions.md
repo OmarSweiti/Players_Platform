@@ -32,8 +32,9 @@ classification), `0.10.2`.
 
 ### I-3 · Authentication is not authorization
 The identity provider proves who someone is; Sadara decides what they may do — on every protected
-action, on the server. A route declares its permission or is `@Public()`, or the application does not
-start. Hidden navigation is UX, never control.
+action, on the server. A route declares exactly one of its permission, `@SignedIn()` (a member's own
+session, [ADR-0027](../adr/0027-a-members-own-session-is-signed-in.md)) or `@Public()`, or the
+application does not start. Hidden navigation is UX, never control.
 *Serves* SR-AUTH-009, SR-API-001. *Enforced by* `0.6.2`, `0.6.9`.
 
 ### I-4 · Workflow transitions only

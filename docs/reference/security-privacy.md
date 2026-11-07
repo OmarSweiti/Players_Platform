@@ -54,7 +54,7 @@ For unsafe browser methods require an exact Origin match, synchronizer CSRF toke
 
 ## Authorization, field classification and role defaults
 
-The permission catalog is explicit code (`0.6.1`), not dot-splitting into enums. Route coverage fails for any protected operation without a declared permission (`0.6.2`). Use cases evaluate membership, action, object relationship, classification, lifecycle/approval eligibility, support scope and authentication assurance (`0.6.3`). A permission decorator alone does not authorize an object or its fields. Reject forbidden write properties; do not silently accept tenantId, role, confidential flags, workflow status or money fields because they exist in a Prisma model.
+The permission catalog is explicit code (`0.6.1`), not dot-splitting into enums. Route coverage fails for any route without exactly one declared access rule — a permission, `@SignedIn()` for the caller's own session only, or `@Public()` (`0.6.2`, [ADR-0027](../adr/0027-a-members-own-session-is-signed-in.md)). Use cases evaluate membership, action, object relationship, classification, lifecycle/approval eligibility, support scope and authentication assurance (`0.6.3`). A permission decorator alone does not authorize an object or its fields. Reject forbidden write properties; do not silently accept tenantId, role, confidential flags, workflow status or money fields because they exist in a Prisma model.
 
 The following classifications merge the data taxonomy with a safer default. **OPEN — the agency must approve field-level classifications and recipient rules.** Until then sensitive fields are denied unless an explicit reviewed permission and object/purpose policy permits them. A field marked sporting/internal is not automatically public.
 

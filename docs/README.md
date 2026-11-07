@@ -37,7 +37,7 @@ the same pull request.
 | [0002](adr/0002-identity-oidc.md) | Identity through an external OIDC provider; the local credential system retired | Accepted · name superseded by 0018 |
 | [0003](adr/0003-browser-sessions.md) | Browser sessions owned by the API, on one origin | Accepted · name superseded by 0018; cookie names by 0023 |
 | [0004](adr/0004-tenancy-defense-in-depth.md) | Tenancy in depth, enforced by the database | Accepted · name superseded by 0018 |
-| [0005](adr/0005-authorization.md) | A permission catalog, object policies, confidential projections | Accepted |
+| [0005](adr/0005-authorization.md) | A permission catalog, object policies, confidential projections | Accepted · route declarations superseded by 0027 |
 | [0006](adr/0006-money.md) | Money as NUMERIC(19,4) with currency rules | Accepted |
 | [0007](adr/0007-time.md) | Calendar dates and instants | Accepted |
 | [0008](adr/0008-i18n.md) | Arabic and English, equal, from the first screen | Accepted |
@@ -59,3 +59,4 @@ the same pull request.
 | [0024](adr/0024-zod-schemas-and-vitest-on-nestjs-12.md) | On NestJS 12: Zod schemas for validation and the contract, Vitest for tests | Accepted |
 | [0025](adr/0025-the-web-app-data-path.md) | The web app reads on the server, writes through the API, and caches nothing tenant-scoped | Accepted |
 | [0026](adr/0026-interface-design-with-skills-and-references.md) | The interface speaks football's visual language, designed with named skills and references used for inspiration | Accepted |
+| [0027](adr/0027-a-members-own-session-is-signed-in.md) | A member's own session is `@SignedIn()`: every route declares a permission, `@SignedIn()` or `@Public()` | Accepted |
