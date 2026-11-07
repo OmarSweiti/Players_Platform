@@ -189,6 +189,498 @@
       "serviceAccountClientId": "sadara-provisioner",
       "realmRoles": [],
       "clientRoles": { "realm-management": ["manage-clients"] }
+    },
+    {
+      "id": "d8a48d72-17f5-8fd1-aa6d-82fecab8666c",
+      "username": "owner@sadara.test",
+      "email": "owner@sadara.test",
+      "emailVerified": true,
+      "firstName": "Owner",
+      "lastName": "Sadara",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "${SADARA_DEV_MEMBER_PASSWORD}", "temporary": false },
+        {
+          "type": "otp",
+          "userLabel": "development",
+          "secretData": "{\"value\":\"${SADARA_DEV_OTP_SECRET}\"}",
+          "credentialData": "{\"subType\":\"totp\",\"digits\":6,\"counter\":0,\"period\":30,\"algorithm\":\"HmacSHA1\"}"
+        }
+      ]
+    },
+    {
+      "id": "506c59ed-0e75-818a-8585-5501289da1c6",
+      "username": "admin@sadara.test",
+      "email": "admin@sadara.test",
+      "emailVerified": true,
+      "firstName": "Admin",
+      "lastName": "Sadara",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "${SADARA_DEV_MEMBER_PASSWORD}", "temporary": false },
+        {
+          "type": "otp",
+          "userLabel": "development",
+          "secretData": "{\"value\":\"${SADARA_DEV_OTP_SECRET}\"}",
+          "credentialData": "{\"subType\":\"totp\",\"digits\":6,\"counter\":0,\"period\":30,\"algorithm\":\"HmacSHA1\"}"
+        }
+      ]
+    },
+    {
+      "id": "d89153ba-e891-8d9b-a96d-61819a2e5432",
+      "username": "sporting-director@sadara.test",
+      "email": "sporting-director@sadara.test",
+      "emailVerified": true,
+      "firstName": "Sporting Director",
+      "lastName": "Sadara",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "${SADARA_DEV_MEMBER_PASSWORD}", "temporary": false },
+        {
+          "type": "otp",
+          "userLabel": "development",
+          "secretData": "{\"value\":\"${SADARA_DEV_OTP_SECRET}\"}",
+          "credentialData": "{\"subType\":\"totp\",\"digits\":6,\"counter\":0,\"period\":30,\"algorithm\":\"HmacSHA1\"}"
+        }
+      ]
+    },
+    {
+      "id": "fed0f850-009c-81b0-b72b-07873f525e46",
+      "username": "scout@sadara.test",
+      "email": "scout@sadara.test",
+      "emailVerified": true,
+      "firstName": "Scout",
+      "lastName": "Sadara",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "${SADARA_DEV_MEMBER_PASSWORD}", "temporary": false }
+      ]
+    },
+    {
+      "id": "5d194e24-d795-8124-ad47-ad296eebe5d7",
+      "username": "coach@sadara.test",
+      "email": "coach@sadara.test",
+      "emailVerified": true,
+      "firstName": "Coach",
+      "lastName": "Sadara",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "${SADARA_DEV_MEMBER_PASSWORD}", "temporary": false }
+      ]
+    },
+    {
+      "id": "105f82f1-7110-88f5-9f44-bc5cac921a7c",
+      "username": "assistant-coach@sadara.test",
+      "email": "assistant-coach@sadara.test",
+      "emailVerified": true,
+      "firstName": "Assistant Coach",
+      "lastName": "Sadara",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "${SADARA_DEV_MEMBER_PASSWORD}", "temporary": false }
+      ]
+    },
+    {
+      "id": "1fc20c3c-0efb-8b2f-a2cf-392851ec226f",
+      "username": "goalkeeper-coach@sadara.test",
+      "email": "goalkeeper-coach@sadara.test",
+      "emailVerified": true,
+      "firstName": "Goalkeeper Coach",
+      "lastName": "Sadara",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "${SADARA_DEV_MEMBER_PASSWORD}", "temporary": false }
+      ]
+    },
+    {
+      "id": "5d80b0a7-5d73-84ad-a158-626d4a8e2962",
+      "username": "fitness-coach@sadara.test",
+      "email": "fitness-coach@sadara.test",
+      "emailVerified": true,
+      "firstName": "Fitness Coach",
+      "lastName": "Sadara",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "${SADARA_DEV_MEMBER_PASSWORD}", "temporary": false }
+      ]
+    },
+    {
+      "id": "a70b1f82-5353-8460-b439-702fb781a54f",
+      "username": "medical@sadara.test",
+      "email": "medical@sadara.test",
+      "emailVerified": true,
+      "firstName": "Medical",
+      "lastName": "Sadara",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "${SADARA_DEV_MEMBER_PASSWORD}", "temporary": false },
+        {
+          "type": "otp",
+          "userLabel": "development",
+          "secretData": "{\"value\":\"${SADARA_DEV_OTP_SECRET}\"}",
+          "credentialData": "{\"subType\":\"totp\",\"digits\":6,\"counter\":0,\"period\":30,\"algorithm\":\"HmacSHA1\"}"
+        }
+      ]
+    },
+    {
+      "id": "99ebd0c9-c9bc-8b52-89af-2c09b71c994e",
+      "username": "physiotherapist@sadara.test",
+      "email": "physiotherapist@sadara.test",
+      "emailVerified": true,
+      "firstName": "Physiotherapist",
+      "lastName": "Sadara",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "${SADARA_DEV_MEMBER_PASSWORD}", "temporary": false },
+        {
+          "type": "otp",
+          "userLabel": "development",
+          "secretData": "{\"value\":\"${SADARA_DEV_OTP_SECRET}\"}",
+          "credentialData": "{\"subType\":\"totp\",\"digits\":6,\"counter\":0,\"period\":30,\"algorithm\":\"HmacSHA1\"}"
+        }
+      ]
+    },
+    {
+      "id": "90d1f72e-b5bf-82eb-850e-cbeecdc7a576",
+      "username": "legal@sadara.test",
+      "email": "legal@sadara.test",
+      "emailVerified": true,
+      "firstName": "Legal",
+      "lastName": "Sadara",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "${SADARA_DEV_MEMBER_PASSWORD}", "temporary": false },
+        {
+          "type": "otp",
+          "userLabel": "development",
+          "secretData": "{\"value\":\"${SADARA_DEV_OTP_SECRET}\"}",
+          "credentialData": "{\"subType\":\"totp\",\"digits\":6,\"counter\":0,\"period\":30,\"algorithm\":\"HmacSHA1\"}"
+        }
+      ]
+    },
+    {
+      "id": "62d9d1e4-6d28-8254-b0ac-3b9401a406f4",
+      "username": "finance-manager@sadara.test",
+      "email": "finance-manager@sadara.test",
+      "emailVerified": true,
+      "firstName": "Finance Manager",
+      "lastName": "Sadara",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "${SADARA_DEV_MEMBER_PASSWORD}", "temporary": false },
+        {
+          "type": "otp",
+          "userLabel": "development",
+          "secretData": "{\"value\":\"${SADARA_DEV_OTP_SECRET}\"}",
+          "credentialData": "{\"subType\":\"totp\",\"digits\":6,\"counter\":0,\"period\":30,\"algorithm\":\"HmacSHA1\"}"
+        }
+      ]
+    },
+    {
+      "id": "9dc85ac5-a3de-8e6c-9075-aa411e15a7ec",
+      "username": "performance-analyst@sadara.test",
+      "email": "performance-analyst@sadara.test",
+      "emailVerified": true,
+      "firstName": "Performance Analyst",
+      "lastName": "Sadara",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "${SADARA_DEV_MEMBER_PASSWORD}", "temporary": false }
+      ]
+    },
+    {
+      "id": "1bb6848c-2e6a-8bf6-b8b5-92892c8e8f22",
+      "username": "video-analyst@sadara.test",
+      "email": "video-analyst@sadara.test",
+      "emailVerified": true,
+      "firstName": "Video Analyst",
+      "lastName": "Sadara",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "${SADARA_DEV_MEMBER_PASSWORD}", "temporary": false }
+      ]
+    },
+    {
+      "id": "74b51bac-6bb6-86db-94ad-2cdf2f1e80e3",
+      "username": "training-manager@sadara.test",
+      "email": "training-manager@sadara.test",
+      "emailVerified": true,
+      "firstName": "Training Manager",
+      "lastName": "Sadara",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "${SADARA_DEV_MEMBER_PASSWORD}", "temporary": false }
+      ]
+    },
+    {
+      "id": "063d31c1-5141-8b46-8bb5-4db2f7a693a8",
+      "username": "player@sadara.test",
+      "email": "player@sadara.test",
+      "emailVerified": true,
+      "firstName": "Player",
+      "lastName": "Sadara",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "${SADARA_DEV_MEMBER_PASSWORD}", "temporary": false }
+      ]
+    },
+    {
+      "id": "ab670f50-e731-80d0-9688-bc6fa0ac98c7",
+      "username": "guardian@sadara.test",
+      "email": "guardian@sadara.test",
+      "emailVerified": true,
+      "firstName": "Guardian",
+      "lastName": "Sadara",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "${SADARA_DEV_MEMBER_PASSWORD}", "temporary": false }
+      ]
+    },
+    {
+      "id": "6529e1be-fe1d-820a-92d4-7d6e5dec7b4a",
+      "username": "owner@northwind.test",
+      "email": "owner@northwind.test",
+      "emailVerified": true,
+      "firstName": "Owner",
+      "lastName": "Northwind",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "${SADARA_DEV_MEMBER_PASSWORD}", "temporary": false },
+        {
+          "type": "otp",
+          "userLabel": "development",
+          "secretData": "{\"value\":\"${SADARA_DEV_OTP_SECRET}\"}",
+          "credentialData": "{\"subType\":\"totp\",\"digits\":6,\"counter\":0,\"period\":30,\"algorithm\":\"HmacSHA1\"}"
+        }
+      ]
+    },
+    {
+      "id": "ca42fd46-91a0-88fb-9630-37fac6edfaf5",
+      "username": "admin@northwind.test",
+      "email": "admin@northwind.test",
+      "emailVerified": true,
+      "firstName": "Admin",
+      "lastName": "Northwind",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "${SADARA_DEV_MEMBER_PASSWORD}", "temporary": false },
+        {
+          "type": "otp",
+          "userLabel": "development",
+          "secretData": "{\"value\":\"${SADARA_DEV_OTP_SECRET}\"}",
+          "credentialData": "{\"subType\":\"totp\",\"digits\":6,\"counter\":0,\"period\":30,\"algorithm\":\"HmacSHA1\"}"
+        }
+      ]
+    },
+    {
+      "id": "e6ad80b0-243f-8adc-9584-29c5c9335aee",
+      "username": "sporting-director@northwind.test",
+      "email": "sporting-director@northwind.test",
+      "emailVerified": true,
+      "firstName": "Sporting Director",
+      "lastName": "Northwind",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "${SADARA_DEV_MEMBER_PASSWORD}", "temporary": false },
+        {
+          "type": "otp",
+          "userLabel": "development",
+          "secretData": "{\"value\":\"${SADARA_DEV_OTP_SECRET}\"}",
+          "credentialData": "{\"subType\":\"totp\",\"digits\":6,\"counter\":0,\"period\":30,\"algorithm\":\"HmacSHA1\"}"
+        }
+      ]
+    },
+    {
+      "id": "6672861d-0b3d-843d-b9b7-615a485b956a",
+      "username": "scout@northwind.test",
+      "email": "scout@northwind.test",
+      "emailVerified": true,
+      "firstName": "Scout",
+      "lastName": "Northwind",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "${SADARA_DEV_MEMBER_PASSWORD}", "temporary": false }
+      ]
+    },
+    {
+      "id": "4770b0c9-1428-8287-8ad2-a24ee31d2e01",
+      "username": "coach@northwind.test",
+      "email": "coach@northwind.test",
+      "emailVerified": true,
+      "firstName": "Coach",
+      "lastName": "Northwind",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "${SADARA_DEV_MEMBER_PASSWORD}", "temporary": false }
+      ]
+    },
+    {
+      "id": "a6f4ae09-6f3f-81f0-a1d6-630eae5aa500",
+      "username": "assistant-coach@northwind.test",
+      "email": "assistant-coach@northwind.test",
+      "emailVerified": true,
+      "firstName": "Assistant Coach",
+      "lastName": "Northwind",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "${SADARA_DEV_MEMBER_PASSWORD}", "temporary": false }
+      ]
+    },
+    {
+      "id": "ee3c23ec-e9f2-86aa-b204-16c0877a0e39",
+      "username": "goalkeeper-coach@northwind.test",
+      "email": "goalkeeper-coach@northwind.test",
+      "emailVerified": true,
+      "firstName": "Goalkeeper Coach",
+      "lastName": "Northwind",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "${SADARA_DEV_MEMBER_PASSWORD}", "temporary": false }
+      ]
+    },
+    {
+      "id": "7248ef85-e528-8f6e-9161-5ffd391009b9",
+      "username": "fitness-coach@northwind.test",
+      "email": "fitness-coach@northwind.test",
+      "emailVerified": true,
+      "firstName": "Fitness Coach",
+      "lastName": "Northwind",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "${SADARA_DEV_MEMBER_PASSWORD}", "temporary": false }
+      ]
+    },
+    {
+      "id": "4387cc31-459c-8a61-909c-efa5633a283a",
+      "username": "medical@northwind.test",
+      "email": "medical@northwind.test",
+      "emailVerified": true,
+      "firstName": "Medical",
+      "lastName": "Northwind",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "${SADARA_DEV_MEMBER_PASSWORD}", "temporary": false },
+        {
+          "type": "otp",
+          "userLabel": "development",
+          "secretData": "{\"value\":\"${SADARA_DEV_OTP_SECRET}\"}",
+          "credentialData": "{\"subType\":\"totp\",\"digits\":6,\"counter\":0,\"period\":30,\"algorithm\":\"HmacSHA1\"}"
+        }
+      ]
+    },
+    {
+      "id": "1f68e00c-03bb-8702-b840-41e23ec9f41d",
+      "username": "physiotherapist@northwind.test",
+      "email": "physiotherapist@northwind.test",
+      "emailVerified": true,
+      "firstName": "Physiotherapist",
+      "lastName": "Northwind",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "${SADARA_DEV_MEMBER_PASSWORD}", "temporary": false },
+        {
+          "type": "otp",
+          "userLabel": "development",
+          "secretData": "{\"value\":\"${SADARA_DEV_OTP_SECRET}\"}",
+          "credentialData": "{\"subType\":\"totp\",\"digits\":6,\"counter\":0,\"period\":30,\"algorithm\":\"HmacSHA1\"}"
+        }
+      ]
+    },
+    {
+      "id": "26473e6f-10e3-8b4f-af01-4dc5bb9f1507",
+      "username": "legal@northwind.test",
+      "email": "legal@northwind.test",
+      "emailVerified": true,
+      "firstName": "Legal",
+      "lastName": "Northwind",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "${SADARA_DEV_MEMBER_PASSWORD}", "temporary": false },
+        {
+          "type": "otp",
+          "userLabel": "development",
+          "secretData": "{\"value\":\"${SADARA_DEV_OTP_SECRET}\"}",
+          "credentialData": "{\"subType\":\"totp\",\"digits\":6,\"counter\":0,\"period\":30,\"algorithm\":\"HmacSHA1\"}"
+        }
+      ]
+    },
+    {
+      "id": "02780d09-3c29-8b99-ab68-3ec6455bcfce",
+      "username": "finance-manager@northwind.test",
+      "email": "finance-manager@northwind.test",
+      "emailVerified": true,
+      "firstName": "Finance Manager",
+      "lastName": "Northwind",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "${SADARA_DEV_MEMBER_PASSWORD}", "temporary": false },
+        {
+          "type": "otp",
+          "userLabel": "development",
+          "secretData": "{\"value\":\"${SADARA_DEV_OTP_SECRET}\"}",
+          "credentialData": "{\"subType\":\"totp\",\"digits\":6,\"counter\":0,\"period\":30,\"algorithm\":\"HmacSHA1\"}"
+        }
+      ]
+    },
+    {
+      "id": "58a58775-f640-81ca-bf8a-429607686b8c",
+      "username": "performance-analyst@northwind.test",
+      "email": "performance-analyst@northwind.test",
+      "emailVerified": true,
+      "firstName": "Performance Analyst",
+      "lastName": "Northwind",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "${SADARA_DEV_MEMBER_PASSWORD}", "temporary": false }
+      ]
+    },
+    {
+      "id": "e73928e2-d797-868a-a84e-13f4743886e9",
+      "username": "video-analyst@northwind.test",
+      "email": "video-analyst@northwind.test",
+      "emailVerified": true,
+      "firstName": "Video Analyst",
+      "lastName": "Northwind",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "${SADARA_DEV_MEMBER_PASSWORD}", "temporary": false }
+      ]
+    },
+    {
+      "id": "11c951ef-8330-84be-b6f2-5e3caabfcc78",
+      "username": "training-manager@northwind.test",
+      "email": "training-manager@northwind.test",
+      "emailVerified": true,
+      "firstName": "Training Manager",
+      "lastName": "Northwind",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "${SADARA_DEV_MEMBER_PASSWORD}", "temporary": false }
+      ]
+    },
+    {
+      "id": "362b2cb7-ca55-8309-898a-2c837d057b12",
+      "username": "player@northwind.test",
+      "email": "player@northwind.test",
+      "emailVerified": true,
+      "firstName": "Player",
+      "lastName": "Northwind",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "${SADARA_DEV_MEMBER_PASSWORD}", "temporary": false }
+      ]
+    },
+    {
+      "id": "8a81cc09-354d-8756-b7a9-fb9c144cc65d",
+      "username": "guardian@northwind.test",
+      "email": "guardian@northwind.test",
+      "emailVerified": true,
+      "firstName": "Guardian",
+      "lastName": "Northwind",
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "${SADARA_DEV_MEMBER_PASSWORD}", "temporary": false }
+      ]
     }
   ]
 }
