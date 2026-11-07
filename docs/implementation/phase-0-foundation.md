@@ -1228,7 +1228,10 @@ sign-in, as it asks a provisioned owner (`0.5.9`).
 ### 0.5.11 — Development identities and the synthetic seed
 **Repo:** backend + umbrella + frontend · **Size:** M · **Depends on:** `0.5.10`, `0.4.7`, `0.4.8`, `0.2.4` · **Requirements:** —
 **Files:** umbrella `infra/keycloak/realm-sadara.json` (development users), `infra/keycloak/README.md` (the development members),
-`justfile` (`dev-cookie`); backend `src/database/seed.ts`, `justfile` (`seed`); frontend `scripts/dev-cookie.ts` (new)
+`infra/keycloak/test-realm.sh`, `infra/{.env.example,compose.yaml,README.md}`, `justfile` (`dev-cookie`); backend `src/database/seed.ts`,
+`src/database/{development-data,seed-development-data}.ts` (new), `src/database/{development-data,seed}.spec.ts` (new),
+`test/database/seed.integration-spec.ts` (new), `eslint.config.mjs`, `package.json` (`seed`), `justfile` (`seed`), `scripts/preflight.sql`;
+frontend `scripts/dev-cookie.mts` (new)
 Two fictional tenants (`sadara`, `northwind`), one member per role in each, linked to development
 identities in the realm (documented development-only passwords; privileged members pre-enrolled in
 MFA), and synthetic players with Arabic and Latin names. Every address is on the reserved `.test`
@@ -1236,6 +1239,34 @@ domain; today's seed names tenants after real clubs on a real-looking domain (`s
 a `SUPER_ADMIN` with a known address (`seed.ts:42`) — both go. The seed is idempotent and grows with each
 phase. `just dev-cookie <member>` signs a development member in headlessly (Playwright against the local
 Keycloak) and prints a curl cookie jar, for manual API testing.
+As built: 34 members, one for each tenant role (`UserRole` less `SUPER_ADMIN`) in each tenant, at
+`<role>@<tenant>.test`, named for their role and tenant so the first sign-in asks for nothing, and five
+players in each tenant. Every seeded id, and every development account's id in the realm, is RFC 9562's
+name-based UUIDv8 over SHA-256 (its Appendix B.2) in one namespace: `development-data.ts` and
+`test-realm.sh` derive the same values, so a membership is linked to its account's identity by issuer and
+subject, never by address (ADR-0002). The passwords are not in the realm file: one development password
+for all 34 accounts, and one authenticator secret for the 14 privileged ones (`0.5.8`), are
+`SADARA_DEV_MEMBER_PASSWORD` and `SADARA_DEV_OTP_SECRET` in `infra/.env`, which the realm reads through
+placeholders as it reads the client secrets; `.env.example` and the Keycloak README document both, and the
+README says no staging or production realm is made from the file. The data (`development-data.ts`) and
+the writing (`seed-development-data.ts`) are their own files, tested apart. The seed writes each tenant in
+its own tenant transaction, makes what is missing, brings back only the fields that differ, and writes
+nothing on a second run, `updatedAt` included; it refuses a tenant of its slug that it did not make and a
+membership linked to another identity, and writes no audit entry, since this is development data. The
+command refuses any argument and any `NODE_ENV` but `development` or `test`, composes only the
+configuration and the database, and mints its own contexts, so it is a fourth context minter in
+`eslint.config.mjs`. The old seed's call to `seedDefaultPermissions`, which crashes, goes with its tenants:
+`0.6.1` syncs the catalog into the seed, and until then `user.invite` (`0.5.10`'s migration) is the only
+permission row. A database seeded before this keeps the old rows until `just reset`. The frontend script
+is `dev-cookie.mts`, not `.ts`: the package declares no module type, so Node warned about a `.ts` file on
+every run. It requests the API's two legs from Node, verified against the proxy's certificate authority,
+and fills only Keycloak's forms in a browser; the callback is caught there through Chromium's Fetch
+interception, because Playwright's `route()` sees only a redirect chain's first request, and redeemed from
+Node. Beyond the plan: `test-realm.sh` checks every account (`development_members_one_per_role_in_each_tenant`)
+and signs an ordinary and a privileged member in with `infra/.env`'s values
+(`a_development_member_signs_in_with_infra_env_credentials`), and the backend adds
+`the_seed_never_takes_a_tenant_or_relinks_a_member_it_did_not_make`. All 34 members signed in through
+`just dev-cookie`, the privileged roles only at the second level of assurance.
 **Tests:** `the_seed_is_idempotent` · `seed_data_uses_only_reserved_domains`
 **Verify:** `just seed && just seed && just test-int -- seed`
 **Done when:** two consecutive seeds leave the same data and every seeded member can sign in locally.
