@@ -62,9 +62,29 @@ for p in (l.strip().lower() for l in sys.stdin):
     if len(p) >= 12 and p not in seen: seen.add(p); print(p)' > infra/keycloak/blocked-passwords.txt
 ```
 
+## The development members (0.5.11)
+
+The realm file holds one account for each tenant role — the backend's `UserRole`, less the platform's
+`SUPER_ADMIN`: 17 roles — in each tenant the proxy serves, `sadara` and `northwind`: 34 accounts. The
+backend's `just seed` makes their memberships. They are development data: invented, on the reserved
+`.test` domain, and only in this realm, which only this machine's development Keycloak imports. No
+staging or production realm is ever made from this file.
+
+| | |
+|---|---|
+| Address | `<role>@<tenant>.test`, the role in lower case with hyphens: `owner@sadara.test`, `coach@sadara.test`, `sporting-director@northwind.test` |
+| Password | `SADARA_DEV_MEMBER_PASSWORD` in `infra/.env`: `sadara-member-local-only`, unless you changed it |
+| Second factor | the privileged roles of `0.5.8` — owner, admin, sporting director, medical, physiotherapist, legal, finance manager — come with an authenticator already enrolled, whose secret is `SADARA_DEV_OTP_SECRET` in `infra/.env`. In an authenticator app, the default's key is `ONQWIYLSMEWW65DQFVWG6Y3BNQWW63TMPE` (its UTF-8 bytes in Base32; TOTP, SHA-1, six digits, 30 seconds). A code is good once |
+| Name | the role and the tenant, *Coach Sadara*: the first sign-in asks for nothing |
+| Id | derived from `account:<address>`: RFC 9562's name-based UUIDv8 (SHA-256, its Appendix B.2) in the namespace `b17a1124-e87a-42a1-8686-85b091391c55`. The seed derives the same, and links each membership to its account by that id, never by its address |
+
+`just dev-cookie <address>` signs one in without a browser window and prints a curl cookie jar for the
+API ([the playbook](../../docs/implementation/02-development-workflow.md#manual-testing-playbook)).
+`test-realm.sh` checks every account, and signs one of each kind in. A changed password or secret in
+`infra/.env` reaches Keycloak through `just realm-reset`.
+
 ## What arrives later
 
 | Step | What |
 |---|---|
-| `0.5.11` | the development members, one per role in each tenant, listed here with their development-only passwords |
 | `1.1.7` | the bilingual login theme |
