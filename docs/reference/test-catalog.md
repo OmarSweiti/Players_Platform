@@ -189,8 +189,8 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `own_record_access_requires_a_live_link` | 0.6.5 | backend | todo |
 | `an_expired_guardian_link_denies_access` | 0.6.5 | backend | todo |
 | `assigned_access_requires_a_live_staff_assignment` | 0.6.5 | backend | todo |
-| `the_session_lists_effective_permissions` | 0.6.6 | backend | todo |
-| `a_role_change_applies_on_the_next_request` | 0.6.6 | backend | todo |
+| `the_session_lists_effective_permissions` | 0.6.6 | backend | done |
+| `a_role_change_applies_on_the_next_request` | 0.6.6 | backend | done |
 | `super_admin_reads_no_tenant_data` | 0.6.7 | backend | todo |
 | `super_admin_cannot_be_granted_by_invitation` | 0.6.7 | backend | todo |
 | `a_coach_cannot_read_a_medical_record` | 0.6.8 | backend | todo |

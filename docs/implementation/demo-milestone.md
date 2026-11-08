@@ -116,9 +116,9 @@ run early.
 stale.*
 
 <!-- plan:milestone:begin -->
-**Demo milestone** — 60 of 126 microsteps done; 396–792 engineering hours left before the reserve.
+**Demo milestone** — 61 of 126 microsteps done; 394–788 engineering hours left before the reserve.
 
-Next in build order (every dependency done): `0.6.6`, `0.6.7`, `0.6.9`, `0.7.1`, `0.7.7`, `0.8.1`, `0.10.2`.
+Next in build order (every dependency done): `0.6.7`, `0.6.9`, `0.7.1`, `0.7.7`, `0.8.1`, `0.10.2`, `0.9.5`.
 
 | Stage | Step | Title | Repo | Size | Status |
 |---|---|---|---|---|---|
@@ -181,7 +181,7 @@ Next in build order (every dependency done): `0.6.6`, `0.6.7`, `0.6.9`, `0.7.1`,
 | E | 0.6.2 | Deny by default: every route declares its permission | backend | M | done |
 | E | 0.6.3 | Object policies in the use cases | backend | M | done |
 | E | 0.6.4 | Confidential projections, checked against an independent classification | backend | L | done |
-| E | 0.6.6 | Effective permissions for the web app | backend | S | todo |
+| E | 0.6.6 | Effective permissions for the web app | backend | S | done |
 | E | 0.6.7 | No implicit platform access | backend | S | todo |
 | E | 0.6.9 | The two-tenant isolation suite over every route | backend | L | todo |
 | F | 0.2.6 | A production build that starts, in a container | backend | M | done |
