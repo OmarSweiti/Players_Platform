@@ -183,9 +183,9 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `each_route_refuses_a_member_without_its_permission` | 0.6.2 | backend | done |
 | `a_read_denied_by_policy_is_not_found` | 0.6.3 | backend | done |
 | `policies_apply_to_direct_use_case_calls` | 0.6.3 | backend | done |
-| `confidential_fields_are_absent_for_roles_without_permission` | 0.6.4 | backend | todo |
-| `every_response_field_is_classified` | 0.6.4 | backend | todo |
-| `an_unclassified_new_field_fails_the_suite` | 0.6.4 | backend | todo |
+| `confidential_fields_are_absent_for_roles_without_permission` | 0.6.4 | backend | done |
+| `every_response_field_is_classified` | 0.6.4 | backend | done |
+| `an_unclassified_new_field_fails_the_suite` | 0.6.4 | backend | done |
 | `own_record_access_requires_a_live_link` | 0.6.5 | backend | todo |
 | `an_expired_guardian_link_denies_access` | 0.6.5 | backend | todo |
 | `assigned_access_requires_a_live_staff_assignment` | 0.6.5 | backend | todo |

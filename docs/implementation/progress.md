@@ -75,7 +75,7 @@ edit only Status and Evidence.
 | 0.6.1 | The permission catalog is code; the seed cannot crash | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/109 |
 | 0.6.2 | Deny by default: every route declares its permission | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/110 · https://github.com/OmarSweiti/Players_Platform/pull/96 |
 | 0.6.3 | Object policies in the use cases | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/111 |
-| 0.6.4 | Confidential projections, checked against an independent classification | backend | todo |  |
+| 0.6.4 | Confidential projections, checked against an independent classification | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/112 |
 | 0.6.5 | Player-account and guardian relationships | backend | todo |  |
 | 0.6.6 | Effective permissions for the web app | backend | todo |  |
 | 0.6.7 | No implicit platform access | backend | todo |  |
