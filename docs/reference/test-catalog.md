@@ -21,7 +21,7 @@ the pinned commit.
 | Fixture | Holds | Used by |
 |---|---|---|
 | two tenants | `sadara` and `northwind`, colliding names across them, one member per role in each, a revoked session, an archived member | every authorization, isolation and data test |
-| the field classification | every response field with its class — `PUBLIC`, `IDENTITY`, `MEDICAL`, `LEGAL_INTERNAL`, `FINANCE`, `MINOR` — kept independently of the code's markers | `0.6.4` and every later response |
+| the field classification | every response field with its class — `PUBLIC`, and security-privacy.md's `OPERATIONAL`, `IDENTITY`, `MEDICAL`, `LEGAL_INTERNAL`, `FINANCE` and `MINOR_POLICY` — and who may receive each confidential class, kept independently of the code's markers (`backend/test/fixtures/field-classification.ts`) | `0.6.4` and every later response |
 | the test issuer | an in-process OIDC issuer that mints valid, expired, foreign-issuer, foreign-audience and replayed tokens | `0.5.4`–`0.5.8` |
 | hostile files | an executable renamed `.pdf`, the EICAR string, a size-mismatched upload, a replayed presigned URL | `0.8.3`–`0.8.5` |
 | canaries | a unique secret and a unique email planted in queries, bodies, headers, cookies, errors and job payloads | `0.1.4`, `0.10.2` |
