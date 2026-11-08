@@ -1450,9 +1450,27 @@ history kept: the role matrix's "assigned" cells read it, and no live assignment
 
 ### 0.6.6 — Effective permissions for the web app
 **Repo:** backend · **Size:** S · **Depends on:** `0.6.2` · **Requirements:** —
-**Files:** `src/modules/identity/presentation/auth.controller.ts`, `src/modules/users/application/services/permission.service.ts`
+**Files:** `src/modules/users/permissions.module.ts` (new), `src/modules/users/users.module.ts`,
+`src/modules/users/application/{services/permission.service,services/permission.service.spec,ports/permission-records.port}.ts`
+(the spec new), `src/modules/users/infrastructure/repositories/permission.repository.ts`,
+`src/modules/identity/{identity.module,application/use-cases/read-session.usecase,presentation/dto/session.dto}.ts`,
+`openapi/openapi.json`, `test/fixtures/field-classification.ts`, `test/auth/sessions.e2e-spec.ts`,
+`test/authz/effective-permissions.e2e-spec.ts` (new)
 `GET /api/v1/auth/session` adds the member's effective permissions, computed per request from the
 database, so the web app can shape navigation. Display only: the API still decides every call.
+As built: the session answers `permissions`, the catalog keys the member's role holds in the catalog's
+order. `PermissionService.effectivePermissions(ctx)` reads them from the stored matrix for the role the
+session guard minted on this request — the role `hasPermission` decides with — and a job holds none.
+`ReadSessionUseCase` adds them, so the controller is unchanged. The contract declares the field as an array
+of the catalog's keys, and the field classification classes it `OPERATIONAL`: the member's own role's
+permissions are the product's matrix, not a confidential fact. Users imports identity, so identity could
+not import users: `PermissionService` and its stored matrix moved into `PermissionsModule`, which depends
+on nothing but the tenant transaction; users re-exports it for the permission guard, and identity imports
+it. The role change in the test is written to the database between two requests of one session, until a
+role-change use case exists (`1.1.x`). Beyond the plan: for every tenant role in two tenants the list
+agrees with what the API answers on a route behind a permission, seen both ways;
+`effective_permissions_follow_the_catalogs_order` and `a_job_holds_no_effective_permission`. Each of seven
+planted faults — among them a list remembered from a member's first request — failed the suite.
 **Tests:** `the_session_lists_effective_permissions` · `a_role_change_applies_on_the_next_request`
 **Verify:** `just test-e2e -- test/authz/effective-permissions.e2e-spec.ts`
 **Done when:** both tests pass.
