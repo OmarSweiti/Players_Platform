@@ -1329,12 +1329,30 @@ and `a_permission_never_takes_its_grants_with_it`. The legacy scouting routes gu
 
 ### 0.6.2 — Deny by default: every route declares its permission
 **Repo:** backend · **Size:** M · **Depends on:** `0.6.1`, `0.5.6` · **Requirements:** SR-AUTH-009, SR-API-001
-**Files:** `src/common/guards/roles.guard.ts` → `permission.guard.ts`, `src/common/decorators/{permissions,public}.decorator.ts`,
-`src/common/decorators/roles.decorator.ts` (delete), `src/shared/types/user.types.ts` (delete), controllers, `test/authz/route-coverage.e2e-spec.ts` (new)
+**Files:** `src/common/guards/roles.guard.ts` → `permission.guard{,.spec}.ts`, `src/common/decorators/permissions.decorator.ts`,
+`src/common/decorators/signed-in.decorator.ts` (new), `src/common/decorators/roles.decorator.ts` (delete),
+`src/shared/types/user.types.ts` (delete), `src/common/authz/{route-access,route-access-check}.ts` (new), `src/app.module.ts`,
+the identity, medical, scouting and invitations controllers, the test controllers in `test/{auth,platform}/*`,
+`test/harness/app.ts`, `test/authz/route-coverage.e2e-spec.ts` (new)
 The global `RolesGuard` (`app.module.ts:53`) lets through any route that declares nothing
 (`roles.guard.ts:27`). The permission guard enforces `@RequirePermission('contract.approve')` and the
 application **refuses to start** if any route has neither a permission nor `@Public()`. The unused
 `@Roles` decorator and `ROLE_HIERARCHY` go — two authorization systems invite the wrong one.
+As built: a route declares exactly one of three rules, not two. Six routes are neither a permission nor
+public — step-up, the session, signing out, signing out everywhere, and listing or ending one's own
+sessions — and any signed-in member uses them on their own session; the maintainer chose a third marker,
+`@SignedIn()`, over a permission every role would hold ([ADR-0027](../adr/0027-a-members-own-session-is-signed-in.md),
+which supersedes ADR-0005's route declarations; I-3 and the backend rules name all three). Today's routes are
+5 public, 6 signed-in and 38 behind a permission. `@RequirePermission` takes one catalog key, where
+`@Permissions` took a list that no route used as one. `route-access.ts` reads a route's declarations, the
+handler's over its controller's, for both the boot check and the guard: `RouteAccessCheck` reads every
+controller's routes through Nest's discovery service at boot and refuses to start the API, naming each route
+that declares none or more than one; `PermissionGuard` takes `RolesGuard`'s place among the global guards,
+fails closed on a route without a single rule, and refuses a role without the route's permission with `403`,
+as a typed error. Nothing imported `user.types.ts`, `ROLE_HIERARCHY`'s file, so all of it went. The
+test-only controllers declare their rules too, and the test harness closes an application that refuses to
+start before the refusal reaches the test. Beyond the plan: `every_route_declares_exactly_one_access_rule`
+and `a_signed_in_route_needs_a_session_and_no_permission`.
 **Tests:** `a_route_without_a_permission_or_public_fails_startup` · `each_route_refuses_a_member_without_its_permission`
 **Verify:** `just test-e2e -- test/authz/route-coverage.e2e-spec.ts`
 **Done when:** every route carries an explicit decorator and both tests pass.
