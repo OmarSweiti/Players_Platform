@@ -179,8 +179,8 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `every_catalog_entry_can_be_stored` | 0.6.1 | backend | done |
 | `the_database_matrix_equals_the_code_matrix` | 0.6.1 | backend | done |
 | `the_permission_sync_is_idempotent` | 0.6.1 | backend | done |
-| `a_route_without_a_permission_or_public_fails_startup` | 0.6.2 | backend | todo |
-| `each_route_refuses_a_member_without_its_permission` | 0.6.2 | backend | todo |
+| `a_route_without_a_permission_or_public_fails_startup` | 0.6.2 | backend | done |
+| `each_route_refuses_a_member_without_its_permission` | 0.6.2 | backend | done |
 | `a_read_denied_by_policy_is_not_found` | 0.6.3 | backend | todo |
 | `policies_apply_to_direct_use_case_calls` | 0.6.3 | backend | todo |
 | `confidential_fields_are_absent_for_roles_without_permission` | 0.6.4 | backend | todo |
