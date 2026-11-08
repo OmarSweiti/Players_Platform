@@ -14,8 +14,10 @@ The law is `docs/implementation/01-conventions.md`; the contracts are `docs/refe
   `tenantId: ctx.tenantId` into their predicates. Never import the root Prisma client in a module; never
   read a tenant id from a body, header or query, or accept one from a caller.
 - **Authorization.** Every route has exactly one of `@RequirePermission(…)`, `@SignedIn()` (the caller's
-  own session only; ADR-0027) or `@Public()`. A use case that loads a resource calls
-  `authorize(ctx, action, resource)` before returning or changing it; a denied read is `404`.
+  own session only; ADR-0027) or `@Public()`. A use case that loads a resource passes it to its policy
+  (`src/common/policy`: `authorizeRead`, or `authorizeChange` for an action) before returning or changing
+  it; a denied read is `404`, the same as absence. A policy decides from the context alone — never from a
+  role or id the caller passes in.
   Repositories **select** fields — never `include` a whole relation into a response. A new response
   field goes into the field-classification fixture in the same PR.
 - **Shape.** Controllers are thin: validate (Zod schemas, strict objects — ADR-0024), call one use

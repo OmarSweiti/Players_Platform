@@ -96,7 +96,7 @@ An exact configured host produces a **tenant hint**, not authorization. The narr
 ```ts
 export type TenantContext = Readonly<{
   tenantId: string;
-  actor: { kind: 'USER'; userId: string; sessionId: string }
+  actor: { kind: 'USER'; userId: string; sessionId: string; role: UserRole }
        | { kind: 'SYSTEM'; service: string; eventId: string };
   requestId: string;
   assurance: { authTime?: string; acr?: string; amr: readonly string[] };
@@ -112,7 +112,7 @@ export type TenantTransaction = Prisma.TransactionClient;
 
 The helper opens the transaction, sets `app.tenant_id` using parameterized `set_config(..., true)`, and passes that transaction client to every repository. Repository methods receive both the transaction and explicit context/tenant ID; they cannot obtain the root client as a fallback. Policies run before data release or mutation. Repositories require explicit tenant predicates; composite and same-parent foreign keys plus ENABLE/FORCE RLS protect omissions. Runtime is non-owner `sadara_app`, without BYPASSRLS; `sadara_owner` is NOLOGIN and the migrator is separate. See [database](database.md) for the SQL and tests. CLS may carry log correlation, never hidden authorization or query rewriting.
 
-The actor union above is the Phase-0/1 contract. `4.1.1` adds a separately authorized global `PlatformSession`, because an operator must not acquire a hidden tenant User merely to authenticate. `4.1.2` adds an explicit `PLATFORM` actor with operatorId, sessionId and supportGrantId; only a current approved tenant-scoped support grant can create that tenant context. Recheck the operator, session and grant against PostgreSQL and audit the operator identity without impersonating a User. This future extension grants no Phase-0/1 platform access.
+The actor union above is the Phase-0/1 contract. A member acts in their role, as their membership held it when the session guard minted the context: object policies decide from it, so a use case called directly is decided as one called over HTTP (`0.6.3`). `4.1.1` adds a separately authorized global `PlatformSession`, because an operator must not acquire a hidden tenant User merely to authenticate. `4.1.2` adds an explicit `PLATFORM` actor with operatorId, sessionId and supportGrantId; only a current approved tenant-scoped support grant can create that tenant context. Recheck the operator, session and grant against PostgreSQL and audit the operator identity without impersonating a User. This future extension grants no Phase-0/1 platform access.
 
 OIDC logout events revoke matching derived issuer/subject/sid sessions. Cross-tenant discovery uses a narrow TenantRegistry followed by tenant-scoped operations. Back-channel signature/audience/time/event/replay validation is mandatory. Provider-side disablement or recovery is not assumed to generate every required event: changes take effect at the next validated event or session expiry. That exposure window requires owner acceptance before real-user launch. See OPEN — identity provider and session freshness in the [OPEN register](../implementation/00-master-plan.md#open-register).
 
