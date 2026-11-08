@@ -1359,7 +1359,10 @@ and `a_signed_in_route_needs_a_session_and_no_permission`.
 
 ### 0.6.3 — Object policies in the use cases
 **Repo:** backend · **Size:** M · **Depends on:** `0.6.2` · **Requirements:** SR-ACL-005, SR-API-002, BR-RULE-02
-**Files:** `src/common/policy/policy.ts` (new), `src/modules/*/application/policies/*.policy.ts`
+**Files:** `src/common/policy/{policy,policy.spec,direct-calls.spec}.ts` (new), `src/modules/{scouting,medical,users}/application/policies/*.policy{,.spec}.ts`
+and `medical/application/policies/medical-staff.ts` (new), the use cases that load a resource and the medical and scouting
+controllers, `src/common/tenancy/tenant-context.ts`, `src/common/guards/session.guard.ts`, `test/harness/fixtures.ts`,
+`test/authz/object-policies.integration-spec.ts` (new), and three tests that mint a member's context
 A policy is a pure function evaluated **inside the use case**, after the resource is loaded and before
 it is returned or changed — so it holds for every caller, not only HTTP. Relationship, sensitivity and
 state are inputs; an id is never authorization. A read denied by policy is `404`, indistinguishable from
@@ -1368,6 +1371,24 @@ absence.
 export type Decision = { allow: true } | { allow: false; reason: DenyReason };
 export function authorize(ctx: AuthorizedTenantContext, action: Action, resource: ResourceView): Decision;
 ```
+As built: the tenant context's member actor carries their role, which the session guard mints from the
+membership it verified on that request, so a policy decides from the context alone and no controller passes a
+role into a use case. `definePolicy` takes one rule per action, `read` among them, and denies a job
+(`NOT_A_MEMBER`) and any action it has no rule for; `authorize` is each policy's own function —
+`scoutingReportPolicy.authorize(ctx, action, resource)` — since `src/common` cannot import the modules' policies.
+`authorizeRead` answers a denied read with the not-found of absence; `authorizeChange` answers a change by
+someone who cannot read the resource the same way, and otherwise refuses for the policy's reason, with the use
+case's own error. Six policies — scouting reports and assignments, medical records and treatment sessions,
+invitations and memberships — hold the decisions the use cases made inline, unchanged in meaning, so the
+defects their owners close stay named in them: who reads which medical records (`0.6.8`, after `0.6.5`), and
+scouting's draft editing and self-approval (`1.11`). One tightening: `SUPER_ADMIN` is no longer medical staff
+(I-2). Archiving a record or a report, a treatment session's status and removal, and reactivating a membership
+acted by id; they now load the resource first, so they pass the policy too. Lists and own-scoped queries call
+no object policy: today's read rules restrict no one, and a restriction belongs in the query before pagination
+(`0.6.4`, `0.6.8`). Beyond the plan: each policy's decision table,
+`a_report_is_submitted_by_its_author_however_the_use_case_is_called` and
+`a_confidential_record_is_changed_by_medical_staff_however_the_use_case_is_called` against PostgreSQL with two
+tenants.
 **Tests:** `a_read_denied_by_policy_is_not_found` · `policies_apply_to_direct_use_case_calls`
 **Verify:** `npx vitest run src/common/policy`
 **Done when:** both tests pass and every existing use case that loads a resource calls `authorize`.
