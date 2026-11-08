@@ -21,7 +21,7 @@ the pinned commit.
 | Fixture | Holds | Used by |
 |---|---|---|
 | two tenants | `sadara` and `northwind`, colliding names across them, one member per role in each, a revoked session, an archived member | every authorization, isolation and data test |
-| the field classification | every response field with its class — `PUBLIC`, `IDENTITY`, `MEDICAL`, `LEGAL_INTERNAL`, `FINANCE`, `MINOR` — kept independently of the code's markers | `0.6.4` and every later response |
+| the field classification | every response field with its class — `PUBLIC`, and security-privacy.md's `OPERATIONAL`, `IDENTITY`, `MEDICAL`, `LEGAL_INTERNAL`, `FINANCE` and `MINOR_POLICY` — and who may receive each confidential class, kept independently of the code's markers (`backend/test/fixtures/field-classification.ts`) | `0.6.4` and every later response |
 | the test issuer | an in-process OIDC issuer that mints valid, expired, foreign-issuer, foreign-audience and replayed tokens | `0.5.4`–`0.5.8` |
 | hostile files | an executable renamed `.pdf`, the EICAR string, a size-mismatched upload, a replayed presigned URL | `0.8.3`–`0.8.5` |
 | canaries | a unique secret and a unique email planted in queries, bodies, headers, cookies, errors and job payloads | `0.1.4`, `0.10.2` |
@@ -183,9 +183,9 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `each_route_refuses_a_member_without_its_permission` | 0.6.2 | backend | done |
 | `a_read_denied_by_policy_is_not_found` | 0.6.3 | backend | done |
 | `policies_apply_to_direct_use_case_calls` | 0.6.3 | backend | done |
-| `confidential_fields_are_absent_for_roles_without_permission` | 0.6.4 | backend | todo |
-| `every_response_field_is_classified` | 0.6.4 | backend | todo |
-| `an_unclassified_new_field_fails_the_suite` | 0.6.4 | backend | todo |
+| `confidential_fields_are_absent_for_roles_without_permission` | 0.6.4 | backend | done |
+| `every_response_field_is_classified` | 0.6.4 | backend | done |
+| `an_unclassified_new_field_fails_the_suite` | 0.6.4 | backend | done |
 | `own_record_access_requires_a_live_link` | 0.6.5 | backend | todo |
 | `an_expired_guardian_link_denies_access` | 0.6.5 | backend | todo |
 | `assigned_access_requires_a_live_staff_assignment` | 0.6.5 | backend | todo |

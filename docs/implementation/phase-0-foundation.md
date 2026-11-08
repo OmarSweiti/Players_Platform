@@ -1395,13 +1395,40 @@ tenants.
 
 ### 0.6.4 — Confidential projections, checked against an independent classification
 **Repo:** backend · **Size:** L · **Depends on:** `0.6.3` · **Requirements:** SR-ACL-008, BR-OBJ-05
-**Files:** `test/fixtures/field-classification.ts` (new), response DTOs, repositories, `test/authz/confidential-fields.e2e-spec.ts` (new)
+**Files:** `src/common/policy/{confidential-class,projection,projection.spec}.ts` (new), `src/common/policy/{policy,policy.spec}.ts`,
+`src/modules/users/domain/confidential-grants{,.spec}.ts` (new), `src/modules/users/application/services/permission.service.ts`,
+`test/fixtures/field-classification.ts` (new), `test/authz/confidential-fields.e2e-spec.ts` (new)
 Repositories **select** the fields a response needs — never `include` a whole related record — and the
 response carries a confidential field only when the caller's permission and the policy allow it. The
 test does not trust the code's own markers: an **independent fixture** classifies every response field
-(`PUBLIC`, `IDENTITY`, `MEDICAL`, `LEGAL_INTERNAL`, `FINANCE`, `MINOR`), and the suite compares real
-payloads for every role against it — so a removed marker, a new unclassified field or a widened select
-fails.
+(`PUBLIC`, and [security-privacy](../reference/security-privacy.md)'s `OPERATIONAL`, `IDENTITY`, `MEDICAL`,
+`LEGAL_INTERNAL`, `FINANCE` and `MINOR_POLICY`), and the suite compares real payloads for every role against
+it — so a removed marker, a new unclassified field or a widened select fails.
+As built: a response is built from its Zod schema by `project(schema, value, disclosed)`
+(`src/common/policy/projection.ts`), an allowlist — only the fields the schema names leave, at every depth,
+so a widened select or a row passed whole reaches nobody; a value without its schema's shape is withheld,
+and an object under a scalar's schema is refused rather than passed on. `confidential(class, field)` is the
+code's marker: the field becomes optional, and is absent — never `null` — unless its class is disclosed.
+`disclosedClasses(ctx, policy, resource, granted)` keeps a class only when the member's role holds its grant
+**and** the resource's policy discloses it; `definePolicy` takes an optional disclosure rule per class, and a
+class without one is disclosed to nobody. `CONFIDENTIAL_GRANTS` names each class's grant: only `MEDICAL`
+has one, `medical.view_confidential`, so the other four reach nobody yet. `PermissionService.grantedClasses(ctx)`
+reads the grants from the stored matrix; a job holds none. The fixture imports nothing from `src/`: it
+classifies every field of every live answer — successes, pages and problems — and names who may receive
+each confidential class (a role the matrix calls eligible that holds the class's permission); it is the
+engineering default while field-level classification is OPEN. The suite calls every route the app serves
+as each of the 17 tenant roles in both tenants, and signed out, and fails on an unclassified field, a
+classified field no answer carries, a confidential field to a role the fixture does not entitle, or
+anything but a `PUBLIC` field to someone signed out. No route the app serves carried a confidential field —
+they are in the medical and scouting modules, which stay off — so no live response or repository changed,
+nor the contract. A test-only route carries a clinical note's diagnosis through the real marker, grant,
+policy and projection: that is where deleting a marker fails the suite until `0.6.8` puts the medical
+module's fields under it (scouting's embedded player record is `1.11.1`'s). Each of eleven planted faults —
+among them a lost marker, a widened select and the medical module switched on unclassified — failed the
+suite. Beyond the plan: `a_projection_carries_only_the_fields_its_schema_names`,
+`a_confidential_field_leaves_only_when_its_class_is_disclosed`, `a_value_without_its_schemas_shape_does_not_leave`,
+`marking_a_field_leaves_the_schema_it_marks_unmarked`, `a_class_is_disclosed_only_with_its_grant_and_the_policys_rule`
+and `each_confidential_permission_grants_exactly_one_class`.
 **Tests:** `confidential_fields_are_absent_for_roles_without_permission` · `every_response_field_is_classified` · `an_unclassified_new_field_fails_the_suite`
 **Verify:** `just test-e2e -- test/authz/confidential-fields.e2e-spec.ts`
 **Done when:** the three tests pass, and deleting any confidentiality marker in the code makes the suite
