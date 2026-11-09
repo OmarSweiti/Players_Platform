@@ -116,9 +116,9 @@ run early.
 stale.*
 
 <!-- plan:milestone:begin -->
-**Demo milestone** — 63 of 126 microsteps done; 384–768 engineering hours left before the reserve.
+**Demo milestone** — 64 of 126 microsteps done; 380–760 engineering hours left before the reserve.
 
-Next in build order (every dependency done): `0.7.1`, `0.7.7`, `0.8.1`, `0.10.2`, `0.9.5`.
+Next in build order (every dependency done): `0.7.2`, `0.7.3`, `0.7.7`, `0.8.1`, `0.10.2`, `0.9.5`.
 
 | Stage | Step | Title | Repo | Size | Status |
 |---|---|---|---|---|---|
@@ -185,7 +185,7 @@ Next in build order (every dependency done): `0.7.1`, `0.7.7`, `0.8.1`, `0.10.2`
 | E | 0.6.7 | No implicit platform access | backend | S | done |
 | E | 0.6.9 | The two-tenant isolation suite over every route | backend | L | done |
 | F | 0.2.6 | A production build that starts, in a container | backend | M | done |
-| F | 0.7.1 | Audit evidence is append-only in the database | backend | M | todo |
+| F | 0.7.1 | Audit evidence is append-only in the database | backend | M | done |
 | F | 0.7.2 | Audit inside the business transaction, redacted; a failed audit aborts the change | backend | M | todo |
 | F | 0.7.3 | Security events that have no tenant | backend | S | todo |
 | F | 0.7.4 | Access audit for confidential reads | backend | S | todo |
