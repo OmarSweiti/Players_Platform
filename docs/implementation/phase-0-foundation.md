@@ -1477,9 +1477,28 @@ planted faults — among them a list remembered from a member's first request �
 
 ### 0.6.7 — No implicit platform access
 **Repo:** backend · **Size:** S · **Depends on:** `0.6.1` · **Requirements:** SR-ACL-003, BR-RULE-12
-**Files:** `src/modules/users/domain/default-role-matrix.ts`, `src/modules/users/**`, `test/authz/platform-access.e2e-spec.ts` (new)
+**Files:** `prisma/schema.prisma` + migration `…_no_platform_membership`, `scripts/preflight.sql`,
+`src/modules/identity/presentation/dto/session.dto.ts`, `openapi/openapi.json`,
+`test/db/{preflight,constraints}.integration-spec.ts`, `test/auth/assurance.e2e-spec.ts`,
+`test/platform/{validation,responses,feature-flags}.e2e-spec.ts`, `test/authz/platform-access.e2e-spec.ts` (new)
 `SUPER_ADMIN` holds no tenant-data permission and cannot be granted through an invitation or a role
 change; platform support access waits for audited, time-boxed grants (`4.1.2`).
+As built: the matrix already held nothing for `SUPER_ADMIN` (`0.6.1`), and an invitation could not name
+it — the request, the grant rule (`mayGrant`) and `invitations_role_check` each refuse it (`0.5.10`).
+What remained was a member holding it: a `users` row is a membership of one tenant, so a `SUPER_ADMIN`
+there would be the platform inside a tenant by role alone (DB-45). `users_role_check` refuses it on
+every row, archived ones included, since reactivation brings the role back. No role-change route exists
+yet (`1.1.x`), so the database refuses the change whoever writes it, and the grant rule that route will
+apply refuses it too. The migration stops on a membership that already holds the role — the seed made
+one before `0.5.11` — and never deletes or changes that row: `just preflight` lists it as
+`platform_membership`. The session's contract names the seventeen tenant roles as a member's role. Four
+suites that made a `SUPER_ADMIN` member now make a tenant one; the assurance policy keeps `SUPER_ADMIN`
+among its privileged roles, so a session of one would need a second factor all the same. The suite runs
+with the medical and scouting modules switched on: the real permission guard refuses `SUPER_ADMIN` on
+every route behind a permission, naming the permission, and the role is shown no permission and granted
+no confidential class. Beyond the plan: `super_admin_cannot_be_granted_by_a_role_change`. Each of ten
+planted faults — among them a guard that lets `SUPER_ADMIN` through, and either CHECK dropped — failed
+the suite or the contract gate.
 **Tests:** `super_admin_reads_no_tenant_data` · `super_admin_cannot_be_granted_by_invitation`
 **Verify:** `just test-e2e -- test/authz/platform-access.e2e-spec.ts`
 **Done when:** both tests pass.
