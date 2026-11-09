@@ -203,10 +203,10 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `the_runtime_role_cannot_update_audit` | 0.7.1 | backend | done |
 | `the_runtime_role_cannot_delete_audit` | 0.7.1 | backend | done |
 | `truncating_audit_is_refused` | 0.7.1 | backend | done |
-| `a_rolled_back_change_leaves_no_audit_row` | 0.7.2 | backend | todo |
-| `a_failed_audit_insert_aborts_the_change` | 0.7.2 | backend | todo |
-| `audit_payloads_carry_no_confidential_values` | 0.7.2 | backend | todo |
-| `role_changes_record_before_and_after` | 0.7.2 | backend | todo |
+| `a_rolled_back_change_leaves_no_audit_row` | 0.7.2 | backend | done |
+| `a_failed_audit_insert_aborts_the_change` | 0.7.2 | backend | done |
+| `audit_payloads_carry_no_confidential_values` | 0.7.2 | backend | done |
+| `role_changes_record_before_and_after` | 0.7.2 | backend | done |
 | `a_refused_sign_in_is_recorded_without_a_tenant` | 0.7.3 | backend | todo |
 | `security_events_are_append_only` | 0.7.3 | backend | todo |
 | `provider_sign_in_failures_reach_security_events` | 0.7.3 | backend | todo |
