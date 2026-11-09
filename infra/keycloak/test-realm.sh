@@ -254,7 +254,7 @@ def sign_in_events_are_stored():
               "REMOVE_CREDENTIAL", "UPDATE_TOTP", "REMOVE_TOTP"}
     missing = needed - set(events["enabledEventTypes"])
     expect(not missing, "events not stored: %s" % sorted(missing))
-    # Kept until 0.7.3 imports them and a retention policy exists (OPEN-06).
+    # Kept, as 0.7.3 imports them, until a retention policy exists (OPEN-06).
     expect(not events.get("eventsExpiration"), "events expire after %ss" % events.get("eventsExpiration"))
 
 def the_admin_account_manages_users_only():
@@ -331,6 +331,47 @@ def the_provisioning_account_manages_clients_only():
                        "/admin/realms/%s/users?max=1" % REALM: 403, "/admin/realms/%s/roles" % REALM: 403,
                        "/admin/realms/%s/events" % REALM: 403, "/admin/realms/master/clients": 403},
            "the service account's reach: %s" % answers)
+
+def the_event_reader_reads_events_only():
+    # 0.7.3: the security-event import reads the realm's login and admin events
+    # as sadara-events' service account, which holds realm-management's
+    # view-events and nothing else. The API never holds it.
+    clients = admin("/clients?clientId=sadara-events")
+    expect(len(clients) == 1, "the realm has no client sadara-events")
+    client = clients[0]
+    flows = {k: client[k] for k in ("publicClient", "standardFlowEnabled", "implicitFlowEnabled",
+                                    "directAccessGrantsEnabled", "serviceAccountsEnabled")}
+    expect(flows == {"publicClient": False, "standardFlowEnabled": False, "implicitFlowEnabled": False,
+                     "directAccessGrantsEnabled": False, "serviceAccountsEnabled": True},
+           "not a confidential service account alone: %s" % flows)
+    status, _, secret = call("GET", "/admin/realms/%s/clients/%s/client-secret" % (REALM, client["id"]), TOKEN)
+    expect(status == 200 and "${" not in (secret.get("value") or ""), "the server holds no secret, or the placeholder")
+    expect(secrets.compare_digest(secret.get("value") or "", setting("SADARA_EVENTS_CLIENT_SECRET") or ""),
+           "the server's secret is not infra/.env's SADARA_EVENTS_CLIENT_SECRET")
+    account = admin("/clients/%s/service-account-user" % client["id"])
+    roles = admin("/users/%s/role-mappings" % account["id"])
+    granted = {name: sorted(r["name"] for r in mapping["mappings"])
+               for name, mapping in roles.get("clientMappings", {}).items()}
+    expect(not roles.get("realmMappings") and granted == {"realm-management": ["view-events"]},
+           "the service account holds %s and realm roles %s" % (granted, [r["name"] for r in roles.get("realmMappings", [])]))
+    # Exercised: its token reads login and admin events, and is refused the
+    # realm's users, clients and roles, the events' settings, and every other realm.
+    status, _, grant = call("POST", "/realms/%s/protocol/openid-connect/token" % REALM, form={
+        "client_id": "sadara-events", "client_secret": setting("SADARA_EVENTS_CLIENT_SECRET"),
+        "grant_type": "client_credentials"})
+    expect(status == 200, "the service account cannot sign in (%s)" % status)
+    answers = {path: call("GET", path, grant["access_token"])[0] for path in (
+        "/admin/realms/%s/events?max=1" % REALM, "/admin/realms/%s/admin-events?max=1" % REALM,
+        "/admin/realms/%s/users?max=1" % REALM, "/admin/realms/%s/clients" % REALM,
+        "/admin/realms/%s/roles" % REALM, "/admin/realms/master/events")}
+    expect(answers == {"/admin/realms/%s/events?max=1" % REALM: 200,
+                       "/admin/realms/%s/admin-events?max=1" % REALM: 200,
+                       "/admin/realms/%s/users?max=1" % REALM: 403, "/admin/realms/%s/clients" % REALM: 403,
+                       "/admin/realms/%s/roles" % REALM: 403, "/admin/realms/master/events": 403},
+           "the service account's reach: %s" % answers)
+    status, _, _ = call("PUT", "/admin/realms/%s/events/config" % REALM, grant["access_token"],
+                        body={"eventsEnabled": False})
+    expect(status == 403, "the service account may change the events' settings (%s)" % status)
 
 def development_members_one_per_role_in_each_tenant():
     expect(len(ROLES) >= 17 and "OWNER" in ROLES, "the backend's roles were not read: %s" % ROLES)
@@ -411,6 +452,7 @@ TESTS = [the_api_client_requires_pkce, the_client_secret_comes_from_the_environm
          email_is_verified_and_sent_to_mailpit, mfa_maps_to_assurance_level_2,
          webauthn_and_passkeys_are_available_not_required, arabic_and_english, sign_in_events_are_stored,
          the_admin_account_manages_users_only, the_provisioning_account_manages_clients_only,
+         the_event_reader_reads_events_only,
          development_members_one_per_role_in_each_tenant, a_development_member_signs_in_with_infra_env_credentials]
 
 failed = 0
