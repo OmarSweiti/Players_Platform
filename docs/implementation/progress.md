@@ -82,7 +82,7 @@ edit only Status and Evidence.
 | 0.6.8 | The existing medical routes obey the rules | backend | todo |  |
 | 0.6.9 | The two-tenant isolation suite over every route | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/115 |
 | 0.7.1 | Audit evidence is append-only in the database | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/116 |
-| 0.7.2 | Audit inside the business transaction, redacted; a failed audit aborts the change | backend | todo |  |
+| 0.7.2 | Audit inside the business transaction, redacted; a failed audit aborts the change | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/117 |
 | 0.7.3 | Security events that have no tenant | backend | todo |  |
 | 0.7.4 | Access audit for confidential reads | backend | todo |  |
 | 0.7.5 | The transactional outbox and the consumer inbox | backend | todo |  |
