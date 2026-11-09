@@ -1,5 +1,7 @@
 # Sadara — Players Platform
 
+![visitors](https://img.shields.io/endpoint?url=https%3A%2F%2Fgist.githubusercontent.com%2FOmarSweiti%2Fda40bd01b88b10328fd63c2a39ea6679%2Fraw%2Fvisitors.json)
+
 The player-management platform for Sadara Sports Agency: player records, contracts and approvals,
 legal tickets, documents and media, training, performance, medical, communication and scouting — for
 one agency first, built multi-tenant from the start, in Arabic and English.
