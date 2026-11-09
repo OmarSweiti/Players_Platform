@@ -200,9 +200,9 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `no_route_reads_another_tenants_object` | 0.6.9 | backend | done |
 | `no_route_mutates_another_tenants_object` | 0.6.9 | backend | done |
 | `every_route_is_in_the_isolation_inventory` | 0.6.9 | backend | done |
-| `the_runtime_role_cannot_update_audit` | 0.7.1 | backend | todo |
-| `the_runtime_role_cannot_delete_audit` | 0.7.1 | backend | todo |
-| `truncating_audit_is_refused` | 0.7.1 | backend | todo |
+| `the_runtime_role_cannot_update_audit` | 0.7.1 | backend | done |
+| `the_runtime_role_cannot_delete_audit` | 0.7.1 | backend | done |
+| `truncating_audit_is_refused` | 0.7.1 | backend | done |
 | `a_rolled_back_change_leaves_no_audit_row` | 0.7.2 | backend | todo |
 | `a_failed_audit_insert_aborts_the_change` | 0.7.2 | backend | todo |
 | `audit_payloads_carry_no_confidential_values` | 0.7.2 | backend | todo |

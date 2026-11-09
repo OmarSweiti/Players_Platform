@@ -28,7 +28,7 @@ The four source documents and their checksums: [`../requirements/README.md`](../
 | BR-RULE-02 | BRD | 0.6.3, 1.5.3, 2.1.0, 3.4.3, 3.4.5, 4.5.1, 4.5.3 | 1/7 |
 | BR-RULE-03 | BRD | 1.4.2, 1.4.9 | 0/2 |
 | BR-RULE-04 | BRD | 1.4.2, 1.4.5, 3.5.0, 3.5.2 | 0/4 |
-| BR-RULE-05 | BRD | 0.7.1, 3.5.2 | 0/2 |
+| BR-RULE-05 | BRD | 0.7.1, 3.5.2 | 1/2 |
 | BR-RULE-06 | BRD | 3.3.2 | 0/1 |
 | BR-RULE-07 | BRD | 0.6.8, 1.1.4, 2.1.0, 2.1.2, 2.1.5, 2.1.8, 4.4.3, 4.5.1, 4.5.3 | 0/9 |
 | BR-RULE-08 | BRD | 2.3.1 | 0/1 |
@@ -206,7 +206,7 @@ The four source documents and their checksums: [`../requirements/README.md`](../
 | SR-AUD-002 | SRD | 0.7.2, 2.1.2 | 0/2 |
 | SR-AUD-003 | SRD | 0.7.2 | 0/1 |
 | SR-AUD-004 | SRD | 0.7.2, 1.7.1, 2.1.2 | 0/3 |
-| SR-AUD-005 | SRD | 0.7.1 | 0/1 |
+| SR-AUD-005 | SRD | 0.7.1 | 1/1 |
 | SR-AUD-006 | SRD | 1.7.1, 1.7.3 | 0/2 |
 | SR-AUD-007 | SRD | 1.3.4, 1.10.5, 3.7.4, 4.1.6, 4.3.2 | 0/5 |
 | SR-API-001 | SRD | 0.6.2, 4.4.2 | 1/2 |
@@ -239,7 +239,7 @@ The four source documents and their checksums: [`../requirements/README.md`](../
 | SR-DB-006 | SRD | 0.4.6, 4.3.3 | 1/2 |
 | SR-DB-007 | SRD | 0.4.10, 1.11.1, 2.1.1 | 1/3 |
 | SR-DB-008 | SRD | 0.8.2, 1.3.1 | 0/2 |
-| SR-DB-009 | SRD | 0.7.1, 3.5.2 | 0/2 |
+| SR-DB-009 | SRD | 0.7.1, 3.5.2 | 1/2 |
 | SR-DB-010 | SRD | 0.1.6, 1.10.3, 4.2.1 | 1/3 |
 | TEST-001 | SRD | 0.2.3 | 1/1 |
 | TEST-002 | SRD | 0.2.3, 3.4.6, 4.3.1 | 1/3 |
