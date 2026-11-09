@@ -78,7 +78,7 @@ edit only Status and Evidence.
 | 0.6.4 | Confidential projections, checked against an independent classification | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/112 |
 | 0.6.5 | Player-account and guardian relationships | backend | todo |  |
 | 0.6.6 | Effective permissions for the web app | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/113 |
-| 0.6.7 | No implicit platform access | backend | todo |  |
+| 0.6.7 | No implicit platform access | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/114 |
 | 0.6.8 | The existing medical routes obey the rules | backend | todo |  |
 | 0.6.9 | The two-tenant isolation suite over every route | backend | todo |  |
 | 0.7.1 | Audit evidence is append-only in the database | backend | todo |  |
