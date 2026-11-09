@@ -25,9 +25,11 @@ Arabic sign-in page.
 | Client `sadara-api` | confidential, standard flow only, **PKCE S256 required**; no implicit flow, direct grants or service account; refresh tokens off | the API is the OIDC client and stores no provider token ([ADR-0003](../../docs/adr/0003-browser-sessions.md)) |
 | Its secret | `${SADARA_API_CLIENT_SECRET}`, from `infra/.env` | the file holds a placeholder, never a secret |
 | Client `sadara-admin` | confidential, **service account only**: no browser flow, no direct grants; its secret is `${SADARA_ADMIN_CLIENT_SECRET}`, from `infra/.env` | the API manages accounts (create, setup email, disable) through the admin API as this account (`0.5.4`) |
-| Its service account | realm-management's **`manage-users` and nothing else**: no realm role; its token reads and changes users, and is refused the realm's clients, roles and events and every other realm | least privilege ([ADR-0002](../../docs/adr/0002-identity-oidc.md)); events are read by `0.7.3`, which adds what it needs |
+| Its service account | realm-management's **`manage-users` and nothing else**: no realm role; its token reads and changes users, and is refused the realm's clients, roles and events and every other realm | least privilege ([ADR-0002](../../docs/adr/0002-identity-oidc.md)); events are read by `sadara-events` alone (`0.7.3`) |
 | Client `sadara-provisioner` | confidential, **service account only**; its secret is `${SADARA_PROVISIONER_CLIENT_SECRET}`, from `infra/.env` | the provisioning command (`0.5.9`) registers a new tenant's hosts on `sadara-api` as this account; **only that command holds it, never the running API** |
 | Its service account | realm-management's **`manage-clients` and nothing else**: its token reads and changes the realm's clients, and is refused its users, roles and events and every other realm | an operator's command needs to change the sign-in client; the API's own account (`sadara-admin`) still cannot |
+| Client `sadara-events` | confidential, **service account only**; its secret is `${SADARA_EVENTS_CLIENT_SECRET}`, from `infra/.env` | the security-event import (`0.7.3`; DB-61) reads the realm's login and admin events as this account; **only that command holds it, never the running API** |
+| Its service account | realm-management's **`view-events` and nothing else**: its token reads login and admin events, and is refused the realm's users, clients and roles, the events' settings, and every other realm | reading events needs no other right; neither the API's account nor the provisioning one can read them |
 | Redirect URIs | exactly `https://{host}/api/v1/auth/callback`, per tenant host | the proxy's hosts (`infra/proxy/Caddyfile`); `test-realm.sh` holds the two lists equal on a fresh realm. `0.5.9`'s command adds a provisioned tenant's hosts at run time |
 | Post-logout URIs | exactly `https://{host}/`, per tenant host | the web app's root; `0.5.7` returns the browser there |
 | Back-channel logout | `http://host.docker.internal:3000/api/v1/auth/backchannel-logout`, session required; no front-channel logout | the API on this machine (`0.5.7`) |
@@ -39,7 +41,7 @@ Arabic sign-in page.
 | How long a level lasts | level 1, 12 hours (the session's absolute lifetime, OPEN-02); level 2, five minutes | the step-up window of [security](../../docs/reference/security-privacy.md) |
 | WebAuthn and passkeys | available, never required: a member may register an OTP app, a security key or a passkey (`webauthn-register-passwordless`, discoverable keys) | SR-AUTH-008; adopted later without any API change |
 | Languages | Arabic (the default) and English | |
-| Events | login and admin events stored, without expiry; admin events without representations | `0.7.3` imports them (DB-61); no retention period is invented (OPEN-06) |
+| Events | login and admin events stored, without expiry; admin events without representations | `0.7.3`'s import reads them as `sadara-events`, into Sadara's security events (DB-61); no retention period is invented (OPEN-06) |
 
 **What this release provides, recorded rather than assumed.** Keycloak 26.7.4 has an `amr` claim mapper
 (`oidc-amr-mapper`), but the realm does not use it: assurance is asserted through `acr` levels, which is

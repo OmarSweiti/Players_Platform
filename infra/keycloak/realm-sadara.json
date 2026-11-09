@@ -172,6 +172,27 @@
       "attributes": {
         "use.refresh.tokens": "false"
       }
+    },
+    {
+      "clientId": "sadara-events",
+      "name": "Sadara security-event import",
+      "description": "The security-event import's service account (0.7.3): it reads the realm's login and admin events, and nothing else; the running API never holds it",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "${SADARA_EVENTS_CLIENT_SECRET}",
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "consentRequired": false,
+      "frontchannelLogout": false,
+      "redirectUris": [],
+      "webOrigins": [],
+      "attributes": {
+        "use.refresh.tokens": "false"
+      }
     }
   ],
 
@@ -189,6 +210,13 @@
       "serviceAccountClientId": "sadara-provisioner",
       "realmRoles": [],
       "clientRoles": { "realm-management": ["manage-clients"] }
+    },
+    {
+      "username": "service-account-sadara-events",
+      "enabled": true,
+      "serviceAccountClientId": "sadara-events",
+      "realmRoles": [],
+      "clientRoles": { "realm-management": ["view-events"] }
     },
     {
       "id": "d8a48d72-17f5-8fd1-aa6d-82fecab8666c",

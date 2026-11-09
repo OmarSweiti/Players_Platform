@@ -113,6 +113,7 @@ services:
       SADARA_API_CLIENT_SECRET: ${SADARA_API_CLIENT_SECRET:?run `just up`, which adds it to infra/.env}
       SADARA_ADMIN_CLIENT_SECRET: ${SADARA_ADMIN_CLIENT_SECRET:?run `just up`, which adds it to infra/.env}
       SADARA_PROVISIONER_CLIENT_SECRET: ${SADARA_PROVISIONER_CLIENT_SECRET:?run `just up`, which adds it to infra/.env}
+      SADARA_EVENTS_CLIENT_SECRET: ${SADARA_EVENTS_CLIENT_SECRET:?run `just up`, which adds it to infra/.env}
       # And the development members' password and second factor (0.5.11).
       SADARA_DEV_MEMBER_PASSWORD: ${SADARA_DEV_MEMBER_PASSWORD:?run `just up`, which adds it to infra/.env}
       SADARA_DEV_OTP_SECRET: ${SADARA_DEV_OTP_SECRET:?run `just up`, which adds it to infra/.env}
