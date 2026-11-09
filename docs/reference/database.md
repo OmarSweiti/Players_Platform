@@ -172,6 +172,7 @@ Identity(id UUID, issuer VARCHAR(500), subject VARCHAR(255), createdAt TIMESTAMP
 User(existing id, tenantId, identityId UUID?, normalizedEmail, role, isActive, ...)
   UNIQUE(identityId, tenantId), UNIQUE(tenantId, normalizedEmail)
   UNIQUE(id, tenantId, identityId); FK identityId -> Identity.id
+  CHECK role <> SUPER_ADMIN      -- 0.6.7 (Players_Platform_Backend#114): a platform role no membership holds
 UserSession(id UUIDv7, tokenHash BYTEA, tenantId, userId, identityId,
   issuer, subject, providerSid?, acr?, amr VARCHAR(64)[], authTime TIMESTAMPTZ,
   createdAt, lastSeenAt, idleExpiresAt, absoluteExpiresAt, revokedAt?, revokeReason?,
