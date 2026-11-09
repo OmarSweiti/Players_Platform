@@ -1521,11 +1521,39 @@ rebuild, which takes over their three tests (`1.11.1`, `1.11.3`).
 
 ### 0.6.9 — The two-tenant isolation suite over every route
 **Repo:** backend · **Size:** L · **Depends on:** `0.6.2`, `0.4.12` · **Requirements:** SR-NFR-SEC-003, TEST-003
-**Files:** `test/isolation/isolation.e2e-spec.ts`, `test/isolation/route-inventory.ts` (new)
+**Files:** `test/isolation/{isolation.e2e-spec,route-inventory}.ts` (new),
+`src/modules/medical/application/{ports/medical-players.port,ports/medical-records.port,ports/treatment-sessions.port}.ts`
+(the first new), `src/modules/medical/application/use-cases/{read-medical-records,read-treatment-sessions,create-medical-record,update-medical-record,create-treatment-session,update-treatment-session}.usecase.ts`,
+`src/modules/medical/{medical.module,infrastructure/repositories/medical-player.repository}.ts` (the repository new),
+`src/modules/scouting/application/{ports/scouting-directory.port,ports/scouting-reports.port,ports/assignments.port}.ts`
+(the first new), `src/modules/scouting/application/use-cases/{create-scouting-report,update-scouting-report,manage-watchlist,manage-assignment}.usecase.ts`,
+`src/modules/scouting/{scouting.module,infrastructure/repositories/scouting-directory.repository}.ts` (the repository new),
+`test/legacy-modules/tenant-transaction.e2e-spec.ts`, `test/authz/object-policies.integration-spec.ts`,
+`src/common/policy/direct-calls.spec.ts`
 Introspect every registered route (flags on). For each route that takes an object id, create the object
 in tenant B and call it as every role of tenant A: the answer is `404` (or `403` for a function-level
 denial), never `2xx`, and nothing in B changed. Lists, counts and search never include B's rows. A route
 missing from the inventory fails the suite, so a new route cannot ship unexamined.
+As built: the inventory names all 49 routes the app serves with both modules on — 31 that name an object,
+8 lists and searches, 3 of the caller's own session, and 7 that name none, each with its reason. A probe
+names B's objects, in its path or its body, and is sent as each of A's 17 roles; it is answered `404`, or
+`403` for a role without the route's permission, and no answer carries B's id, slug or objects. B's rows,
+every table with a `tenant_id`, are digested before and after and do not change; nor do A's, but for the
+sessions the calls open. The suite switches the modules on itself, so the verify line runs it with or
+without the variables. It found two gaps in the quarantined modules, closed here. Six player-scoped medical
+reads and the watchlist check answered `200`, empty or zero, for another tenant's player. A create or a
+move naming another tenant's player, record or member was refused only by the composite foreign key, as
+`409`: a record, a treatment session, a report, a watchlist entry, an assignment. Each now answers not
+found, from a check in the use case's own transaction, through a port per module: `MedicalPlayers` and
+`MedicalRecords`' `requireRecord`, and `ScoutingDirectory` for players and members. The update inputs now
+declare the `playerId`, `medicalRecordId` and `assignedToId` their request schemas already accepted and
+passed through. The global mapping of a foreign-key violation to `409` stays, for the delete of a row
+others name. Beyond the plan: smuggles, the caller's own record, session, report or assignment moved to
+B's player, record or member by the member allowed to change it, answered not found with A unchanged;
+and a control for every probe, A's own objects by a member allowed to use them, served — a list showing
+A's object — so a refusal is the tenant's, not a broken request's. Each of thirteen planted faults failed
+the suite, among them three with row-level security lifted and the tenant predicate dropped, and a delete
+that commits against B and still answers `404`, which only the digest sees.
 **Tests:** `no_route_reads_another_tenants_object` · `no_route_mutates_another_tenants_object` · `every_route_is_in_the_isolation_inventory`
 **Verify:** `FEATURE_MEDICAL=true FEATURE_SCOUTING=true just test-e2e -- test/isolation`
 **Done when:** the suite covers every route and passes.
