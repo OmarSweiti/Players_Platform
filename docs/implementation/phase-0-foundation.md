@@ -1568,12 +1568,38 @@ change, in the same transaction ([ADR-0014](../adr/0014-async-outbox.md)).*
 
 ### 0.7.1 — Audit evidence is append-only in the database
 **Repo:** backend · **Size:** M · **Depends on:** `0.4.2` · **Requirements:** SR-AUD-005, SR-DB-009, BR-RULE-05
-**Files:** migration `…_audit_append_only`, `prisma/schema.prisma`, `test/db/audit-immutability.integration-spec.ts` (new)
+**Files:** migration `…_audit_append_only`, `prisma/schema.prisma`, `scripts/{preflight.sql,generate-rls.ts}`,
+`src/common/audit/audit-actor{,.spec}.ts` (new), `src/infrastructure/prisma/model-classification.ts`,
+`src/common/tenancy/auth-bootstrap.ts`, `src/modules/users/{infrastructure/repositories/invitation.repository,application/use-cases/reactivate-membership.usecase}.ts`,
+`src/modules/platform/infrastructure/repositories/provisioning.repository.ts`, `test/harness/db.ts`,
+`test/db/{constraints,foreign-keys,ids,preflight,rls,time}.integration-spec.ts`,
+`test/db/audit-immutability.integration-spec.ts` (new)
 The runtime role gets `INSERT` and policy-controlled `SELECT` on `audit_logs` — no `UPDATE`, `DELETE` or
 `TRUNCATE`. Triggers refuse row updates and deletes and, separately, `TRUNCATE` (which fires no row
 trigger), for every role, until an approved retention path exists. The table gains `eventId` (UUIDv7),
 `actorType` (`USER | SYSTEM | PLATFORM`), an actor snapshot, `requestId`, `reason`, `outcome` and
 `schemaVersion`; it stops using `deletedAt`, which is dropped once the preflight shows no archived rows.
+As built: `reject_evidence_mutation()` raises and does nothing else — no setting, flag or role lifts it —
+from `audit_logs_no_update_delete` (each row) and `audit_logs_no_truncate` (the statement); later evidence
+tables reuse it. The model classification gains the row class `appended`, which `generate-rls` prints as
+those revokes and triggers. The columns are typed, and CHECKs hold them together: `event_id`, unique in
+its tenant as every tenant index leads with `tenant_id`; `actor_type`; the actor as the context held it —
+`actor_role` and `actor_session_id` for a member, `actor_job` for the system, never a name — with a member
+named (`user_id`) exactly when one acted; `request_id`; `reason`; `outcome` (`SUCCEEDED`, and `DENIED`,
+which nothing writes yet); and `schema_version`, 1 or more. The migration stops on an archived audit row
+and never undeletes or erases one; the preflight's `deleted_audit_row` asks only while the column exists.
+Rows from before keep every column, and get an `event_id` stamped with their own `created_at`, `USER` or
+`SYSTEM` from `user_id`, `SUCCEEDED` and version 1, with nothing invented for what they never recorded.
+The four writers record the actor through `auditedChangeOf(ctx)`; an invitation's acceptance, which has no
+context, names the new member in the invited role, with the request id, and no session, which comes
+after. Test schemas now migrate without Prisma's database-wide advisory lock: each is its own, and the lock
+only made files that migrate at once time out (`P1002`). Beyond the plan: the runtime role still appends
+and reads its own tenant's rows only; each row records its actor, and the CHECKs refuse one that does not
+hold together; the catalog holds the grants, both triggers and the function's body; the migration,
+replayed on a schema rebuilt as it was before it, stops on an archived row and otherwise keeps and fills
+every row; and a runtime role given its rights back by mistake is still refused. Each of thirteen planted
+faults — among them a setting that lifts the refusal and a backfill that calls every old row a member's —
+failed a suite.
 **Tests:** `the_runtime_role_cannot_update_audit` · `the_runtime_role_cannot_delete_audit` · `truncating_audit_is_refused`
 **Verify:** `just migrations && just test-int -- audit-immutability`
 **Done when:** each operation fails as the runtime role **and** as the owner, on PostgreSQL 18.
