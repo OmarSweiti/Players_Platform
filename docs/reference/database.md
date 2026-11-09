@@ -280,19 +280,22 @@ RLS limits accidental missing predicates; it does not supply same-tenant medical
 
 ### Audit, security events and immutable evidence
 
-`0.7.1` locks down existing AuditLog first and adds its typed columns: eventId (UUIDv7), actor kind, immutable actor ID/display snapshot, requestId, reason, outcome and payload schema version. Preserve historical deletedAt values in a restricted migration report; do not silently undelete or erase evidence. `0.7.2` writes those rows inside the business transaction, with redacted structural deltas. Business mutation, audit and outbox intent share one transaction: a failed audit aborts the business command. Confidential reads create access audit before the authorized payload is released (`0.7.4`).
+`0.7.1` locks down existing AuditLog first and adds its typed columns (Players_Platform_Backend#116): `event_id` (UUIDv7, unique in its tenant), `actor_type` (`USER | SYSTEM | PLATFORM`), the actor as the context held it — `actor_role` and `actor_session_id` for a member, `actor_job` for the system, never a name, which is personal data — `request_id`, `reason`, `outcome` (`SUCCEEDED | DENIED`) and the payload's `schema_version`. CHECKs hold the actor together: a member is named (`user_id`) exactly when one acted. `deleted_at` is dropped: an archived row stops the migration, and the preflight's `deleted_audit_row` lists it for the owner to decide, so evidence is never silently undeleted or erased. Rows from before keep every column; what they never recorded stays empty. `0.7.2` writes those rows inside the business transaction, with redacted structural deltas. Business mutation, audit and outbox intent share one transaction: a failed audit aborts the business command. Confidential reads create access audit before the authorized payload is released (`0.7.4`).
 
 `0.7.3` creates global SecurityEvent `(id, occurredAt, eventType, outcome, issuer?, identityRef?, tenantHint?, requestId, reasonCode, redactedMetadata)` for pre-tenant authentication failures and other genuine platform security events. An untrusted tenant hint is not a business-tenant FK or proof of membership. Restrict insertion through a typed adapter and reading to security operators; never manufacture a fake tenant/entity UUID to satisfy AuditLog fields. Business resource IDs may be nullable only for typed events with no resource.
 
 ```sql
+-- As 0.7.1's migration carries it; generate-rls prints the revokes and triggers
+-- for a tenant table classified `appended`.
 REVOKE UPDATE, DELETE, TRUNCATE ON audit_logs FROM sadara_app;
 CREATE FUNCTION reject_evidence_mutation() RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
-  RAISE EXCEPTION 'evidence is append-only' USING ERRCODE = '42501';
+  RAISE EXCEPTION 'evidence is append-only: % on % is refused', TG_OP, TG_TABLE_NAME
+    USING ERRCODE = 'insufficient_privilege';
 END $$;
-CREATE TRIGGER audit_no_update_delete BEFORE UPDATE OR DELETE ON audit_logs
+CREATE TRIGGER audit_logs_no_update_delete BEFORE UPDATE OR DELETE ON audit_logs
   FOR EACH ROW EXECUTE FUNCTION reject_evidence_mutation();
-CREATE TRIGGER audit_no_truncate BEFORE TRUNCATE ON audit_logs
+CREATE TRIGGER audit_logs_no_truncate BEFORE TRUNCATE ON audit_logs
   FOR EACH STATEMENT EXECUTE FUNCTION reject_evidence_mutation();
 ```
 
