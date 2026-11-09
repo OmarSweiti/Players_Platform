@@ -197,9 +197,9 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `a_player_reads_only_their_own_medical_record` | 0.6.8 | backend | todo |
 | `the_confidentiality_filter_is_not_caller_controlled` | 0.6.8 | backend | todo |
 | `treatment_sessions_are_archived_not_deleted` | 0.6.8 | backend | todo |
-| `no_route_reads_another_tenants_object` | 0.6.9 | backend | todo |
-| `no_route_mutates_another_tenants_object` | 0.6.9 | backend | todo |
-| `every_route_is_in_the_isolation_inventory` | 0.6.9 | backend | todo |
+| `no_route_reads_another_tenants_object` | 0.6.9 | backend | done |
+| `no_route_mutates_another_tenants_object` | 0.6.9 | backend | done |
+| `every_route_is_in_the_isolation_inventory` | 0.6.9 | backend | done |
 | `the_runtime_role_cannot_update_audit` | 0.7.1 | backend | todo |
 | `the_runtime_role_cannot_delete_audit` | 0.7.1 | backend | todo |
 | `truncating_audit_is_refused` | 0.7.1 | backend | todo |
