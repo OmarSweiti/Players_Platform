@@ -1606,13 +1606,42 @@ failed a suite.
 
 ### 0.7.2 — Audit inside the business transaction, redacted; a failed audit aborts the change
 **Repo:** backend · **Size:** M · **Depends on:** `0.7.1`, `0.4.3` · **Requirements:** SR-AUD-002, SR-AUD-003, SR-AUD-004, SR-ACL-006
-**Files:** `src/infrastructure/audit/audit.service.ts` (new), `src/infrastructure/events/event.service.ts` (delete the queued audit), the users module, `test/db/audit.integration-spec.ts` (new)
+**Files:** `src/infrastructure/audit/{audit.service,audit.service.spec,audited-actions,audit.module}.ts` (new),
+`src/infrastructure/audit/audit-actor{,.spec}.ts` (moved from `src/common/audit/`),
+`src/infrastructure/events/{event.service,event.service.spec,events.module}.ts` (the queued audit deleted),
+`src/infrastructure/prisma/prisma.module.ts`, `src/common/tenancy/{tenant-context,auth-bootstrap}.ts`,
+`src/common/guards/session.guard.ts`, the users module (invitations, their port and repository, reactivation),
+`src/modules/platform/**` (provisioning), `prisma/schema.prisma` + migration `…_audit_client_inet`,
+`scripts/preflight.sql`, `test/harness/fixtures.ts`, `test/db/{preflight,users,audit-immutability}.integration-spec.ts`,
+`test/users/invitations.e2e-spec.ts`, `test/db/audit.integration-spec.ts` (new)
 `audit.record(tx, ctx, event)` writes inside the caller's transaction. Payloads are allowlisted
 structural deltas — who, what, when, tenant, request, before and after — with confidential values
 replaced by references; never a request body. If the audit insert fails, the business change rolls back.
 Permission and role changes record the previous and the new state.
 The client address is stored as `inet` and an over-long user agent is truncated before the insert, so
 request metadata can never abort a business change (DB-56).
+As built: `AUDITED_ACTIONS` is the allowlist — each action, its entity, and every field of its before
+and after with how it is recorded: an `OPERATIONAL` field as its value (an instant in ISO 8601), a
+`PERSONAL` one (an address) or a confidential class as `{ ref: '<Entity>/<id>/<field>', class }`. A field
+the action does not list, a nested value, a reason over 500 characters, or a role change without its
+state before and after is refused with `AuditEventRefused`, and the change with it. Payloads are
+schema version 2. The context gains an optional `client` — the address as the trusted proxies report
+it and the user agent — which only the session guard sets and which decides nothing; the service keeps
+an address only if `inet` takes it and cuts the user agent to 500 characters. `ip_address` is converted
+to `inet` in place, never dropped and added back, and the migration stops on an address `inet` refuses
+(`just preflight`: `audit_address_not_inet`). Every writer records through the service, so audit has
+one: invitations made and revoked (a revocation's reason in its own column; the invitation port loses its
+`audit`), reactivation, provisioning (its payload now flat), and an invitation's acceptance, recorded at
+sign-in for the member it makes, with its request id and no session — sign-in's network data is its
+security event's (`0.7.3`). `AuditModule` is global and comes with the `PrismaModule`, for the API and
+the provisioning command alike; `EventService.queueAuditLog` and its queue, which nothing consumed, are
+gone. No route changes a role yet (`1.1.x`): `role_changes_record_before_and_after` makes one in a
+tenant transaction, as that command will, and `member.role_changed` requires both states. Beyond the
+plan: the client kept as `inet`, an over-long user agent cut and a refused address dropped without
+aborting the change; the `inet` migration replayed, keeping every address; and an e2e test of an
+invitation made over HTTP through a trusted proxy, audited with its client's address, its user agent and
+its answer's request id. Each of eleven planted faults — among them the audit written on a transaction
+of its own after the change commits — failed a suite.
 **Tests:** `a_rolled_back_change_leaves_no_audit_row` · `a_failed_audit_insert_aborts_the_change` · `audit_payloads_carry_no_confidential_values` · `role_changes_record_before_and_after`
 **Verify:** `just test-int -- audit`
 **Done when:** the four tests pass, the failure case by injected fault.
