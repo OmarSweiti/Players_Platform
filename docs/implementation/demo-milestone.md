@@ -116,9 +116,9 @@ run early.
 stale.*
 
 <!-- plan:milestone:begin -->
-**Demo milestone** — 66 of 126 microsteps done; 374–748 engineering hours left before the reserve.
+**Demo milestone** — 67 of 126 microsteps done; 372–744 engineering hours left before the reserve.
 
-Next in build order (every dependency done): `0.7.4`, `0.7.5`, `0.7.7`, `0.8.1`, `0.10.2`, `0.9.5`.
+Next in build order (every dependency done): `0.7.5`, `0.7.7`, `0.8.1`, `0.10.2`, `0.9.5`.
 
 | Stage | Step | Title | Repo | Size | Status |
 |---|---|---|---|---|---|
@@ -188,7 +188,7 @@ Next in build order (every dependency done): `0.7.4`, `0.7.5`, `0.7.7`, `0.8.1`,
 | F | 0.7.1 | Audit evidence is append-only in the database | backend | M | done |
 | F | 0.7.2 | Audit inside the business transaction, redacted; a failed audit aborts the change | backend | M | done |
 | F | 0.7.3 | Security events that have no tenant | backend | S | done |
-| F | 0.7.4 | Access audit for confidential reads | backend | S | todo |
+| F | 0.7.4 | Access audit for confidential reads | backend | S | done |
 | F | 0.7.5 | The transactional outbox and the consumer inbox | backend | M | todo |
 | F | 0.7.6 | The worker process, with tenant-safe job discovery | backend + umbrella | L | todo |
 | F | 0.7.7 | Idempotency keys for retried commands | backend | M | todo |
