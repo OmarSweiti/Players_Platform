@@ -1,8 +1,9 @@
 # The local stack
 
-Everything the applications need on a development machine, from one command. The applications
-themselves run on the host (`npm run start:dev` in `backend/`, `npm run dev` in `frontend/`), and the
-proxy puts both behind one HTTPS origin per tenant, exactly as production routes them.
+Everything the applications need on a development machine, from one command. The API and the web app
+run on the host (`npm run start:dev` in `backend/`, `npm run dev` in `frontend/`), and the proxy puts
+both behind one HTTPS origin per tenant, exactly as production routes them. The backend's worker runs
+in the stack, built from the pinned backend (`0.7.6`): a process apart from the API, as it is deployed.
 
 ```bash
 just up             # start everything and wait until every service is healthy; creates infra/.env on the first run
@@ -23,6 +24,7 @@ just dev-cookie coach@sadara.test > jar   # sign a development member in, headle
 | `mailpit` | Mailpit 1.31.2 | SMTP `127.0.0.1:1025`, <http://localhost:8025> | every email the stack sends |
 | `keycloak` | Keycloak 26.7.4 | <http://localhost:8080> | the development identity provider, with the `sadara` realm as code ([keycloak/README.md](keycloak/README.md)) |
 | `proxy` | Caddy 2.11.4 | <https://sadara.localhost>, <https://northwind.localhost> | `/api/` → the API on `:3000`, everything else → the web app on `:3001` |
+| `worker` | built from `backend/` (its Dockerfile pins every base image by digest) | no port; `just logs worker` | relays the transactional outbox to Valkey and runs the queue's jobs, each in its own tenant's transaction (`0.7.6`); healthy while its relay's loop turns |
 
 The development credentials are in `infra/.env`, copied from [`.env.example`](.env.example). They open
 services bound to 127.0.0.1 and nothing else.
@@ -37,18 +39,28 @@ services bound to 127.0.0.1 and nothing else.
 | `sadara_owner` | never | owns both databases' schemas and everything in them |
 | `sadara_migrator` | with `SADARA_MIGRATOR_PASSWORD` | `just migrate` and the test harness's migrations; it becomes the owner at login |
 | `sadara_app` | with `SADARA_APP_PASSWORD` | the API, the worker and the tests: data only, never the schema, never past row-level security; statements 15 s, lock waits 5 s, idle in a transaction 60 s |
+| `sadara_registry` | with `SADARA_REGISTRY_PASSWORD` | the worker's discovery: it reads `tenant_directory`'s `id` and `is_active` and nothing else (`0.7.6`); statements 5 s |
 
 The API connects as `postgresql://sadara_app:<SADARA_APP_PASSWORD>@127.0.0.1:5432/sadara` and refuses to
 boot as `postgres`. Both databases collate with PostgreSQL's builtin `C.UTF-8` provider (DB-51). The
-roles and the collation take effect only when the volume is created: `just up` adds missing settings to
-an existing `infra/.env` and warns when the volume predates the roles; `just reset`, then `just up`,
-creates it again.
+collation takes effect only when the volume is created. The roles are applied again on every `just up`,
+in both databases, from the passwords in the database container's environment: a volume made before a
+role existed gains it (the registry role). `just up` adds missing settings to an existing `infra/.env`,
+and warns when the volume predates the roles altogether; `just reset`, then `just up`, creates it again.
+
+**The worker (`0.7.6`).** `just up` builds it from `backend/` whenever the backend changed, and starts it
+once PostgreSQL and Valkey are healthy. It connects as `sadara_app` for its tenant transactions and as
+`sadara_registry` to find the active tenants, and holds none of the API's identity-provider, session or
+mail settings. A stack whose database is not migrated yet runs it all the same: its relay's passes fail,
+are logged and tried again, so `backend/`'s `just migrate` is all it waits for. `docker compose stop
+worker` drains the jobs it is running before it stops.
 
 ## The rules, and what enforces them
 
 - **Every image is pinned by digest**, and **every port binds to 127.0.0.1**. **Every service has a health
-  check**, so `just up` can wait for it. **PostgreSQL runs the backend CI's digest.**
-  `scripts/check-stack.py` refuses anything else, in `just check` and CI.
+  check**, so `just up` can wait for it. **PostgreSQL runs the backend CI's digest.** A service built here
+  (the worker) is built from the pinned backend alone, whose Dockerfile pins every base image by digest,
+  and is never pulled. `scripts/check-stack.py` refuses anything else, in `just check` and CI.
 - **The object store proves itself on every `just up`.** `objectstore/bootstrap.py` makes sure both
   buckets exist, are private and are versioned. It then shows, in a throwaway bucket, that the store does
   everything the storage port needs:
