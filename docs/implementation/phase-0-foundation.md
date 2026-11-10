@@ -1768,8 +1768,13 @@ failed a suite.
 
 ### 0.7.6 — The worker process, with tenant-safe job discovery
 **Repo:** backend + umbrella · **Size:** L · **Depends on:** `0.7.5` · **Requirements:** SYS-ARC-005, SYS-ASY-003, SYS-ASY-004, SYS-TEN-006
-**Files:** backend `src/worker.ts` (new), `src/infrastructure/queue/**` (new), `src/infrastructure/tenancy/tenant-registry.ts` (new),
-migration `…_registry_role`; umbrella `infra/compose.yaml` (a `worker` service), `infra/postgres/init/`
+**Files:** backend `src/{worker,worker.module}.ts` (new),
+`src/infrastructure/queue/{job-context,outbox-queue,outbox-worker,relay-loop}.ts` and their specs (new),
+`src/infrastructure/outbox/{outbox-relay,outbox-consumers}.ts` (new), `src/infrastructure/tenancy/tenant-registry.ts` (new),
+`src/config/env.schema.ts` (the worker's settings), `src/infrastructure/logging/logging.module.ts`, `eslint.config.mjs` (a
+minter), `scripts/database-roles.sql`, migrations `…_registry_role` and `…_outbox_delivery`,
+`test/worker/worker.integration-spec.ts` (new); umbrella `infra/compose.yaml` (a `worker` service),
+`infra/postgres/init/`, `justfile` (`up`), `scripts/check-stack.py`
 A second entry point runs BullMQ on Valkey. It finds work without a privileged client: a registry role,
 which this step's migration creates and grants `SELECT` on it, may read only the `tenant_directory` view
 (`0.4.5`); for each active tenant the relay opens a tenant
@@ -1780,6 +1785,30 @@ Retries back off exponentially to a bound, then mark `DEAD` with the last error;
 in-flight jobs.
 Valkey runs with append-only persistence and `maxmemory-policy noeviction`, as BullMQ requires — in the
 local stack already (`infra/compose.yaml`) and in every hosted environment.
+As built: a migration cannot create a role — the migrator holds no CREATEROLE — so `scripts/database-roles.sql`
+creates `sadara_registry`, NOINHERIT, with no attribute past the runtime role's and short timeouts, able to log in
+only where `SADARA_REGISTRY_PASSWORD` is given; `…_registry_role` stops if it is missing and grants it `SELECT (id,
+is_active)` on `tenant_directory`, since discovery needs the active flag, and nothing else. `TenantRegistry` answers
+the active tenants' ids over one connection as that role. For each, in that tenant's transaction as the runtime
+role, the relay claims up to 100 due events — `CREATED` and available, or `LEASED` past their lease — `FOR UPDATE
+SKIP LOCKED` under a 60-second lease that names the claim, publishes each with the event's id as the job's, and marks
+it `PUBLISHED` only while the lease is still its own: a relay that stops in between leaves the event to a later pass
+once the lease runs out. A job carries identifiers only: its tenant, its event, and the request the event was
+enqueued in (`request_id`, added by `…_outbox_delivery`, which also lets an event die after dispatch). The handler
+restores the tenant with `jobContext` (`src/infrastructure/queue/job-context.ts`, a minter — the plan's job loader),
+runs in the job's correlation, loads the event in that tenant — a job naming another tenant's event finds nothing
+and is refused without a retry — and runs each registered consumer behind `ConsumerInboxes.once`, in a tenant
+transaction of its own. A failing delivery is tried 8 times, the waits doubling from 5 seconds (about 10½ minutes
+in all); each failure is recorded on the event as an error code, never a message, and the last marks it `DEAD`. A
+stalled job runs again once, on another worker. On SIGTERM the worker stops relaying, drains the jobs running, then
+closes its connections. Its settings are its own: the runtime and registry roles' URLs, Valkey, a heartbeat file
+and a log level, and none of the API's provider, session or mail secrets; it logs as `"service":"worker"`. No
+consumer is registered yet: the first is `0.7.8`'s. The stack runs it as the `worker` service, built from the pinned
+backend (`pull_policy: build`, so never pulled), healthy while its heartbeat is fresh, given 30 seconds to drain;
+`just up` applies the roles again in both databases before building it, and the API stays on the host. The stack
+check accepts a built service only from the pinned backend, with every base of its Dockerfile pinned by digest,
+never pulled, and health-checked. Beyond the plan: two relays claiming each event once, an expired lease claimed
+again, and shutdown draining in-flight jobs. Each of nine planted faults failed a suite.
 **Tests:** `a_crashed_worker_redelivers_and_the_handler_stays_idempotent` · `retries_stop_at_the_bound_and_mark_dead` · `a_job_runs_only_in_its_own_tenant` · `the_registry_role_reads_nothing_but_tenant_ids`
 **Verify:** `just test-int -- worker`
 **Done when:** the four tests pass and `just up` runs `api` and `worker` as separate processes.
