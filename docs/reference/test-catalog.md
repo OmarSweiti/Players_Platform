@@ -212,9 +212,9 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `provider_sign_in_failures_reach_security_events` | 0.7.3 | backend | done |
 | `reading_a_medical_record_leaves_an_access_event` | 0.7.4 | backend | done |
 | `a_failed_access_audit_withholds_the_data` | 0.7.4 | backend | done |
-| `a_rolled_back_change_enqueues_nothing` | 0.7.5 | backend | todo |
-| `a_duplicate_dedup_key_is_a_no_op` | 0.7.5 | backend | todo |
-| `a_consumer_commits_an_event_once` | 0.7.5 | backend | todo |
+| `a_rolled_back_change_enqueues_nothing` | 0.7.5 | backend | done |
+| `a_duplicate_dedup_key_is_a_no_op` | 0.7.5 | backend | done |
+| `a_consumer_commits_an_event_once` | 0.7.5 | backend | done |
 | `a_crashed_worker_redelivers_and_the_handler_stays_idempotent` | 0.7.6 | backend + umbrella | todo |
 | `retries_stop_at_the_bound_and_mark_dead` | 0.7.6 | backend + umbrella | todo |
 | `a_job_runs_only_in_its_own_tenant` | 0.7.6 | backend + umbrella | todo |
