@@ -95,16 +95,29 @@ up:
         }
       done
     fi
-    docker compose --file infra/compose.yaml up --detach --wait --wait-timeout 900
+    # PostgreSQL first, so that the roles are in place before anything logs in as them.
+    docker compose --file infra/compose.yaml up --detach --wait --wait-timeout 900 postgres
     # The init scripts run only when the database volume is created: one made before 0.4.2 has no roles.
-    docker compose --file infra/compose.yaml exec -T postgres \
-      psql -U postgres -d sadara -Atc "SELECT 1 FROM pg_roles WHERE rolname = 'sadara_app'" | grep -q 1 ||
+    if docker compose --file infra/compose.yaml exec -T postgres \
+      psql -U postgres -d sadara -Atc "SELECT 1 FROM pg_roles WHERE rolname = 'sadara_app'" | grep -q 1; then
+      # The roles again, in both databases, from the backend's one definition and the passwords
+      # in the container's environment: a volume made before a role existed gains it (the worker's
+      # registry role, 0.7.6), and every role's attributes and password are applied again.
+      for database in sadara sadara_test; do
+        docker compose --file infra/compose.yaml exec -T postgres \
+          psql -q -U postgres -d "$database" -f /sadara/database-roles.sql >/dev/null
+      done
+    else
       echo "up: WARNING — this database volume predates the database roles (0.4.2): run just reset, then just up" >&2
+    fi
+    # Everything else; the worker is built again from the pinned backend when it changed (0.7.6).
+    docker compose --file infra/compose.yaml up --detach --build --wait --wait-timeout 900
     python3 infra/objectstore/bootstrap.py
     echo
     echo "  https://sadara.localhost    the web app (:3001) and the API (/api/ → :3000), through the proxy"
     echo "  http://localhost:8080       Keycloak — admin password in infra/.env"
     echo "  http://localhost:8025       Mailpit — every email the stack sends"
+    echo "  the worker                  relays the outbox and runs its jobs: just logs worker"
     echo "  First time on this machine? just trust-dev-ca"
 
 # Stop the stack; every volume is kept
