@@ -202,7 +202,7 @@ The four source documents and their checksums: [`../requirements/README.md`](../
 | SR-NF-005 | SRD | 1.6.1, 1.6.3, 2.7.1 | 0/3 |
 | SR-NF-006 | SRD | 1.6.1, 2.7.1, 3.6.1 | 0/3 |
 | SR-NF-007 | SRD | 1.6.2, 2.7.2 | 0/2 |
-| SR-AUD-001 | SRD | 0.7.3 | 0/1 |
+| SR-AUD-001 | SRD | 0.7.3 | 1/1 |
 | SR-AUD-002 | SRD | 0.7.2, 2.1.2 | 1/2 |
 | SR-AUD-003 | SRD | 0.7.2 | 1/1 |
 | SR-AUD-004 | SRD | 0.7.2, 1.7.1, 2.1.2 | 1/3 |
