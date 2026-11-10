@@ -16,9 +16,11 @@ services:
       POSTGRES_DB: sadara
       # PostgreSQL's own collation, which no operating-system upgrade can reorder (0.4.2, DB-51)
       POSTGRES_INITDB_ARGS: --locale-provider=builtin --locale=C.UTF-8
-      # The migrator's and the runtime role's, read by init/10-roles.sql when the volume is created
+      # The roles' passwords, read by init/10-roles.sql when the volume is created,
+      # and by `just up`, which applies the roles again every time (0.7.6)
       SADARA_MIGRATOR_PASSWORD: ${SADARA_MIGRATOR_PASSWORD:?run `just up`, which adds it to infra/.env}
       SADARA_APP_PASSWORD: ${SADARA_APP_PASSWORD:?run `just up`, which adds it to infra/.env}
+      SADARA_REGISTRY_PASSWORD: ${SADARA_REGISTRY_PASSWORD:?run `just up`, which adds it to infra/.env}
     ports: ["127.0.0.1:${POSTGRES_PORT:-5432}:5432"]
     volumes:
       - postgres:/var/lib/postgresql # PostgreSQL 18 images keep PGDATA below it, in 18/docker
@@ -31,6 +33,44 @@ services:
       interval: 2s
       timeout: 5s
       retries: 60
+
+  # The worker (0.7.6): the backend's own image, built from the pinned checkout,
+  # whose Dockerfile pins every base image by digest, running its second entry
+  # point. It relays the transactional outbox to Valkey and runs the queue's
+  # jobs, each in its own tenant's transaction, as the runtime role; it finds
+  # the active tenants as the registry role, which reads their ids and nothing
+  # else. The API runs on the host (backend: npm run start:dev), apart from it.
+  # `just up` builds it again whenever the backend changes.
+  worker:
+    build:
+      context: ../backend
+    image: sadara-backend:local
+    # Built here, never pulled: no registry holds an image of this name.
+    pull_policy: build
+    command: ["node", "dist/worker.js"]
+    environment:
+      NODE_ENV: development
+      # The passwords go into URLs as they are: the development ones need no escaping.
+      DATABASE_URL: postgresql://sadara_app:${SADARA_APP_PASSWORD:?run `just up`, which adds it to infra/.env}@postgres:5432/sadara
+      REGISTRY_DATABASE_URL: postgresql://sadara_registry:${SADARA_REGISTRY_PASSWORD:?run `just up`, which adds it to infra/.env}@postgres:5432/sadara
+      REDIS_HOST: valkey
+      REDIS_PORT: "6379"
+      WORKER_HEARTBEAT_FILE: /tmp/sadara-worker.alive
+      # What it does, not every query of a pass that runs every second.
+      LOG_LEVEL: info
+    depends_on:
+      postgres: { condition: service_healthy }
+      valkey: { condition: service_healthy }
+    healthcheck:
+      # Healthy while the relay's loop turns: it touches the file after every pass.
+      test: ["CMD-SHELL", "find /tmp/sadara-worker.alive -mmin -1 | grep -q ."]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 30s
+    # SIGTERM drains the jobs running before the worker stops.
+    stop_grace_period: 30s
+    mem_limit: 512m
 
   valkey:
     image: valkey/valkey:9.1.2-alpine@sha256:48332870af354a799964c0012ae1194a0bf2bf894eb508f945810596dc2d8d11
