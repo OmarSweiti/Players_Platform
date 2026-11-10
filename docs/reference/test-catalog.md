@@ -215,10 +215,10 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `a_rolled_back_change_enqueues_nothing` | 0.7.5 | backend | done |
 | `a_duplicate_dedup_key_is_a_no_op` | 0.7.5 | backend | done |
 | `a_consumer_commits_an_event_once` | 0.7.5 | backend | done |
-| `a_crashed_worker_redelivers_and_the_handler_stays_idempotent` | 0.7.6 | backend + umbrella | todo |
-| `retries_stop_at_the_bound_and_mark_dead` | 0.7.6 | backend + umbrella | todo |
-| `a_job_runs_only_in_its_own_tenant` | 0.7.6 | backend + umbrella | todo |
-| `the_registry_role_reads_nothing_but_tenant_ids` | 0.7.6 | backend + umbrella | todo |
+| `a_crashed_worker_redelivers_and_the_handler_stays_idempotent` | 0.7.6 | backend + umbrella | done |
+| `retries_stop_at_the_bound_and_mark_dead` | 0.7.6 | backend + umbrella | done |
+| `a_job_runs_only_in_its_own_tenant` | 0.7.6 | backend + umbrella | done |
+| `the_registry_role_reads_nothing_but_tenant_ids` | 0.7.6 | backend + umbrella | done |
 | `a_replayed_command_has_one_effect` | 0.7.7 | backend | todo |
 | `a_reused_key_with_a_different_body_conflicts` | 0.7.7 | backend | todo |
 | `a_concurrent_duplicate_is_refused_while_in_progress` | 0.7.7 | backend | todo |
