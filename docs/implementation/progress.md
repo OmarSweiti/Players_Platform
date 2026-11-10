@@ -85,7 +85,7 @@ edit only Status and Evidence.
 | 0.7.2 | Audit inside the business transaction, redacted; a failed audit aborts the change | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/117 |
 | 0.7.3 | Security events that have no tenant | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/119 · https://github.com/OmarSweiti/Players_Platform/pull/114 |
 | 0.7.4 | Access audit for confidential reads | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/120 |
-| 0.7.5 | The transactional outbox and the consumer inbox | backend | todo |  |
+| 0.7.5 | The transactional outbox and the consumer inbox | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/121 |
 | 0.7.6 | The worker process, with tenant-safe job discovery | backend + umbrella | todo |  |
 | 0.7.7 | Idempotency keys for retried commands | backend | todo |  |
 | 0.7.8 | Transactional email with honest delivery semantics | backend | todo |  |
