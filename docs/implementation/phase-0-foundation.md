@@ -1648,7 +1648,21 @@ of its own after the change commits — failed a suite.
 
 ### 0.7.3 — Security events that have no tenant
 **Repo:** backend · **Size:** S · **Depends on:** `0.7.1`, `0.5.5` · **Requirements:** SR-AUD-001
-**Files:** `prisma/schema.prisma` + migration `…_security_events`, `src/infrastructure/audit/security-events.ts` (new)
+**Files:** `prisma/schema.prisma` + migration `…_security_events`,
+`src/infrastructure/audit/security-events{,.spec}.ts` (new), `src/infrastructure/audit/audit.module.ts`,
+`src/infrastructure/prisma/model-classification.ts`, `scripts/generate-rls.ts`,
+`src/config/env.schema{,.spec}.ts` and every place the environment is supplied,
+`src/common/tenancy/auth-bootstrap.ts`, `src/common/http/client.ts` (new),
+`src/common/guards/session.guard.ts`, the identity module's sign-in, sign-out, own-sessions and
+back-channel use cases, its controller and `identity-provider.port{,.spec}.ts`; the import:
+`provider-security-events.port.ts`, `import-provider-security-events.usecase.ts`,
+`keycloak-provider-security-events.ts`, `security-event-import.module.ts`,
+`src/cli/import-security-events.ts` (new) and `package.json` (`security-events:import`);
+`test/db/security-events.integration-spec.ts`,
+`test/cli/import-security-events.{integration,keycloak}-spec.ts` (new), `test/support/test-issuer.ts`,
+`test/harness/fixtures.ts`, `test/auth/{sign-in,assurance,session-management}.e2e-spec.ts`,
+`test/db/{rls,ids,constraints,time,audit-immutability}.integration-spec.ts`; umbrella
+`infra/keycloak/{realm-sadara.json,test-realm.sh,README.md}`, `infra/{compose.yaml,.env.example}`
 A refused sign-in on an unknown host has no tenant to belong to, and inventing one would falsify the
 record. `SecurityEvent` — global, UUIDv7, append-only by the same grants and triggers — records sign-in
 success and refusal, step-up, logout, back-channel events and session revocations, with the tenant when
@@ -1658,6 +1672,33 @@ arrives in `1.7.1`).
 It also imports the identity provider's own login and admin events — failed sign-ins, lockouts, MFA
 changes, none of which reach Sadara — through the provider adapter (`0.5.4`) and its authenticated admin
 API, deduplicated by the provider's event id (DB-61).
+As built: `security_events` is global and classified `insert-only`: the runtime role may only insert — it
+cannot read, since reading is a security operator's — and `reject_evidence_mutation()` refuses UPDATE,
+DELETE and TRUNCATE for every role; `generate-rls` prints that class's revokes and triggers. A row holds
+its source (`SADARA` or `PROVIDER`), a lower_snake dotted type, `SUCCEEDED` or `REFUSED` and a reason
+code (a refusal always has one), the tenant only as a hint — the tenant the request's host named, never a
+foreign key, and none for a host that names no tenant, not even the one a sign-in began on — the
+provider's issuer and subject (the plan's `identityRef`), the Sadara session, the request id, the
+client's address as HMAC-SHA-256 under a key of its own, `SECURITY_EVENT_KEY`, and redacted metadata
+(codes, counts, ids; an object of at most 4 KB); CHECKs hold each. `SecurityEvents` is the one writer:
+`createMany`, which reads nothing back, and for the import `ON CONFLICT DO NOTHING` on the provider's id,
+which needs no read either. A sign-in or a step-up is recorded in the transaction that opens or renews
+the session, with `acr` and `amr`; any refused callback with what was known — whom the provider proved,
+the session a step-up named, the host's tenant — and a refusal whose event cannot be written fails as any
+fault does; a sign-out, here or everywhere, and a session ended from the list in the transaction that
+ends it, an attempt on another's session as refused; each back-channel logout without a tenant, one whose
+event cannot be written not honoured. A provider's refusal keeps only its check's name and the words
+OAuth and the token claims define. Sending a privileged member back for a second factor is not recorded,
+and the user agent is not kept. The import reads the realm's login and admin events newest first from
+`dateFrom`, 100 a page, at most `--limit` of each kind, as the event reader `sadara-events` —
+`view-events` and nothing else, held only by the command (`OIDC_EVENTS_CLIENT_ID`, `_SECRET`;
+Players_Platform#114), never by the API — and redacts as it reads: never the provider's `details`, which
+hold the username typed, or an admin event's representation; a subject only of this realm; a client id
+only when the provider found the client. `npm run security-events:import -- [--hours 24] [--limit 1000]`
+prints counts only; `0.7.6`'s worker will run it on a schedule. Beyond the plan: every CHECK's
+counter-example, the paged read within its bound, the command's own test, the import against the local
+Keycloak with a real failed sign-in at its form, and each wired path asserted end to end. Each of fifteen
+planted faults failed a suite — one only once its test was sharpened.
 **Tests:** `a_refused_sign_in_is_recorded_without_a_tenant` · `security_events_are_append_only` · `provider_sign_in_failures_reach_security_events`
 **Verify:** `just test-int -- security-events`
 **Done when:** the three tests pass.

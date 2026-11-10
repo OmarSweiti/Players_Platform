@@ -80,6 +80,7 @@ repository's `AGENTS.md`.
 | backend | `npm run openapi` | regenerate the committed contract *(from 0.3.9)* |
 | backend | `just contract` | the committed contract is the code's, and breaks nothing in `development`'s *(from 0.3.9)* |
 | backend | `npm run tenant:provision -- …` | create a tenant and invite its owner, once `npm run build` has built it *(from 0.5.9)* |
+| backend | `npm run security-events:import -- …` | import the identity provider's login and admin events into the security events, once `npm run build` has built it *(from 0.7.3)* |
 | frontend | `just check` | type-check, lint and formatting, production build, unit tests, the browser journeys |
 | frontend | `just test` · `just test-e2e` | unit and component tests (Vitest, jsdom, MSW) · the browser journeys in Arabic and English, with axe, against a fresh build |
 | frontend | `just format` | rewrite the application code in Prettier's format |
