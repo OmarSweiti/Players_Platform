@@ -210,8 +210,8 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `a_refused_sign_in_is_recorded_without_a_tenant` | 0.7.3 | backend | done |
 | `security_events_are_append_only` | 0.7.3 | backend | done |
 | `provider_sign_in_failures_reach_security_events` | 0.7.3 | backend | done |
-| `reading_a_medical_record_leaves_an_access_event` | 0.7.4 | backend | todo |
-| `a_failed_access_audit_withholds_the_data` | 0.7.4 | backend | todo |
+| `reading_a_medical_record_leaves_an_access_event` | 0.7.4 | backend | done |
+| `a_failed_access_audit_withholds_the_data` | 0.7.4 | backend | done |
 | `a_rolled_back_change_enqueues_nothing` | 0.7.5 | backend | todo |
 | `a_duplicate_dedup_key_is_a_no_op` | 0.7.5 | backend | todo |
 | `a_consumer_commits_an_event_once` | 0.7.5 | backend | todo |

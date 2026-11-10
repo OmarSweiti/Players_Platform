@@ -21,8 +21,12 @@ The law is `docs/implementation/01-conventions.md`; the contracts are `docs/refe
   Repositories **select** fields — never `include` a whole relation into a response. A confidential
   field is marked `confidential(class, …)` in its response schema, and the use case builds that response
   with `project(schema, value, disclosedClasses(ctx, policy, resource, granted))` (`src/common/policy`),
-  where `granted` is `PermissionService.grantedClasses(ctx)`. A new response field goes into the
-  field-classification fixture (`test/fixtures/field-classification.ts`) in the same PR.
+  where `granted` is `PermissionService.grantedClasses(ctx)`. A response that may carry an `IDENTITY`,
+  `MEDICAL`, `LEGAL_INTERNAL` or `FINANCE` field is released instead with
+  `accessAudit.release(tx, ctx, { action: '<entity>.read', id }, { schema, value }, disclosed)`
+  (`src/infrastructure/audit/access-audit.ts`), inside the read's transaction, which records the access
+  first; `project` refuses those classes. A new response field goes into the field-classification fixture
+  (`test/fixtures/field-classification.ts`) in the same PR.
 - **Shape.** Controllers are thin: validate (Zod schemas, strict objects — ADR-0024), call one use
   case, return a response DTO — never a Prisma row. Errors are typed domain errors mapped to RFC 9457;
   never `throw new Error`. Workflow state changes only through transition commands. Generic create and
