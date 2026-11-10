@@ -1734,13 +1734,34 @@ confidential answered even when the audit cannot be written. Each of seven plant
 
 ### 0.7.5 — The transactional outbox and the consumer inbox
 **Repo:** backend · **Size:** M · **Depends on:** `0.7.2` · **Requirements:** SYS-ASY-005, SYS-ASY-002, BR-RULE-10
-**Files:** `prisma/schema.prisma` + migration `…_outbox`, `src/infrastructure/outbox/**` (new), `test/db/outbox.integration-spec.ts` (new)
+**Files:** `prisma/schema.prisma` + migration `…_outbox`,
+`src/infrastructure/outbox/{outbox,outbox-events,consumer-inboxes,outbox.module,outbox.spec}.ts` (new),
+`src/infrastructure/prisma/{prisma.module,model-classification}.ts`, `test/db/outbox.integration-spec.ts`
+(new), `test/db/{ids,constraints,time}.integration-spec.ts`
 `OutboxEvent` (tenant-owned, UUIDv7, under RLS like every tenant table): type, aggregate reference, a
 payload of **identifiers only**, a unique `dedupKey`, state `CREATED → LEASED → PUBLISHED` or `DEAD`,
 attempts and next-attempt time. `outbox.enqueue(tx, ctx, event)` writes it in the business transaction.
 `ConsumerInbox` — tenant-owned under forced RLS, unique on `(consumer, eventId)`, with a composite foreign
 key to its `OutboxEvent` — lets a handler commit its effect exactly once however often the event is
 delivered. A notification is advisory; the workflow record stays the truth.
+As built: `outbox_events` and `consumer_inbox` are tenant-owned under forced RLS, UUIDv7 and `kept`: the
+runtime role never removes an event still needed for replay, nor the receipt that stops a second effect.
+The dedup key is unique in its tenant, `(tenant_id, dedup_key)`, and the inbox's `UNIQUE(consumer,
+eventId)` is `(tenant_id, consumer, event_id)` — the same rule, since an event belongs to one tenant —
+because every tenant index leads with `tenant_id` and a key unique across tenants would let one tenant
+learn another's by a conflict. CHECKs hold the type's and aggregate's form, the counts, a non-empty dedup
+key, a lease to `LEASED`, a dispatch time to `PUBLISHED`, a last error to `DEAD`, the payload's shape and
+size (4 KB) and the consumer's name. `Outbox.enqueue(tx, ctx, event)` writes in the context's tenant, its
+payload exactly the identifiers its catalog entry names (`OUTBOX_EVENTS`), each a UUID; a dedup key
+already enqueued writes nothing and answers the event kept, with `ON CONFLICT DO NOTHING`, so a duplicate
+never fails its transaction. `ConsumerInboxes.once(tx, ctx, { consumer, eventId }, effect)` writes the
+receipt first, on the effect's transaction, and runs the effect only if the receipt is new: a concurrent
+delivery waits on the first receipt, a failed effect rolls its receipt back, and the receipt keeps what
+the effect names. Both services are global and come with the `PrismaModule`. The first catalog entry is
+`invitation.created` (`{ invitationId }`), whose producer and consumer are `0.7.8`'s; nothing enqueues or
+consumes yet, and the relay is `0.7.6`'s. Beyond the plan: two deliveries of a fresh event at once, every
+CHECK's counter-example, the payload's allowlist and the consumer's name. Each of nine planted faults
+failed a suite.
 **Tests:** `a_rolled_back_change_enqueues_nothing` · `a_duplicate_dedup_key_is_a_no_op` · `a_consumer_commits_an_event_once`
 **Verify:** `just test-int -- outbox`
 **Done when:** the three tests pass.
