@@ -219,11 +219,11 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `retries_stop_at_the_bound_and_mark_dead` | 0.7.6 | backend + umbrella | done |
 | `a_job_runs_only_in_its_own_tenant` | 0.7.6 | backend + umbrella | done |
 | `the_registry_role_reads_nothing_but_tenant_ids` | 0.7.6 | backend + umbrella | done |
-| `a_replayed_command_has_one_effect` | 0.7.7 | backend | todo |
-| `a_reused_key_with_a_different_body_conflicts` | 0.7.7 | backend | todo |
-| `a_concurrent_duplicate_is_refused_while_in_progress` | 0.7.7 | backend | todo |
-| `a_stale_lease_is_recovered_without_a_second_effect` | 0.7.7 | backend | todo |
-| `a_replay_succeeds_despite_its_stale_original_if_match` | 0.7.7 | backend | todo |
+| `a_replayed_command_has_one_effect` | 0.7.7 | backend | done |
+| `a_reused_key_with_a_different_body_conflicts` | 0.7.7 | backend | done |
+| `a_concurrent_duplicate_is_refused_while_in_progress` | 0.7.7 | backend | done |
+| `a_stale_lease_is_recovered_without_a_second_effect` | 0.7.7 | backend | done |
+| `a_replay_succeeds_despite_its_stale_original_if_match` | 0.7.7 | backend | done |
 | `an_invitation_notice_is_sent_in_the_recipients_locale` | 0.7.8 | backend | todo |
 | `a_redelivered_event_does_not_resend_a_recorded_email` | 0.7.8 | backend | todo |
 | `object_keys_are_opaque_and_tenant_prefixed` | 0.8.1 | backend | todo |
