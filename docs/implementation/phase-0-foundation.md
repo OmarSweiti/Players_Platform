@@ -1705,10 +1705,29 @@ planted faults failed a suite — one only once its test was sharpened.
 
 ### 0.7.4 — Access audit for confidential reads
 **Repo:** backend · **Size:** S · **Depends on:** `0.7.2`, `0.6.4` · **Requirements:** —
-**Files:** `src/infrastructure/audit/access-audit.ts` (new), the confidential projections
+**Files:** `src/infrastructure/audit/access-audit.ts` (new),
+`src/infrastructure/audit/{audit.module,audited-actions}.ts`, the confidential projections:
+`src/common/policy/{projection,projection.spec,confidential-class}.ts`;
+`test/db/access-audit.integration-spec.ts` (new), `test/authz/confidential-fields.e2e-spec.ts`
 Returning a `MEDICAL`, `LEGAL_INTERNAL`, `IDENTITY` or `FINANCE` field records who read which record's
 which class, in the same transaction and **before** the data is released; if that record cannot be
 written, the data is withheld. The event carries identifiers, never the content.
+As built: `AccessAudit.release(tx, ctx, record, { schema, value }, disclosed)` builds the response as
+`project` does and, when it carries a field of an access-audited class (`ACCESS_AUDITED_CLASSES`: the
+four above; `MINOR_POLICY` is not one), records through the audit service, on the caller's transaction,
+who read which record's which classes, and only then returns it; a null field disclosed counts as
+released. The event is an audit row — the member, their role and session, the request and its client, the
+record's entity and id, and `{ classes }` — under a read action of the entity's own;
+`medical_record.read` is the first. A response that carries no such field records nothing. `project`
+refuses to release an audited class, disclosed or not (`UnauditedRelease`), so a use case cannot skip the
+event: only the access audit releases one, through `projectAndRecord`. No route the app serves projected
+a confidential field yet, so the plan's tests read a real `medical_records` row as a use case will — in
+its tenant transaction, through a policy that discloses the medical fields to the clinician who recorded
+it — and `0.6.8`'s medical routes and phase 1's legal, finance and identity fields release through it. No
+migration: the events are 0.7.1's append-only audit rows. Beyond the plan: the confidential-fields
+suite's test route releases through the access audit, and only its clinician's read over HTTP leaves an
+event; `project`'s refusal; the event written before the value returns; a read that releases nothing
+confidential answered even when the audit cannot be written. Each of seven planted faults failed a suite.
 **Tests:** `reading_a_medical_record_leaves_an_access_event` · `a_failed_access_audit_withholds_the_data`
 **Verify:** `just test-int -- access-audit`
 **Done when:** both tests pass.
