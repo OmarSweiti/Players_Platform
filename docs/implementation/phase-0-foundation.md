@@ -1923,10 +1923,32 @@ exact bytes that were scanned ([ADR-0009](../adr/0009-object-storage.md)).*
 
 ### 0.8.1 — The storage port and an S3 adapter; local-disk storage removed
 **Repo:** backend · **Size:** M · **Depends on:** `0.2.1` · **Requirements:** SR-DOC-006
-**Files:** `src/infrastructure/storage/**` (port, S3 adapter, key builder), `local.storage.service.ts` (delete), `test/storage/storage.integration-spec.ts` (new)
+**Files:** `src/infrastructure/storage/{storage.port,s3-storage,object-keys,storage.module}.ts` and a spec (port, S3
+adapter, key builder), `local.storage.service.ts` and `storage.service.ts` (deleted), `src/config/env.schema.ts` (the
+`S3_*` settings), `test/storage/storage.integration-spec.ts` and `test/harness/object-store.ts` (new),
+`scripts/test-database.sh`, `.github/workflows/ci.yml` (the object store as a service)
 `StoragePort` offers presigned PUT and GET, head, ranged read, server-side copy and delete — every read
 addressable by **object version**. Keys come from one builder, `tenants/{tenantId}/{quarantine|objects}/{uuid}`,
 never from a filename. The bucket is private and versioned.
+As built: `StoragePort` (`storage.port.ts`) offers a presigned PUT of one declared `type/subtype` — signed, so another
+type is refused — a presigned GET pinned to one version, with an optional download name (RFC 6266, its fallback ASCII
+and the name in UTF-8, RFC 8187), `head` of the newest or a named version, a ranged read of one version (at most
+1 MiB), a server-side copy of one exact version, and deleting one version alone; a link lasts 1 second to 15
+minutes, as its caller says. `S3Storage` serves it through `@aws-sdk/client-s3` and `s3-request-presigner` 3.1161.0
+(installed with npm's `--before` set to the cooldown, so every package they bring is past it), computing checksums
+only where S3 requires them; a missing object or version is `ObjectNotFound`, any other failure a 503. Keys come from
+`newObjectKey(ctx, area)` alone — `tenants/{the context's tenant}/{quarantine|objects}/{a random UUID v4}` —
+`objectKeyOf(ctx, value, area)` reads one back only in its area and its own tenant, and the adapter refuses any other
+key. The API's settings are `S3_ENDPOINT` (HTTPS, or HTTP on this machine; no path), `S3_REGION`, `S3_BUCKET`,
+`S3_ACCESS_KEY_ID` and `S3_SECRET_ACCESS_KEY` with no default, and `S3_FORCE_PATH_STYLE`; `StorageModule` provides the
+port globally, and nothing calls it yet. The local-disk `StorageService`, which wrote under a caller-influenced path
+and was injected nowhere, is deleted (SEC-14, B-10). The tests run against the local stack's Versity gateway in its
+test bucket, whose settings `scripts/test-database.sh` takes from `infra/.env`; CI's `test` job runs the same gateway,
+by the same digest, as a service, and the tests' setup makes the bucket, versioned, when it is missing. A link points
+at `S3_ENDPOINT` — locally `http://127.0.0.1:7070`, not the HTTPS origin — so how a browser reaches the store for an
+upload is `0.8.3`'s. Beyond the plan: a read pinned to its version through a rewrite, a copy of one exact version, a
+version deleted alone, an upload of another type refused, a link's expiry, a download's Arabic name, and the settings'
+rules. Each of thirteen planted faults failed a suite.
 **Tests:** `object_keys_are_opaque_and_tenant_prefixed` · `the_bucket_refuses_anonymous_reads`
 **Verify:** `just test-int -- storage`
 **Done when:** both tests pass against the compose object store.

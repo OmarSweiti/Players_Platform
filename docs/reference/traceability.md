@@ -126,7 +126,7 @@ The four source documents and their checksums: [`../requirements/README.md`](../
 | SR-DOC-003 | SRD | 0.8.3, 1.1.8, 1.3.2 | 0/3 |
 | SR-DOC-004 | SRD | 0.8.4, 1.3.2 | 0/2 |
 | SR-DOC-005 | SRD | 1.3.1, 1.3.5, 1.4.3, 1.4.5, 1.4.8, 3.3.1 | 0/6 |
-| SR-DOC-006 | SRD | 0.8.1, 1.3.1 | 0/2 |
+| SR-DOC-006 | SRD | 0.8.1, 1.3.1 | 1/2 |
 | SR-DOC-007 | SRD | 1.3.4, 4.3.2 | 0/2 |
 | SR-DOC-008 | SRD | 3.3.1 | 0/1 |
 | SR-MED-001 | SRD | 2.1.0, 2.1.2 | 0/2 |
