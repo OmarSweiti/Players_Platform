@@ -1815,7 +1815,10 @@ again, and shutdown draining in-flight jobs. Each of nine planted faults failed 
 
 ### 0.7.7 — Idempotency keys for retried commands
 **Repo:** backend · **Size:** M · **Depends on:** `0.4.5`, `0.3.1` · **Requirements:** SR-CORE-010
-**Files:** `prisma/schema.prisma` + migration `…_idempotency`, `src/common/idempotency/**` (new), `test/platform/idempotency.e2e-spec.ts` (new)
+**Files:** `prisma/schema.prisma` + migration `…_idempotency`,
+`src/common/idempotency/{idempotency,idempotent-request,request-hash,idempotency.module}.ts` and a spec (new),
+`src/common/openapi/contract.ts`, `src/infrastructure/prisma/model-classification.ts`, `src/app.module.ts`,
+`test/platform/idempotency.e2e-spec.ts` (new), `test/db/idempotency.integration-spec.ts` (new)
 `IdempotencyRecord` (tenant-owned, RLS): tenant, actor, method and canonical path, key hash, request
 hash, state `IN_PROGRESS → SUCCEEDED | REJECTED`, a processing lease with a fencing token, a minimal receipt
 (status, resource id — never a confidential snapshot), expiry — the canonical schema in
@@ -1826,6 +1829,30 @@ atomically: the same key and body return the original outcome after re-checking 
 re-evaluating the original `If-Match`, which the first success has legitimately made stale; the same
 key with a different body is `409 IDEMPOTENCY_KEY_REUSED`; a concurrent duplicate is
 `409 IDEMPOTENCY_IN_PROGRESS` with `Retry-After`.
+As built: `idempotency_records` is tenant-owned under forced RLS, UUIDv7, not kept; a key's namespace
+`(tenant_id, actor_user_id, method, canonical_path, key_hash)` leads with the tenant. It keeps SHA-256 hashes of the
+key and of the validated input with its `If-Match`, never either; a claim's lease and fencing generation; and an
+outcome — the id of what a success made or changed (`result_ref`), or a refusal's error code (`outcome_code`, in
+place of an HTTP status: the code decides it, and a success's status is its route's). There is no lease owner: the
+generation names the claim. CHECKs hold the method, the path's form, the hashes' length, the lease to
+`IN_PROGRESS`, the outcome to its state and the expiry. `Idempotency.run(ctx, request, input, command)` claims the
+key in a transaction of its own, under a 30-second lease, so a duplicate sees the claim; then, in another, locks
+the record, checks the claim is still its own, and commits the command's effect and `SUCCEEDED` together, fenced by
+the generation. A retry of the same request is answered from the outcome without being executed: a success rebuilt
+by the command's `replay` as the caller may read it now, a refusal (a 4xx domain error) as the same refusal, without
+its field errors. Another body or `If-Match` is `IDEMPOTENCY_KEY_REUSED`; a duplicate while the first runs is
+`IDEMPOTENCY_IN_PROGRESS` with `Retry-After: 1`; a claim whose lease ran out is taken over, its generation
+incremented, so the execution that held it cannot commit; a failure that committed nothing frees the key at once.
+A record answers for 24 hours; an expired one is removed when its key is claimed again. The record is read without
+a lock, and locked (`SKIP LOCKED`) only to be changed, so no request waits on another. `@Idempotent()` reads the
+`Idempotency-Key` header (1 to 128 printable ASCII characters, else `400 VALIDATION_FAILED`), the method, the route
+with its parameters filled in, and the `If-Match`; the contract then declares the header, the 400 and both 409s with
+`Retry-After`. No route takes a key yet: invitation acceptance runs in the sign-in navigation (`0.5.10`), which
+carries no header, and works once by its own state; uploads' completion (`0.8.3`) and exports (`1.9.1`) take one
+where they are built. The e2e suite proves the mechanism through a probe route built as such a command. Beyond the
+plan: a refusal answered again, a failure that frees its key, a key's namespace by member, tenant and route, a
+missing or malformed key, an expired key, a replay authorized again, concurrent retries of a finished command, and
+the old holder fenced while the claim that took over still executes. Each of twelve planted faults failed a suite.
 **Tests:** `a_replayed_command_has_one_effect` · `a_reused_key_with_a_different_body_conflicts` · `a_concurrent_duplicate_is_refused_while_in_progress` · `a_stale_lease_is_recovered_without_a_second_effect` · `a_replay_succeeds_despite_its_stale_original_if_match`
 **Verify:** `just test-e2e -- test/platform/idempotency.e2e-spec.ts`
 **Done when:** the five tests pass.
