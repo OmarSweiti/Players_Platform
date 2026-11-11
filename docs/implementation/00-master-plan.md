@@ -218,6 +218,7 @@ evidence and the affected requirement and test IDs here, and update the owning m
 | OPEN-16 | Is break-glass emergency access needed, and who approves it? | disabled; scoped, time-boxed support grants only, never self-approved | Phase 4 support access | the owner, with a security review |
 | OPEN-17 | The default role matrix and approval chains | the seeded defaults in [`../reference/security-privacy.md`](../reference/security-privacy.md) | `1.1.5` | **decided as the product default (ADR-0021)**; per-tenant customization is later work |
 | OPEN-18 | The licence of the code | **decided 29 September 2026 (owner): proprietary, all rights reserved** — `LICENSE` in all three repositories, `UNLICENSED` in both `package.json` files. The repositories stay publicly *visible*: GitHub's terms let anyone view and fork a public repository on GitHub, and only a private repository stops that | — | settled; versions published earlier under GPL-3.0 keep that licence for those versions |
+| OPEN-19 | How long does a new invitee's account-setup link last, against an invitation open for 7 days? | Keycloak's realm default, 12 hours (`0.7.8`); until resending exists, revoking the invitation and inviting again sends both emails afresh | `1.1.6` (resend) | the owner: a link as long as the invitation — a longer-lived credential in an email — or 12 hours with a resend |
 
 ---
 
