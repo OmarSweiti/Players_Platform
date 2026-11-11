@@ -1859,8 +1859,15 @@ the old holder fenced while the claim that took over still executes. Each of twe
 
 ### 0.7.8 — Transactional email with honest delivery semantics
 **Repo:** backend · **Size:** M · **Depends on:** `0.7.6`, `0.5.10` · **Requirements:** —
-**Files:** `src/infrastructure/mail/**` (replaces the logging stub), templates `src/infrastructure/mail/templates/{ar,en}/*`,
-`prisma/schema.prisma` + migration `…_email_delivery`, `test/mail/email.integration-spec.ts` (new)
+**Files:** backend `src/infrastructure/mail/{mail-transport,smtp-mail-transport,email-deliveries,mail.module}.ts`
+(replace the logging stub), templates `src/infrastructure/mail/templates/{layout,invitation-notice}.ts` and
+`templates/{ar,en}/invitation-notice.ts` and a spec, `src/infrastructure/outbox/outbox-consumers.ts` (`dispatch`),
+`src/infrastructure/queue/outbox-worker.ts`, `src/modules/users/application/invitation-notice.consumer.ts` and
+`src/modules/users/invitation-notice.module.ts` (new), `src/modules/users/application/use-cases/invite-member.usecase.ts`,
+`src/config/env.schema.ts` (the worker's mail settings), `src/worker.module.ts`, `prisma/schema.prisma` + migration
+`…_email_delivery`, `test/mail/email.integration-spec.ts` and `test/support/smtp-sink.ts` (new); the legacy
+`src/infrastructure/{mail,events}` and `@nestjs/{bullmq,event-emitter}` removed; umbrella `infra/compose.yaml` (the
+worker's mail settings)
 An SMTP adapter (Mailpit locally; the production provider is `1.6.3`) and per-locale templates; the
 first consumer is the invitation notice, whose handler generates the invitation token at send time and
 stores only its hash (`0.5.10`) — the outbox event carries the invitation id, never a link. **What is promised:** the intent to send is durable (the outbox) and local processing is deduplicated per
@@ -1869,6 +1876,37 @@ crashes after the SMTP server accepted a message but before recording it sends i
 crashes can repeat that; retries are bounded, so a message that keeps failing ends in an explicit `FAILED`
 state that raises an alert. Nothing is lost silently; duplicates are possible unless the provider offers an
 idempotency key, which the adapter then uses.
+As built: `email_deliveries` is tenant-owned under forced RLS, UUIDv7 and `kept`, unique per
+`(tenant_id, event_id, recipient_hash)`, its key to its event carrying the tenant; the recipient is a SHA-256
+hash and no body is kept, a message being built again at each attempt. Status `QUEUED`, `SENDING` (an attempt
+begun, its outcome not yet recorded), `SENT` (with the accepted Message-ID), `FAILED` (with its last error) or
+`CANCELLED`; CHECKs hold the template's name, the hash's length, the locale, the counts and the outcome to its
+state. An outbox consumer that calls out now has `dispatch(ctx, event)`, which the worker runs after the receipt
+commits, outside any transaction, on every delivery; an `EffectFailedForGood` ends the job at once.
+`EmailDeliveries.record` writes the email on the receipt's transaction, once; `dispatch` begins an attempt and
+commits it, has the consumer build the message — its link's token made then — or cancel it, sends, and records the
+server's acceptance. A failure goes back to `QUEUED` with its code (the server's reply code, never its text); a
+permanent refusal (5xx) or the eighth attempt's ends it `FAILED`, logged as `mail.delivery_failed` — the alert's
+delivery is `1.10.12`'s. `SmtpMailTransport` is nodemailer 10.3.1: one pooled connection, bounded waits, no
+attachment from a path or URL, from صدارة / Sadara, `Auto-Submitted`; the worker's settings are `SMTP_HOST`,
+`SMTP_PORT`, `SMTP_TLS` (`implicit`, `starttls`, or `none` — refused in staging and production), an optional account,
+`MAIL_FROM` and `APEX_DOMAIN`. The notice (`templates/{ar,en}`) names the agency, the role in the reader's language
+and the expiry in the tenant's zone with Western digits, carries its language and direction, isolates an Arabic
+notice's agency name and escapes what a tenant wrote; its consumer, `InvitationNoticeConsumer`, lives in the users
+module and reads invitations through its port, records the notice while the invitation is pending, and sends it
+with a token issued at send time, linking to sign-in on the tenant's host (its domain, else `{slug}.APEX_DOMAIN`);
+an invitation no longer pending is sent nothing. Inviting enqueues `invitation.created`, the invitation's id only,
+in its transaction, and — beyond the plan's text, as decided for this step, since without it a new invitee could not
+choose a password — asks the provider for its setup email before writing, which Keycloak sends only while the
+account has something left to set up; the provider down writes nothing, and a retry asks again. Keycloak's setup
+link lasts 12 hours, its realm's default, against a 7-day invitation: OPEN-19. The API lost its mail stub and its
+`MAIL_FROM`, and the unused `EventService` went with `@nestjs/bullmq` and `@nestjs/event-emitter`; a failure's
+recorded code now takes a code the error carries itself. The stack's worker sends to Mailpit (`infra/compose.yaml`).
+Beyond the plan: a worker that stopped after the server accepted sending again with only the newest link working, a
+refusal retried, a permanent one and the eighth failing for good, an invitation no longer pending sent nothing, the
+catalog test and the once-per-recipient key, the notice enqueued with its id only, and the setup email with the
+provider down. Each of fifteen planted faults failed a suite. Validated end to end: invitations made through the API
+reached Mailpit in Arabic and English, and the Arabic invitee completed Keycloak's setup and accepted.
 **Tests:** `an_invitation_notice_is_sent_in_the_recipients_locale` · `a_redelivered_event_does_not_resend_a_recorded_email`
 **Verify:** `just test-int -- email`
 **Done when:** an invitation created through the API arrives in Mailpit in the invitee's language, and
