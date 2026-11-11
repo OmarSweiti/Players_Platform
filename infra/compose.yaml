@@ -58,9 +58,17 @@ services:
       WORKER_HEARTBEAT_FILE: /tmp/sadara-worker.alive
       # What it does, not every query of a pass that runs every second.
       LOG_LEVEL: info
+      # Its email (0.7.8): to Mailpit, unencrypted on this machine only, from
+      # the sender the stack's mail uses, its links to {slug}.localhost.
+      SMTP_HOST: mailpit
+      SMTP_PORT: "1025"
+      SMTP_TLS: none
+      MAIL_FROM: no-reply@sadara.localhost
+      APEX_DOMAIN: localhost
     depends_on:
       postgres: { condition: service_healthy }
       valkey: { condition: service_healthy }
+      mailpit: { condition: service_healthy }
     healthcheck:
       # Healthy while the relay's loop turns: it touches the file after every pass.
       test: ["CMD-SHELL", "find /tmp/sadara-worker.alive -mmin -1 | grep -q ."]

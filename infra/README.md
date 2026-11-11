@@ -21,10 +21,10 @@ just dev-cookie coach@sadara.test > jar   # sign a development member in, headle
 | `valkey` | Valkey 9.1.2 | `127.0.0.1:6379` | queues, rate limits, short-lived sign-in state |
 | `objectstore` | Versity S3 Gateway 1.8.0 | `127.0.0.1:7070`, buckets `sadara` and `sadara-test` | private, versioned files ([ADR-0009](../docs/adr/0009-object-storage.md), [ADR-0020](../docs/adr/0020-local-object-store.md)) |
 | `clamav` | ClamAV 1.5.4 | `127.0.0.1:3310` | the malware scan before a file is promoted |
-| `mailpit` | Mailpit 1.31.2 | SMTP `127.0.0.1:1025`, <http://localhost:8025> | every email the stack sends |
+| `mailpit` | Mailpit 1.31.2 | SMTP `127.0.0.1:1025`, <http://localhost:8025> | every email the stack sends: the worker's (an invitation's notice, `0.7.8`) and Keycloak's (an account's setup) |
 | `keycloak` | Keycloak 26.7.4 | <http://localhost:8080> | the development identity provider, with the `sadara` realm as code ([keycloak/README.md](keycloak/README.md)) |
 | `proxy` | Caddy 2.11.4 | <https://sadara.localhost>, <https://northwind.localhost> | `/api/` → the API on `:3000`, everything else → the web app on `:3001` |
-| `worker` | built from `backend/` (its Dockerfile pins every base image by digest) | no port; `just logs worker` | relays the transactional outbox to Valkey and runs the queue's jobs, each in its own tenant's transaction (`0.7.6`); healthy while its relay's loop turns |
+| `worker` | built from `backend/` (its Dockerfile pins every base image by digest) | no port; `just logs worker` | relays the transactional outbox to Valkey and runs the queue's jobs, each in its own tenant's transaction (`0.7.6`), and sends their email to Mailpit (`0.7.8`); healthy while its relay's loop turns |
 
 The development credentials are in `infra/.env`, copied from [`.env.example`](.env.example). They open
 services bound to 127.0.0.1 and nothing else.
@@ -49,9 +49,10 @@ role existed gains it (the registry role). `just up` adds missing settings to an
 and warns when the volume predates the roles altogether; `just reset`, then `just up`, creates it again.
 
 **The worker (`0.7.6`).** `just up` builds it from `backend/` whenever the backend changed, and starts it
-once PostgreSQL and Valkey are healthy. It connects as `sadara_app` for its tenant transactions and as
-`sadara_registry` to find the active tenants, and holds none of the API's identity-provider, session or
-mail settings. A stack whose database is not migrated yet runs it all the same: its relay's passes fail,
+once PostgreSQL, Valkey and Mailpit are healthy. It connects as `sadara_app` for its tenant transactions and
+as `sadara_registry` to find the active tenants, and holds none of the API's identity-provider or session
+settings. Its email goes to Mailpit, unencrypted — which it accepts only in development and test — from
+`no-reply@sadara.localhost`, with links to `{slug}.localhost` (`0.7.8`). A stack whose database is not migrated yet runs it all the same: its relay's passes fail,
 are logged and tried again, so `backend/`'s `just migrate` is all it waits for. `docker compose stop
 worker` drains the jobs it is running before it stops.
 
