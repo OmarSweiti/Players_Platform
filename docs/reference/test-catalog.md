@@ -226,8 +226,8 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `a_replay_succeeds_despite_its_stale_original_if_match` | 0.7.7 | backend | done |
 | `an_invitation_notice_is_sent_in_the_recipients_locale` | 0.7.8 | backend | done |
 | `a_redelivered_event_does_not_resend_a_recorded_email` | 0.7.8 | backend | done |
-| `object_keys_are_opaque_and_tenant_prefixed` | 0.8.1 | backend | todo |
-| `the_bucket_refuses_anonymous_reads` | 0.8.1 | backend | todo |
+| `object_keys_are_opaque_and_tenant_prefixed` | 0.8.1 | backend | done |
+| `the_bucket_refuses_anonymous_reads` | 0.8.1 | backend | done |
 | `a_file_object_never_stores_a_url` | 0.8.2 | backend | todo |
 | `sizes_beyond_two_gibibytes_are_representable` | 0.8.2 | backend | todo |
 | `an_executable_renamed_pdf_is_refused` | 0.8.3 | backend | todo |

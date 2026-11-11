@@ -116,9 +116,9 @@ run early.
 stale.*
 
 <!-- plan:milestone:begin -->
-**Demo milestone** — 71 of 126 microsteps done; 352–704 engineering hours left before the reserve.
+**Demo milestone** — 72 of 126 microsteps done; 348–696 engineering hours left before the reserve.
 
-Next in build order (every dependency done): `0.8.1`, `0.10.2`, `0.9.5`.
+Next in build order (every dependency done): `0.8.2`, `0.10.2`, `0.9.5`.
 
 | Stage | Step | Title | Repo | Size | Status |
 |---|---|---|---|---|---|
@@ -193,7 +193,7 @@ Next in build order (every dependency done): `0.8.1`, `0.10.2`, `0.9.5`.
 | F | 0.7.6 | The worker process, with tenant-safe job discovery | backend + umbrella | L | done |
 | F | 0.7.7 | Idempotency keys for retried commands | backend | M | done |
 | F | 0.7.8 | Transactional email with honest delivery semantics | backend | M | done |
-| F | 0.8.1 | The storage port and an S3 adapter; local-disk storage removed | backend | M | todo |
+| F | 0.8.1 | The storage port and an S3 adapter; local-disk storage removed | backend | M | done |
 | F | 0.8.2 | File objects and upload sessions | backend | M | todo |
 | F | 0.8.3 | Upload: authorize, presign into quarantine, finalize with content checks | backend | M | todo |
 | F | 0.8.4 | Scan, then promote to an immutable version | backend + umbrella | L | todo |
