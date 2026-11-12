@@ -1993,14 +1993,45 @@ twelve planted faults failed a suite; planting them found one weak assertion, ma
 owning steps replace.
 
 ### 0.8.3 — Upload: authorize, presign into quarantine, finalize with content checks
-**Repo:** backend · **Size:** M · **Depends on:** `0.8.2`, `0.6.3` · **Requirements:** SR-DOC-003, SR-NFR-PERF-002
-**Files:** `src/modules/files/presentation/uploads.controller.ts` (new), `src/modules/files/application/**`, `test/files/uploads.e2e-spec.ts` (new)
+**Repo:** backend + umbrella · **Size:** M · **Depends on:** `0.8.2`, `0.6.3` · **Requirements:** SR-DOC-003, SR-NFR-PERF-002
+**Files:** backend `src/modules/files/presentation/{uploads.controller,dto/upload.dto}.ts`, `src/modules/files/application/**`
+(the two use cases, their ports, `upload.policy.ts`, `upload-errors.ts`), `src/modules/files/infrastructure/repositories/**`,
+`src/modules/files/domain/{upload-kinds,content-signature,file-name,upload-session}.ts` and a spec, `src/modules/files/files.module.ts`
+(all new but `upload-session.ts`), `src/infrastructure/storage/{storage.port,s3-storage,storage.module}.ts`, `src/config/env.schema.ts`
+(`S3_PUBLIC_ENDPOINT`), `src/common/errors/error-codes.ts`, `src/infrastructure/audit/audited-actions.ts`,
+`src/infrastructure/outbox/outbox-events.ts`, `openapi/openapi.json`, `Dockerfile`, `test/files/uploads.e2e-spec.ts` (new),
+`test/{isolation,authz,storage,fixtures,harness}/**`, `.github/workflows/ci.yml`; umbrella `infra/proxy/Caddyfile`,
+`infra/objectstore/bootstrap.py`, `infra/keycloak/test-realm.sh`, `infra/README.md`
 `POST /api/v1/uploads` names the owner and the declared type and size; the owner's policy authorizes
 it; the answer is a presigned PUT **into quarantine**, valid for ten minutes and bound to that size and
 type. `POST /api/v1/uploads/{id}/complete` records the quarantined object's **exact `versionId`**, checks that
 version's size, magic bytes against the declared type, and the filename, then marks the file `UPLOADED`
 and queues its scan. Nothing is processed inside
 the request.
+As built (Players_Platform_Backend#129, Players_Platform#133): an upload names its owner by kind — one kind so far,
+`player-document`, a player's, which takes PDF, JPEG and PNG up to 25 MiB and starts its file `OPERATIONAL`, a class
+`1.3.1`'s binding may only raise — and the declaration is checked first, every issue by field: a type its kind takes, a
+size within its cap, and a name kept in NFC with no control, separator or bidirectional control (a right-to-left override
+cannot make `fdp.exe` read as `.pdf`), not ending in a dot, ending in its type's extension. The owner follows, by its
+policy: another tenant's, or none, is `404`, the same answer; a player is every member's to see who holds
+`document.upload` until the players module's own policy (`1.2.1`). The file is made `UPLOADING` under a builder's key,
+the upload open an hour, and the answer's PUT — ten minutes, `Cache-Control: no-store` — signs the type and the exact
+`Content-Length`, so the store refuses any other body. Completion is the uploader's alone; it reads the store outside any
+transaction — the newest version, its size and type, its first 16 bytes against the type's signature — then, the upload
+locked, pins that exact version, marks the file `UPLOADED`, closes the upload, enqueues `file.uploaded` and audits
+`file.upload_started` and `file.uploaded` (the name as a reference). Nothing arrived is `409 UPLOAD_INCOMPLETE`,
+answered before the key is claimed so the same request completes later; another file than declared is
+`422 UPLOAD_CONTENT_MISMATCH`, the file left unpinned and never readable — `REJECTED` stays the scan's verdict
+(`0.8.4`); past its hour, `409 INVALID_TRANSITION`. Both routes take `document.upload` and an `Idempotency-Key`, the start
+in the `upload` rate-limit category. A browser reaches the store through the umbrella's `https://storage.localhost`: the
+API signs links for `S3_PUBLIC_ENDPOINT`, its own calls stay on `S3_ENDPOINT`, and `just up` sets the bucket's CORS rules
+from the proxy's tenant hosts — the sites that route the API — and proves a PUT refused at another length and a foreign
+page refused. Not built: a tenant's quota (`4.1.7`), and `GET /uploads/{id}`; no step yet sweeps an upload never
+completed. The image no longer makes an `uploads` folder. Beyond the plan: the exact version pinned and the scan queued
+once, a retried start, completing before the file arrives, an upload past its window, a type its kind does not take,
+names refused, the link's size bound in the storage tests, and both routes in the isolation suite and the field
+classification with real uploads; validated from a real browser in Arabic and English. Each of eleven planted faults in
+the backend and two in the umbrella failed a check.
 **Tests:** `an_executable_renamed_pdf_is_refused` · `an_upload_for_another_tenants_owner_is_not_found` · `a_size_mismatch_is_refused`
 **Verify:** `just test-e2e -- test/files/uploads.e2e-spec.ts`
 **Done when:** the three tests pass.
