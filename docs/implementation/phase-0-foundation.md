@@ -1955,7 +1955,10 @@ rules. Each of thirteen planted faults failed a suite.
 
 ### 0.8.2 — File objects and upload sessions
 **Repo:** backend · **Size:** M · **Depends on:** `0.8.1`, `0.4.5` · **Requirements:** SR-DOC-001, SR-DB-008
-**Files:** `prisma/schema.prisma` + migration `…_file_objects`, `src/modules/files/domain/**` (new)
+**Files:** `prisma/schema.prisma` + migrations `…_file_objects` and `…_documents_contained`,
+`src/modules/files/domain/{file-object,upload-session}.ts` and a spec (new), `src/infrastructure/prisma/model-classification.ts`
+and `scripts/generate-rls.ts` (a `contained` row class), `test/files/files.integration-spec.ts` (new),
+`test/db/{constraints,foreign-keys,preflight,rls,time}.integration-spec.ts`, `test/harness/fixtures.ts`
 `FileObject` (tenant-owned, RLS): object key and version, `sha256`, `sizeBytes BigInt`, content type,
 original name (display only), status `CREATED → UPLOADING → UPLOADED → SCANNING → PROCESSING → READY` or
 `REJECTED | FAILED | ABORTED` (`PROCESSING` stays unused until derivatives arrive in `1.3.3`), scan verdict, classification, retention class, creator. `UploadSession`
@@ -1966,6 +1969,24 @@ legal attachments `1.5.3`, message attachments `2.6.5`.
 `FileObject` also keeps the quarantined object's version (`quarantineVersionId`) beside the final one; the
 upload session's owner is a declared intent, `(ownerKind, ownerId)`, checked by the owner's policy at upload
 and at binding and never joined — the typed binding is the only reference (DB-69).
+As built (Players_Platform_Backend#126): `file_objects` and `upload_sessions` are tenant-owned under forced RLS and
+kept — the runtime role may not delete either; a purge marks a file (`1.3.4`). A file holds its quarantine key and the
+quarantined version completion pins, then the promoted object's key, version and SHA-256; its size is a `BIGINT`, its
+declared type and original name are for display, and its classification is operational or one of the confidential
+classes, its retention class `UNCLASSIFIED` until `1.3.4` (OPEN-06). Its creator, and an upload's file and maker, are
+composite keys that carry the tenant; an upload is one per file, its owner kind a lower-case code such as
+`player-document`, so each domain names its own without a schema change. CHECKs hold a key to the storage port's
+form under the row's own tenant — never a URL, a file's name or another tenant's key — and the state to its order:
+pinned from `UPLOADED` on, promoted only when clean and hashed, `READY` only when clean, promoted and finalized,
+`INFECTED` only when `REJECTED`; the trigger `file_objects_identity_immutable` refuses any change to a pinned file's
+keys, versions, hash, size or creator. `Document` is contained in the database, not only by no code writing it: a new
+row class, `contained`, gives the runtime role `SELECT` alone, and `…_documents_contained` revokes its `INSERT`,
+`UPDATE` and `DELETE`; three older tests that wrote legacy `documents` rows as the runtime role now write them as the
+owner, as `1.3.1`'s data migration will. The files module's domain names the statuses, verdicts and classifications —
+a spec holds them equal to the database's enums — the moves a file may make, and that only `READY` and `CLEAN` may be
+served, never as permission alone. Beyond the plan: each CHECK's counter-example, the identity trigger, an upload's
+declared owner and its tenant's keys, the contained table refusing the runtime role, and the domain's moves. Each of
+twelve planted faults failed a suite; planting them found one weak assertion, made stronger before merging.
 **Tests:** `a_file_object_never_stores_a_url` · `sizes_beyond_two_gibibytes_are_representable`
 **Verify:** `just migrations && just test-int -- files`
 **Done when:** both tests pass and no table references files by URL except the legacy columns their
