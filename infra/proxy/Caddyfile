@@ -23,3 +23,14 @@ sadara.localhost, northwind.localhost {
 		reverse_proxy host.docker.internal:3001 # the web app: frontend, npm run dev
 	}
 }
+
+# The object store, where a browser sends a file through a link the API signed
+# for this host (0.8.3; the backend's S3_PUBLIC_ENDPOINT). The Host header
+# passes through unchanged, so the link's signature holds at the gateway; the
+# bucket's CORS rules, which infra/objectstore/bootstrap.py sets from the
+# tenant hosts above, admit their pages and no other. Not a tenant host: only a
+# site that routes /api/* is one.
+storage.localhost {
+	tls internal
+	reverse_proxy objectstore:7070
+}
