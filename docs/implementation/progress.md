@@ -90,7 +90,7 @@ edit only Status and Evidence.
 | 0.7.7 | Idempotency keys for retried commands | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/123 |
 | 0.7.8 | Transactional email with honest delivery semantics | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/124 · https://github.com/OmarSweiti/Players_Platform/pull/126 |
 | 0.8.1 | The storage port and an S3 adapter; local-disk storage removed | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/125 |
-| 0.8.2 | File objects and upload sessions | backend | todo |  |
+| 0.8.2 | File objects and upload sessions | backend | done | https://github.com/OmarSweiti/Players_Platform_Backend/pull/126 |
 | 0.8.3 | Upload: authorize, presign into quarantine, finalize with content checks | backend | todo |  |
 | 0.8.4 | Scan, then promote to an immutable version | backend + umbrella | todo |  |
 | 0.8.5 | Download: version-pinned, authorized, short-lived | backend | todo |  |

@@ -121,7 +121,7 @@ The four source documents and their checksums: [`../requirements/README.md`](../
 | SR-PL-009 | SRD | 3.3.1 | 0/1 |
 | SR-PL-010 | SRD | 3.3.2, 3.3.3 | 0/2 |
 | SR-PL-011 | SRD | 1.2.1, 1.2.8 | 0/2 |
-| SR-DOC-001 | SRD | 0.8.2, 1.1.8, 1.3.1, 1.3.5 | 0/4 |
+| SR-DOC-001 | SRD | 0.8.2, 1.1.8, 1.3.1, 1.3.5 | 1/4 |
 | SR-DOC-002 | SRD | 0.8.5, 1.1.2, 1.1.8, 1.3.1, 1.3.3 | 0/5 |
 | SR-DOC-003 | SRD | 0.8.3, 1.1.8, 1.3.2 | 0/3 |
 | SR-DOC-004 | SRD | 0.8.4, 1.3.2 | 0/2 |
@@ -238,7 +238,7 @@ The four source documents and their checksums: [`../requirements/README.md`](../
 | SR-DB-005 | SRD | 0.2.2, 1.10.11, 4.3.4 | 1/3 |
 | SR-DB-006 | SRD | 0.4.6, 4.3.3 | 1/2 |
 | SR-DB-007 | SRD | 0.4.10, 1.11.1, 2.1.1 | 1/3 |
-| SR-DB-008 | SRD | 0.8.2, 1.3.1 | 0/2 |
+| SR-DB-008 | SRD | 0.8.2, 1.3.1 | 1/2 |
 | SR-DB-009 | SRD | 0.7.1, 3.5.2 | 1/2 |
 | SR-DB-010 | SRD | 0.1.6, 1.10.3, 4.2.1 | 1/3 |
 | TEST-001 | SRD | 0.2.3 | 1/1 |
