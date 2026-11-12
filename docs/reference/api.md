@@ -66,10 +66,11 @@ Use `application/problem+json` following [RFC 9457](https://www.rfc-editor.org/r
 | 401 | `AUTHENTICATION_REQUIRED`, `SESSION_EXPIRED` | No valid application session; clear confidential state and sign in. |
 | 403 | `FORBIDDEN`, `CSRF_FAILED`, `STEP_UP_REQUIRED` | Known authorized context lacks action/assurance; step-up only to an allowlisted auth route. |
 | 404 | `NOT_FOUND` | Missing or unreadable scoped object; do not reveal foreign ownership. |
-| 409 | `CONFLICT`, `INVALID_TRANSITION`, `IDEMPOTENCY_IN_PROGRESS`, `IDEMPOTENCY_KEY_REUSED` | Business conflict or retry-key conflict; no blind resubmit with a new key. |
+| 409 | `CONFLICT`, `INVALID_TRANSITION`, `IDEMPOTENCY_IN_PROGRESS`, `IDEMPOTENCY_KEY_REUSED`, `UPLOAD_INCOMPLETE` | Business conflict or retry-key conflict; no blind resubmit with a new key. `UPLOAD_INCOMPLETE`: an upload completed before its file arrived — send it, then complete again (`0.8.3`). |
 | 412 | `REVISION_MISMATCH` | Supplied entity tag is stale; reload and reconcile edits. |
 | 413 | `PAYLOAD_TOO_LARGE` | Reject before costly parsing or storage allocation. |
 | 415 | `UNSUPPORTED_MEDIA_TYPE` | Request/file type not accepted. |
+| 422 | `UPLOAD_CONTENT_MISMATCH` | The file that arrived is not the one declared — its size, its type or its first bytes; upload the right file (`0.8.3`). |
 | 428 | `PRECONDITION_REQUIRED` | Required `If-Match` absent. |
 | 429 | `RATE_LIMITED` | Include bounded `Retry-After`; do not expose victim account existence. |
 | 500 | `INTERNAL_ERROR` | Unexpected failure; show request ID and safe retry guidance. |
@@ -170,7 +171,9 @@ Realtime begins in `2.6.1`. Validate the session, Origin, tenant and conversatio
 
 ## File endpoints
 
-`POST /uploads` validates the typed owner, classification, quota and intended size/type, and returns a short-lived quarantine PUT plus upload ID. `POST /uploads/{id}/complete` verifies exact stored content and schedules scanning; it does not synchronously process video or mark it clean. `GET /uploads/{id}` exposes safe progress. `GET /files/{id}/download` reauthorizes the typed owner and returns a short-lived version-pinned download URL only for immutable content whose lifecycle is READY and scan verdict is CLEAN. Do not accept arbitrary storage keys in these requests. Confidential classes may require a streaming proxy for stronger revocation; an already-issued signed URL remains a bearer capability within its effective lifetime.
+`POST /uploads` validates the typed owner, classification, quota and intended size/type, and returns a short-lived quarantine PUT plus upload ID. `POST /uploads/{id}/complete` verifies exact stored content and schedules scanning; it does not synchronously process video or mark it clean. `GET /uploads/{id}` exposes safe progress. `GET /files/{id}/download` reauthorizes the typed owner and returns a short-lived version-pinned download URL only for immutable content whose lifecycle is READY and scan verdict is CLEAN. Do not accept arbitrary storage keys in these requests.
+
+As built (`0.8.3`, Players_Platform_Backend#129): `POST /api/v1/uploads` takes `ownerKind` (`player-document`), `ownerId`, `fileName`, `type` and the exact `sizeBytes`, and answers `201` with the upload and `put` — a presigned PUT to `S3_PUBLIC_ENDPOINT` lasting ten minutes, its `Content-Type` and length signed — under `Cache-Control: no-store`; the upload stays open an hour. `POST /api/v1/uploads/{id}/complete` answers `200` with the file `UPLOADED` and `put: null`, `409 UPLOAD_INCOMPLETE` before the file arrives, `422 UPLOAD_CONTENT_MISMATCH` for another file, and `409 INVALID_TRANSITION` past the hour. Both take `document.upload` and an `Idempotency-Key`; only the uploader sees or completes an upload. Neither answers where the file is stored. Confidential classes may require a streaming proxy for stronger revocation; an already-issued signed URL remains a bearer capability within its effective lifetime.
 
 ## OpenAPI and compatibility
 
