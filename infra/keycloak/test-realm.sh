@@ -32,8 +32,10 @@ def setting(name, default=None):
 BASE = os.environ.get("KEYCLOAK_URL") or "http://localhost:%s" % setting("KEYCLOAK_PORT", "8080")
 REALM = "sadara"
 CLIENT = "sadara-api"
-HOSTS = re.findall(r"^([a-z0-9.-]+(?:, [a-z0-9.-]+)*) \{", open("infra/proxy/Caddyfile").read(), re.M)
-HOSTS = sorted(h.strip() for line in HOSTS for h in line.split(","))
+# The tenant hosts: the sites of the proxy that route the API — not the
+# object store's (0.8.3), which serves no tenant.
+SITES = re.findall(r"^([a-z0-9.-]+(?:, [a-z0-9.-]+)*) \{\n(.*?)^\}", open("infra/proxy/Caddyfile").read(), re.M | re.S)
+HOSTS = sorted(h.strip() for hosts, body in SITES if "handle /api/*" in body for h in hosts.split(","))
 
 # The development members (0.5.11): one per tenant role — the backend's
 # UserRole, less the platform's SUPER_ADMIN — in each tenant the proxy serves.

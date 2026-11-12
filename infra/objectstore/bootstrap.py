@@ -5,19 +5,24 @@
 
 1. the buckets `sadara` (development) and `sadara-test` (integration tests) exist,
    private, with versioning enabled (ADR-0009);
-2. in a throwaway bucket, it proves each capability plan steps 0.8.1-0.8.4 rely on:
+2. `sadara`'s CORS rules admit the tenant hosts' pages — the proxy's sites that route
+   the API — to send uploads through the links the API signs (0.8.3), and no other page;
+3. in a throwaway bucket, it proves each capability plan steps 0.8.1-0.8.4 rely on:
    distinct version ids, reads (GET, HEAD, ranged) pinned to a version, presigned PUT
-   and GET, a server-side copy of one exact version, listing and deleting versions, and
-   anonymous reads refused. Then it removes that bucket.
+   and GET, a PUT refused at another length than it signed, a server-side copy of one
+   exact version, listing and deleting versions, anonymous reads refused, and CORS
+   rules that admit a tenant's page and no other. Then it removes that bucket.
 
 A store image that loses one of these fails here, on the next `just up`, not in 0.8.x.
 Standard library only: requests are signed with AWS Signature Version 4 by hand.
 """
+import base64
 import datetime
 import hashlib
 import hmac
 import http.client
 import os
+import re
 import sys
 import urllib.parse
 import uuid
@@ -28,6 +33,24 @@ BUCKETS = ("sadara", "sadara-test")
 NS = "{http://s3.amazonaws.com/doc/2006-03-01/}"
 VERSIONING_ON = (b'<VersioningConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/">'
                  b"<Status>Enabled</Status></VersioningConfiguration>")
+
+
+def tenant_origins():
+    """The tenant hosts' pages: the proxy's sites that route the API (infra/proxy/Caddyfile)."""
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "proxy", "Caddyfile")
+    with open(path, encoding="utf-8") as caddyfile:
+        sites = re.findall(r"^([a-z0-9.-]+(?:, [a-z0-9.-]+)*) \{\n(.*?)^\}", caddyfile.read(), re.M | re.S)
+    return sorted("https://" + host.strip() for hosts, body in sites if "handle /api/*" in body
+                  for host in hosts.split(","))
+
+
+def cors_rules(origins):
+    """One rule: a page of `origins` may PUT a file through a link, and read the version it made."""
+    allowed = "".join("<AllowedOrigin>%s</AllowedOrigin>" % origin for origin in origins)
+    return ('<CORSConfiguration xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><CORSRule>%s'
+            "<AllowedMethod>PUT</AllowedMethod><AllowedHeader>content-type</AllowedHeader>"
+            "<ExposeHeader>ETag</ExposeHeader><ExposeHeader>x-amz-version-id</ExposeHeader>"
+            "<MaxAgeSeconds>600</MaxAgeSeconds></CORSRule></CORSConfiguration>" % allowed).encode()
 
 
 def settings():
@@ -88,16 +111,20 @@ class Store:
             self.access, scope, signed, signature)
         return self._send(method, uri + ("?" + query if query else ""), headers, body)
 
-    def presign(self, method, path, params=None, expires=60):
-        """A URL signed in its query string, as the API will hand one to a browser."""
+    def presign(self, method, path, params=None, expires=60, signed_headers=None):
+        """A URL signed in its query string, as the API hands one to a browser; `signed_headers`
+        are signed too, so a request that sends others is refused."""
         params = dict(params or {})
         now = datetime.datetime.now(datetime.timezone.utc)
         stamp, day = now.strftime("%Y%m%dT%H%M%SZ"), now.strftime("%Y%m%d")
         scope = "%s/%s/s3/aws4_request" % (day, REGION)
+        items = sorted([(k.lower(), str(v)) for k, v in (signed_headers or {}).items()] + [("host", self.host)])
+        signed = ";".join(k for k, _ in items)
         params.update({"X-Amz-Algorithm": "AWS4-HMAC-SHA256", "X-Amz-Credential": "%s/%s" % (self.access, scope),
-                       "X-Amz-Date": stamp, "X-Amz-Expires": str(expires), "X-Amz-SignedHeaders": "host"})
+                       "X-Amz-Date": stamp, "X-Amz-Expires": str(expires), "X-Amz-SignedHeaders": signed})
         uri, query = _q(path, safe="/-_.~"), self._query(params)
-        canonical = "\n".join([method, uri, query, "host:%s\n" % self.host, "host", "UNSIGNED-PAYLOAD"])
+        canonical = "\n".join([method, uri, query, "".join("%s:%s\n" % kv for kv in items), signed,
+                               "UNSIGNED-PAYLOAD"])
         to_sign = "\n".join(["AWS4-HMAC-SHA256", stamp, scope, hashlib.sha256(canonical.encode()).hexdigest()])
         signature = hmac.new(self._signing_key(day), to_sign.encode(), hashlib.sha256).hexdigest()
         return "%s?%s&X-Amz-Signature=%s" % (uri, query, signature)
@@ -113,6 +140,15 @@ class Store:
                                     VERSIONING_ON)
         if status != 200:
             raise RuntimeError("cannot enable versioning on %s: HTTP %s %s" % (bucket, status, body[:200]))
+
+    def admit_origins(self, bucket, origins):
+        """The bucket's CORS rules: `origins`' pages may send uploads (0.8.3)."""
+        body = cors_rules(origins)
+        md5 = base64.b64encode(hashlib.md5(body).digest()).decode()
+        status, _, answer = self.call("PUT", "/" + bucket, {"cors": ""},
+                                      {"content-type": "application/xml", "content-md5": md5}, body)
+        if status != 200:
+            raise RuntimeError("cannot set CORS rules on %s: HTTP %s %s" % (bucket, status, answer[:200]))
 
     def versioning_enabled(self, bucket):
         status, _, body = self.call("GET", "/" + bucket, {"versioning": ""})
@@ -161,6 +197,16 @@ def prove(store, bucket):
     check("a presigned PUT uploads and returns a version id", status == 200 and headers.get("x-amz-version-id"),
           status)
 
+    sized = "tenants/probe/quarantine/" + uuid.uuid4().hex
+    url = store.presign("PUT", "/%s/%s" % (bucket, sized),
+                        signed_headers={"content-length": "8", "content-type": "application/pdf"})
+    other, _, _ = store.anonymous("PUT", url, {"content-length": "9", "content-type": "application/pdf"},
+                                  b"uploaded!")
+    exact, _, _ = store.anonymous("PUT", url, {"content-length": "8", "content-type": "application/pdf"},
+                                  b"uploaded")
+    check("a presigned PUT refuses another length than it signed", other == 403 and exact == 200,
+          (other, exact))
+
     promoted = "tenants/probe/objects/" + uuid.uuid4().hex
     source = "%s?versionId=%s" % (_q("%s/%s" % (bucket, key), safe="/-_.~"), v1)
     status, headers, _ = store.call("PUT", "/%s/%s" % (bucket, promoted), headers={"x-amz-copy-source": source})
@@ -178,6 +224,16 @@ def prove(store, bucket):
     kept, _, body = store.call("GET", "/%s/%s" % (bucket, key), {"versionId": v2})
     check("deleting one version leaves the others", status == 204 and gone in (400, 404)
           and kept == 200 and body == b"version-two", (status, gone, kept))
+
+    origin = "https://tenant.localhost"
+    store.admit_origins(bucket, [origin])
+    preflight = {"access-control-request-method": "PUT", "access-control-request-headers": "content-type"}
+    status, headers, _ = store.anonymous("OPTIONS", "/%s/%s" % (bucket, upload), dict(preflight, origin=origin))
+    admitted = status == 200 and headers.get("access-control-allow-origin") == origin
+    other, headers, _ = store.anonymous("OPTIONS", "/%s/%s" % (bucket, upload),
+                                        dict(preflight, origin="https://elsewhere.test"))
+    check("CORS rules admit a tenant's page and no other", admitted and other in (401, 403)
+          and not headers.get("access-control-allow-origin"), (status, other))
     return results
 
 
@@ -191,6 +247,9 @@ def main():
         enabled = store.versioning_enabled(bucket)
         failed += not enabled
         print("%s  bucket %s is versioned" % ("ok  " if enabled else "FAIL", bucket))
+    origins = tenant_origins()
+    store.admit_origins(BUCKETS[0], origins)
+    print("ok    bucket %s takes uploads from %s" % (BUCKETS[0], ", ".join(origins)))
 
     probe = "sadara-probe-" + uuid.uuid4().hex[:12]
     store.ensure_versioned_bucket(probe)
