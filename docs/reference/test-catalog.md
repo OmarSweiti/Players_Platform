@@ -230,9 +230,9 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `the_bucket_refuses_anonymous_reads` | 0.8.1 | backend | done |
 | `a_file_object_never_stores_a_url` | 0.8.2 | backend | done |
 | `sizes_beyond_two_gibibytes_are_representable` | 0.8.2 | backend | done |
-| `an_executable_renamed_pdf_is_refused` | 0.8.3 | backend | todo |
-| `an_upload_for_another_tenants_owner_is_not_found` | 0.8.3 | backend | todo |
-| `a_size_mismatch_is_refused` | 0.8.3 | backend | todo |
+| `an_executable_renamed_pdf_is_refused` | 0.8.3 | backend + umbrella | done |
+| `an_upload_for_another_tenants_owner_is_not_found` | 0.8.3 | backend + umbrella | done |
+| `a_size_mismatch_is_refused` | 0.8.3 | backend + umbrella | done |
 | `a_clean_file_is_promoted_to_an_immutable_version` | 0.8.4 | backend + umbrella | todo |
 | `an_infected_file_is_rejected` | 0.8.4 | backend + umbrella | todo |
 | `replaying_the_upload_url_after_promotion_changes_nothing` | 0.8.4 | backend + umbrella | todo |
