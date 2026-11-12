@@ -23,7 +23,7 @@ just dev-cookie coach@sadara.test > jar   # sign a development member in, headle
 | `clamav` | ClamAV 1.5.4 | `127.0.0.1:3310` | the malware scan before a file is promoted |
 | `mailpit` | Mailpit 1.31.2 | SMTP `127.0.0.1:1025`, <http://localhost:8025> | every email the stack sends: the worker's (an invitation's notice, `0.7.8`) and Keycloak's (an account's setup) |
 | `keycloak` | Keycloak 26.7.4 | <http://localhost:8080> | the development identity provider, with the `sadara` realm as code ([keycloak/README.md](keycloak/README.md)) |
-| `proxy` | Caddy 2.11.4 | <https://sadara.localhost>, <https://northwind.localhost> | `/api/` → the API on `:3000`, everything else → the web app on `:3001` |
+| `proxy` | Caddy 2.11.4 | <https://sadara.localhost>, <https://northwind.localhost>; <https://storage.localhost> | `/api/` → the API on `:3000`, everything else → the web app on `:3001`; `storage.localhost` → the object store, where a browser sends an upload (`0.8.3`) |
 | `worker` | built from `backend/` (its Dockerfile pins every base image by digest) | no port; `just logs worker` | relays the transactional outbox to Valkey and runs the queue's jobs, each in its own tenant's transaction (`0.7.6`), and sends their email to Mailpit (`0.7.8`); healthy while its relay's loop turns |
 
 The development credentials are in `infra/.env`, copied from [`.env.example`](.env.example). They open
@@ -68,8 +68,14 @@ worker` drains the jobs it is running before it stops.
   - version ids;
   - reads pinned to a version;
   - presigned PUT and GET;
+  - a presigned PUT refused at another length than it signed (`0.8.3`);
   - a server-side copy of one exact version;
-  - refused anonymous reads.
+  - refused anonymous reads;
+  - CORS rules that admit a tenant's page and no other (`0.8.3`).
+
+  It also sets the `sadara` bucket's CORS rules: the pages of the tenant hosts — the proxy's sites that
+  route the API — may send uploads through the links the API signs for `https://storage.localhost`
+  (the backend's `S3_PUBLIC_ENDPOINT`), and no other page may.
 - **`just reset` destroys only this project's state volumes** (those labelled `org.sadara.state`), and only
   on a Docker engine on this machine. It asks first; `just reset yes` confirms without the prompt.
 
@@ -97,5 +103,5 @@ worker` drains the jobs it is running before it stops.
 - **`*.localhost` names.** Browsers and curl resolve `*.localhost` to both loopback addresses themselves.
   - Node.js and Python ask the operating system instead. macOS answers `::1` only, and colima forwards
     only `127.0.0.1`.
-  - For a Node or Python client, add `127.0.0.1 sadara.localhost northwind.localhost` to `/etc/hosts`.
+  - For a Node or Python client, add `127.0.0.1 sadara.localhost northwind.localhost storage.localhost` to `/etc/hosts`.
   - Point Node at the certificate authority with `NODE_EXTRA_CA_CERTS="$(just dev-ca-path)"`.
