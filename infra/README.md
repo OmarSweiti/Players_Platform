@@ -20,11 +20,11 @@ just dev-cookie coach@sadara.test > jar   # sign a development member in, headle
 | `postgres` | PostgreSQL 18.6 | `127.0.0.1:5432`, databases `sadara` and `sadara_test` | the application database; the digest is the one the backend's CI replays migrations on ([ADR-0013](../docs/adr/0013-postgresql-18.md)) |
 | `valkey` | Valkey 9.1.2 | `127.0.0.1:6379` | queues, rate limits, short-lived sign-in state |
 | `objectstore` | Versity S3 Gateway 1.8.0 | `127.0.0.1:7070`, buckets `sadara` and `sadara-test` | private, versioned files ([ADR-0009](../docs/adr/0009-object-storage.md), [ADR-0020](../docs/adr/0020-local-object-store.md)) |
-| `clamav` | ClamAV 1.5.4 | `127.0.0.1:3310` | the malware scan before a file is promoted |
+| `clamav` | ClamAV 1.5.4 | `127.0.0.1:3310` | the malware scan before a file is promoted (`0.8.4`); a file it cannot scan whole is reported, never passed |
 | `mailpit` | Mailpit 1.31.2 | SMTP `127.0.0.1:1025`, <http://localhost:8025> | every email the stack sends: the worker's (an invitation's notice, `0.7.8`) and Keycloak's (an account's setup) |
 | `keycloak` | Keycloak 26.7.4 | <http://localhost:8080> | the development identity provider, with the `sadara` realm as code ([keycloak/README.md](keycloak/README.md)) |
 | `proxy` | Caddy 2.11.4 | <https://sadara.localhost>, <https://northwind.localhost>; <https://storage.localhost> | `/api/` → the API on `:3000`, everything else → the web app on `:3001`; `storage.localhost` → the object store, where a browser sends an upload (`0.8.3`) |
-| `worker` | built from `backend/` (its Dockerfile pins every base image by digest) | no port; `just logs worker` | relays the transactional outbox to Valkey and runs the queue's jobs, each in its own tenant's transaction (`0.7.6`), and sends their email to Mailpit (`0.7.8`); healthy while its relay's loop turns |
+| `worker` | built from `backend/` (its Dockerfile pins every base image by digest) | no port; `just logs worker` | relays the transactional outbox to Valkey and runs the queue's jobs, each in its own tenant's transaction (`0.7.6`), sends their email to Mailpit (`0.7.8`), and scans each completed upload's file with ClamAV, promoting a clean one to an immutable copy in the object store (`0.8.4`); healthy while its relay's loop turns |
 
 The development credentials are in `infra/.env`, copied from [`.env.example`](.env.example). They open
 services bound to 127.0.0.1 and nothing else.
