@@ -233,11 +233,11 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `an_executable_renamed_pdf_is_refused` | 0.8.3 | backend + umbrella | done |
 | `an_upload_for_another_tenants_owner_is_not_found` | 0.8.3 | backend + umbrella | done |
 | `a_size_mismatch_is_refused` | 0.8.3 | backend + umbrella | done |
-| `a_clean_file_is_promoted_to_an_immutable_version` | 0.8.4 | backend + umbrella | todo |
-| `an_infected_file_is_rejected` | 0.8.4 | backend + umbrella | todo |
-| `replaying_the_upload_url_after_promotion_changes_nothing` | 0.8.4 | backend + umbrella | todo |
-| `a_replay_between_scan_and_copy_cannot_promote_unscanned_bytes` | 0.8.4 | backend + umbrella | todo |
-| `a_scanner_outage_never_marks_a_file_clean` | 0.8.4 | backend + umbrella | todo |
+| `a_clean_file_is_promoted_to_an_immutable_version` | 0.8.4 | backend + umbrella | done |
+| `an_infected_file_is_rejected` | 0.8.4 | backend + umbrella | done |
+| `replaying_the_upload_url_after_promotion_changes_nothing` | 0.8.4 | backend + umbrella | done |
+| `a_replay_between_scan_and_copy_cannot_promote_unscanned_bytes` | 0.8.4 | backend + umbrella | done |
+| `a_scanner_outage_never_marks_a_file_clean` | 0.8.4 | backend + umbrella | done |
 | `a_download_is_pinned_to_the_scanned_version` | 0.8.5 | backend | todo |
 | `a_download_for_another_tenant_is_not_found` | 0.8.5 | backend | todo |
 | `an_unscanned_file_cannot_be_downloaded` | 0.8.5 | backend | todo |
