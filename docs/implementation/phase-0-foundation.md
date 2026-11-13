@@ -2038,13 +2038,45 @@ the backend and two in the umbrella failed a check.
 
 ### 0.8.4 — Scan, then promote to an immutable version
 **Repo:** backend + umbrella · **Size:** L · **Depends on:** `0.8.3`, `0.7.6` · **Requirements:** SR-DOC-004
-**Files:** backend `src/modules/files/application/scan-file.handler.ts` (new), `src/infrastructure/scanning/clamav.adapter.ts` (new); umbrella `infra/compose.yaml`
+**Files:** backend `src/modules/files/application/{scan-file.handler,ports/file-scans.port}.ts`,
+`src/modules/files/infrastructure/repositories/file-scan.repository.ts`, `src/modules/files/file-scan.module.ts`,
+`src/infrastructure/scanning/{scanner.port,clamav.adapter,scanning.module}.ts` and a spec (all new),
+`src/infrastructure/storage/{storage.port,s3-storage}.ts`, `src/infrastructure/audit/audited-actions.ts`,
+`src/config/env.schema.ts` and its spec, `src/worker.module.ts`, `prisma/schema.prisma`, the migration `…_file_scans`,
+`.env.example`, `test/files/scanning.integration-spec.ts` (new), `test/{files,db,storage,harness}/**`,
+`scripts/test-database.sh`, `.github/workflows/ci.yml`; umbrella `infra/compose.yaml`, `infra/README.md`
 A worker handler streams **the recorded quarantine version** — never "the latest" — to ClamAV while
 computing its `sha256`. Clean: a server-side copy **of that same version** to the immutable `objects/` key,
 recording the new `versionId` and the hash; the quarantine
 object is deleted; the file becomes `READY`. Infected: `REJECTED`. A scanner outage retries and **never**
 marks a file clean. Because downloads read only the promoted version, replaying the old upload URL —
 still valid for minutes — cannot change what anyone downloads.
+As built (Players_Platform_Backend#130, Players_Platform#136): the worker's consumer `files.scan` takes each
+`file.uploaded`. Its receipt marks the file `SCANNING`; after it commits, outside any transaction, the recorded
+quarantine version is streamed to clamd's `INSTREAM`, in chunks of at most 64 KiB, while its SHA-256 and length are
+taken over the very bytes the scanner reads. `stream: OK` is clean and `<name> FOUND` infected; any other reply, or a
+refused, dropped or stalled connection, is no verdict. Clean: that same version is copied inside the store to a new key
+under `objects/`; then, the file locked and still `SCANNING`, the copy's key, version and hash are recorded and the file
+becomes `READY`, `CLEAN` and finalized — a record that refuses its copy deletes it — and the quarantined version is
+deleted. Infected: `REJECTED`, with ClamAV's name for what it found; its bytes stay in quarantine, which nothing serves.
+No verdict is tried again with the outbox's back-off, the file `SCANNING` and `PENDING` throughout; after the 8th
+attempt it is `FAILED`, `ERROR`, and the event dead with the scanner's code. A pinned version the store no longer holds
+fails the file at once. Each outcome is audited as the system's job: `file.promoted` (the version and hash),
+`file.rejected` (the finding), `file.scan_failed`. A redelivered event promotes nothing twice; a delivery after
+promotion only makes sure the quarantined version is gone. The file keeps its scan's record, each part under a CHECK:
+`scan_attempts` (0 to 32), `scanned_at` set exactly when a verdict exists, `scan_finding` exactly when infected, and
+printable. The worker takes the store's `S3_*` — plain HTTP only in development and test — and `CLAMAV_HOST` and
+`CLAMAV_PORT`. The stack's worker reaches `objectstore` and `clamav` by name and waits on neither: a scan that finds
+ClamAV not ready is tried again. ClamAV reports a file it cannot scan whole (`AlertExceedsMax`) instead of passing it;
+CI's test job runs the same ClamAV image with the signatures it carries. Not built: a sweep of infected or abandoned
+quarantine bytes, which no step owns yet, as for uploads never completed; scan operations and a manual retry are
+`1.3.2`'s. ClamAV does not alert on encrypted content (`AlertEncrypted` off, its default), so an encrypted PDF whose
+readable parts are clean passes; whether to refuse such files is open. Beyond the plan: a replay before the scan is
+neither scanned nor promoted, a redelivered event promotes once, the whole path through the worker's job, a lost version
+fails at once, a scan stays in its file's tenant, the adapter's protocol and each way to no verdict against a fake
+daemon, and the scan's CHECKs, each with a counter-example; validated live, the stack's worker scanning uploads from a
+real browser in Arabic and English, an EICAR PDF, and ClamAV stopped mid-way. Each of eleven planted faults failed a
+check; one, a copy of the newest version, failed none until the replay-before-scan test was added.
 **Tests:** `a_clean_file_is_promoted_to_an_immutable_version` · `an_infected_file_is_rejected` · `replaying_the_upload_url_after_promotion_changes_nothing` · `a_replay_between_scan_and_copy_cannot_promote_unscanned_bytes` · `a_scanner_outage_never_marks_a_file_clean`
 **Verify:** `just test-int -- scanning`
 **Done when:** the five tests pass with the EICAR test file against the compose ClamAV — the race case
