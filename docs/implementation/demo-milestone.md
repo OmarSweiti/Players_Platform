@@ -116,9 +116,9 @@ run early.
 stale.*
 
 <!-- plan:milestone:begin -->
-**Demo milestone** — 75 of 126 microsteps done; 332–664 engineering hours left before the reserve.
+**Demo milestone** — 76 of 126 microsteps done; 330–660 engineering hours left before the reserve.
 
-Next in build order (every dependency done): `0.8.5`, `0.10.2`, `0.9.5`.
+Next in build order (every dependency done): `0.10.2`, `0.9.5`.
 
 | Stage | Step | Title | Repo | Size | Status |
 |---|---|---|---|---|---|
@@ -197,7 +197,7 @@ Next in build order (every dependency done): `0.8.5`, `0.10.2`, `0.9.5`.
 | F | 0.8.2 | File objects and upload sessions | backend | M | done |
 | F | 0.8.3 | Upload: authorize, presign into quarantine, finalize with content checks | backend + umbrella | M | done |
 | F | 0.8.4 | Scan, then promote to an immutable version | backend + umbrella | L | done |
-| F | 0.8.5 | Download: version-pinned, authorized, short-lived | backend | S | todo |
+| F | 0.8.5 | Download: version-pinned, authorized, short-lived | backend | S | done |
 | F | 0.10.2 | Redaction by allowlist, proven by canaries | backend | S | todo |
 | G | 0.9.5 | Sessions in the browser | frontend | M | todo |
 | G | 0.9.6 | The application shell | frontend | M | todo |
