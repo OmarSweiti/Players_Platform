@@ -238,9 +238,9 @@ All fixture data is synthetic, on `.test` domains; no real person, club or organ
 | `replaying_the_upload_url_after_promotion_changes_nothing` | 0.8.4 | backend + umbrella | done |
 | `a_replay_between_scan_and_copy_cannot_promote_unscanned_bytes` | 0.8.4 | backend + umbrella | done |
 | `a_scanner_outage_never_marks_a_file_clean` | 0.8.4 | backend + umbrella | done |
-| `a_download_is_pinned_to_the_scanned_version` | 0.8.5 | backend | todo |
-| `a_download_for_another_tenant_is_not_found` | 0.8.5 | backend | todo |
-| `an_unscanned_file_cannot_be_downloaded` | 0.8.5 | backend | todo |
+| `a_download_is_pinned_to_the_scanned_version` | 0.8.5 | backend | done |
+| `a_download_for_another_tenant_is_not_found` | 0.8.5 | backend | done |
+| `an_unscanned_file_cannot_be_downloaded` | 0.8.5 | backend | done |
 | `every_internal_link_resolves` | 0.9.1 | frontend | done |
 | `an_unknown_route_renders_not_found` | 0.9.1 | frontend | done |
 | `the_catalogs_have_identical_keys` | 0.9.2 | frontend | done |
