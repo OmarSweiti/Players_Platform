@@ -2084,10 +2084,43 @@ driven by a barrier between the scan and the copy.
 
 ### 0.8.5 — Download: version-pinned, authorized, short-lived
 **Repo:** backend · **Size:** S · **Depends on:** `0.8.4`, `0.7.4` · **Requirements:** SR-DOC-002
-**Files:** `src/modules/files/presentation/files.controller.ts` (new), `test/files/downloads.e2e-spec.ts` (new)
+**Files:** `src/modules/files/presentation/{files.controller,dto/download.dto}.ts`,
+`src/modules/files/application/{download-errors,file-owner.policy,ports/file-downloads.port,use-cases/download-file.usecase}.ts`,
+`src/modules/files/infrastructure/repositories/file-download.repository.ts`, `src/common/openapi/growing-enum.ts` and
+a spec (all new), `src/modules/files/files.module.ts`, `src/infrastructure/audit/{access-audit,audited-actions}.ts`,
+`src/infrastructure/storage/s3-storage.ts` and `object-keys.spec.ts`, `src/common/openapi/zod-schema-converter.ts`,
+`src/common/errors/error-codes.ts`, `src/modules/identity/presentation/dto/session.dto.ts`,
+`src/modules/users/domain/{permission-catalog,default-role-matrix}.ts` and a spec, the migration `…_document_read`,
+`openapi/openapi.json`, `test/files/{downloads.e2e-spec,downloads.integration-spec}.ts` and `test/harness/files.ts`
+(new), `test/{authz,isolation,fixtures}/**`
 `GET /api/v1/files/{id}/download` authorizes through the owner's policy, requires `READY` and a clean
 verdict, and returns a presigned GET for the **exact key and version** that were scanned, valid for 60
 seconds, as an attachment with a sanitised name. Confidential classes leave an access event (`0.7.4`).
+As built (Players_Platform_Backend#131): the route takes a new permission, `document.read`, held by the owner and the
+four roles that upload documents (ADMIN, SCOUT, LEGAL, VIDEO_ANALYST), as the maintainer chose; the catalog, the matrix
+and a migration from `scripts/generate-permission-sync.ts` add it. The file is read in the member's tenant, then its
+owner, from its upload session, through that owner kind's policy: a player's document through the player's. A file of
+another tenant, of no known owner, or whose owner the member may not read is `404`, as for no file. A confidential file
+needs both the member's grant of its class and the owner's policy disclosing it; no player-document policy discloses
+one yet (`1.3.1`), so none is downloadable today. A file not `READY` and `CLEAN`, purged, or never promoted is
+`409 FILE_UNAVAILABLE`, a new problem code in Arabic and English. For an access-audited class, `AccessAudit.releaseWhole`
+records `file.read` — the class's name, never the content — in the read's transaction; the link is signed only after
+that commits, so an event that cannot be written signs no link. The answer is the file's id, name, type, size and the
+SHA-256 of the promoted bytes, with a presigned GET for the promoted key and version that lasts 60 seconds and is saved
+as an attachment under the file's name, in UTF-8 with an ASCII fallback; it is sent `Cache-Control: no-store`. The
+session's permission list is now described as `x-extensible-enum` (`growingEnum()`), as the maintainer chose: it still
+lists every value, a permission added later breaks no client, and clients ignore one they do not know. A fix on the way:
+a download's name was cut at 150 UTF-16 units, so a long name could lose its extension and a character outside the Basic
+Multilingual Plane astride the cut threw `URIError`, a `500`; names are now cut in whole characters inside the stem.
+Not built: who may download a confidential document (`1.3.1`), a file's scan state and a retry (`1.3.2`), the web app's
+download button (`1.3.5`). Beyond the plan: a purged file, another member's file, a role without `document.read`, the
+link's minute in its own `X-Amz-Expires`, a long name, a confidential file no policy discloses, an unknown owner, three
+access-event tests through a policy that discloses the class, and the route in the isolation and confidential-fields
+suites. The e2e tests scan with a stand-in that reads every byte and finds nothing, since CI's API tests have no
+ClamAV; ClamAV's verdicts are `0.8.4`'s tests. Validated live, the stack's worker scanning with ClamAV uploads from a
+real browser that then downloaded and saved them, in Arabic and English, with a coach and another tenant refused, an
+EICAR PDF and a file waiting on a stopped ClamAV unavailable, the upload link replayed, and a link refused after its
+minute. Each of thirteen planted faults failed a check; a purged file failed none until its test was added.
 **Tests:** `a_download_is_pinned_to_the_scanned_version` · `a_download_for_another_tenant_is_not_found` · `an_unscanned_file_cannot_be_downloaded`
 **Verify:** `just test-e2e -- test/files/downloads.e2e-spec.ts`
 **Done when:** the three tests pass.
